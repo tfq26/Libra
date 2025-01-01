@@ -1,5 +1,5 @@
 // controllers/userController.js
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { userDB } from '../models/userDB.js';
 
 // Register a new user
