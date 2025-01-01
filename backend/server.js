@@ -92,6 +92,27 @@ app.get('/logout', (req, res) => {
 
 // 8) Start server
 const PORT = process.env.PORT || 5174;
-app.listen(PORT, () => {
+
+// Start the server and save the reference
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+// Graceful Shutdown
+const handleExit = (signal) => {
+    console.log(`\nReceived ${signal}. Cleaning up...`);
+    server.close(() => {
+        console.log('Server closed gracefully.');
+        process.exit(0); // Exit the process
+    });
+};
+
+// Listen for termination signals
+process.on('SIGINT', handleExit); // Handles Ctrl+C
+process.on('SIGTERM', handleExit); // Handles system termination signals
+
+// Catch uncaught exceptions (optional)
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    process.exit(1); // Exit with failure
 });
