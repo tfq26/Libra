@@ -1,0 +1,73 @@
+# Dependency directories
+node_modules/
+bower_components/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# IDE/Editor-specific
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment variables
+.env
+.env.*.local
+
+# Production builds
+build/
+dist/
+coverage/
+
+# Miscellaneous
+*.tgz
+*.lock-wscript
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Cache directories
+.npm/
+.eslintcache
+.parcel-cache/
+.next/
+out/
+.cache/
+*.cache
+
+# Testing outputs
+coverage/
+.jest/
+mochawesome-report/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+~$*
+
+# Svelte/Vue/React specific
+.svelte-kit/
+.nuxt/
+*.vercel/
+.firebase/
