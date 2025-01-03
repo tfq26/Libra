@@ -22,7 +22,7 @@ const Interface = () => {
         try {
             console.log("Sending message to backend:", { userName, message: userMessage });
 
-            const response = await fetch("http://localhost:5174", {
+            const response = await fetch("https://guarded-garden-07517-fadc37928c0d.herokuapp.com/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userName, message: userMessage }),

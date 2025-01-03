@@ -12,7 +12,7 @@ const app = express();
 // 1) Configure CORS
 app.use(
     cors({
-        origin: 'http://localhost:5173', // Update this if your frontend runs elsewhere
+        origin: 'https://testlibra.vercel.app/', // Update this if your frontend runs elsewhere
         credentials: true,
     })
 );
