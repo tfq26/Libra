@@ -2,25 +2,54 @@ const { app } = require('@azure/functions');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const { v4: uuidv4 } = require('uuid');
 const busboy = require('busboy');
+const axios = require('axios');
 
 // NOTE: You will need to install these packages in your function app.
-// npm install @azure/storage-blob uuid busboy
+// npm install @azure/storage-blob uuid busboy axios
 
-// A placeholder function for the AI model call.
-// In a production app, you would replace this with a real call to an Azure AI Service.
-function callAiModel(prompt, imageUrl = null) {
-    if (imageUrl) {
-        console.log(`Analyzing image from URL: ${imageUrl} with prompt: '${prompt}'`);
-        // Simulate a multi-modal analysis.
-        if (prompt.toLowerCase().includes("error") || prompt.toLowerCase().includes("tv")) {
-            return "AI Analysis: I see a television screen displaying an 'E500' error code. Is this correct?";
+// A function to call the real Azure OpenAI multi-modal model
+async function callOpenAI(prompt, imageUrl = null) {
+    try {
+        const apiKey = process.env.AzureOpenAIApiKey;
+        const endpoint = process.env.AzureOpenAIEndpoint;
+        const deploymentName = process.env.AzureOpenAIDeploymentName; // Assumed to be configured
+        const apiVersion = "2024-02-15-preview";
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'api-key': apiKey,
+        };
+
+        const messages = [{
+            role: "user",
+            content: []
+        }];
+
+        if (imageUrl) {
+            messages[0].content.push({ type: "text", text: prompt });
+            messages[0].content.push({ type: "image_url", image_url: { url: imageUrl } });
         } else {
-            return "AI Analysis: I have analyzed the image, and it appears to be a technical component. I need more information to assist you.";
+            messages[0].content.push({ type: "text", text: prompt });
         }
-    } else {
-        console.log(`Processing text-only prompt: '${prompt}'`);
-        // Simulate a text-only response.
-        return `Solution for '${prompt}': Here are some helpful steps based on my analysis: 1. Reboot the device... 2. Check for loose connections... 3. Reinstall the software...`;
+
+        const payload = {
+            messages,
+            stream: false,
+            model: "gpt-4o",
+            max_tokens: 1000
+        };
+
+        const response = await axios.post(
+            `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`,
+            payload,
+            { headers }
+        );
+
+        return response.data.choices[0].message.content;
+
+    } catch (error) {
+        console.error("Error calling Azure OpenAI:", error.response ? error.response.data : error.message);
+        throw new Error("Failed to get response from AI model.");
     }
 }
 
@@ -70,8 +99,12 @@ app.http('libra2', {
                     return { status: 400, body: "Please pass a 'prompt' in the request body." };
                 }
 
-                const aiResponse = callAiModel(prompt);
-                return { jsonBody: { response: aiResponse } };
+                try {
+                    const aiResponse = await callOpenAI(prompt);
+                    return { jsonBody: { response: aiResponse } };
+                } catch (error) {
+                    return { status: 500, body: "Error processing AI request." };
+                }
 
             } catch (error) {
                 return { status: 400, body: "Invalid JSON format." };
@@ -114,8 +147,12 @@ app.http('libra2', {
                         return;
                     }
 
-                    const aiResponse = callAiModel(prompt, imageUrl);
-                    resolve({ jsonBody: { response: aiResponse, imageUrl: imageUrl } });
+                    try {
+                        const aiResponse = await callOpenAI(prompt, imageUrl);
+                        resolve({ jsonBody: { response: aiResponse, imageUrl: imageUrl } });
+                    } catch (error) {
+                        resolve({ status: 500, body: "Error processing AI request with image." });
+                    }
                 });
 
                 request.body.pipe(bb);
