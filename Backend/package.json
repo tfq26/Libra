@@ -1,0 +1,22 @@
+{
+  "name": "libra2-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet...\""
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.5.0",
+    "@azure/functions": "^4.0.0",
+    "@azure/storage-blob": "^12.0.0",
+    "axios": "^1.6.2",
+    "busboy": "^1.0.0",
+    "tiktoken": "^1.0.22",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "azure-functions-core-tools": "^4.x"
+  }
+}
