@@ -11,7 +11,7 @@ on:
 
 env:
   # CORRECTED: Point this to the directory of your backend Azure Function app
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'backend'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'Backend'
   NODE_VERSION: '22.x'
 
 jobs:
