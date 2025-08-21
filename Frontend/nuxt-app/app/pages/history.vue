@@ -1,77 +1,51 @@
 <template>
-  <div class="bg-eerie-black-900 min-h-screen text-eerie-black-100">
-    <div class="container mx-auto p-6 md:p-10">
+  <div class="bg-eerie-black-500 min-h-screen font-nunito text-eerie-black-900">
+    <div class="container mx-auto px-6 py-10 md:px-10 lg:px-16">
 
-      <!-- Header Section -->
-      <header class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold mb-2 text-maize-400">Welcome to Libra</h1>
-        <p class="text-lg text-eerie-black-700">Your intelligent assistant for any task.</p>
+      <!-- Page Header -->
+      <header class="mb-10">
+        <h1 class="text-4xl font-extrabold text-sunglow-400">Conversation History</h1>
+        <p class="text-lg text-eerie-black-700 mt-2">Review your past conversations with Libra.</p>
       </header>
 
-      <!-- Main Action -->
-      <div class="flex justify-center mb-16">
-        <UButton
-            to="/chat"
-            label="Start a New Chat"
-            size="xl"
-            class="bg-bittersweet-500 hover:bg-bittersweet-400 text-white font-bold transition-transform transform hover:scale-105"
-            icon="i-heroicons-plus-circle"
-        />
+      <!-- Loading State -->
+      <div v-if="isLoading" class="space-y-4">
+        <USkeleton class="h-24 w-full" v-for="i in 3" :key="i" />
       </div>
 
-      <!-- Recent Chats Section -->
-      <div>
-        <h2 class="text-2xl font-bold mb-6 border-b-2 border-eerie-black-300 pb-2 text-sunglow-400">
-          Recent Chats
-        </h2>
+      <!-- Error State -->
+      <div v-else-if="error" class="text-center py-12 px-6 bg-eerie-black-400 rounded-2xl border border-dashed border-bittersweet-500">
+        <UIcon name="i-heroicons-exclamation-triangle" class="text-5xl text-bittersweet-500 mx-auto mb-4" />
+        <p class="text-eerie-black-700 font-medium">Could not load history.</p>
+        <p class="text-eerie-black-800 mt-2">There was an error fetching your conversations. Please try again later.</p>
+      </div>
 
-        <div v-if="recentChats.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Loop through recent chats -->
-          <UCard
-              v-for="chat in recentChats"
-              :key="chat.id"
-              class="hover:shadow-xl transition-shadow cursor-pointer bg-white border border-eerie-black-200"
-              @click="navigateToChat(chat.id)"
-          >
-            <template #header>
-              <h3 class="font-semibold text-lg truncate text-eerie-black-600">{{ chat.title }}</h3>
-            </template>
+      <!-- Empty State -->
+      <div v-else-if="conversations.length === 0" class="text-center py-12 px-6 bg-eerie-black-400 rounded-2xl border border-dashed border-eerie-black-600">
+        <UIcon name="i-heroicons-chat-bubble-left-right" class="text-5xl text-eerie-black-600 mx-auto mb-4" />
+        <p class="text-eerie-black-700 font-medium">No conversations yet.</p>
+        <p class="text-eerie-black-800 mt-2">Start a new chat to see your history here!</p>
+        <UButton to="/chat" label="Start Chatting" class="mt-6 bg-sandy-brown-500 hover:bg-sandy-brown-400 text-eerie-black-900" />
+      </div>
 
-            <p class="text-eerie-black-500 text-sm">
-              Last message: {{ new Date(chat.lastMessageDate).toLocaleDateString() }}
-            </p>
-
-            <template #footer>
-              <UButton
-                  variant="link"
-                  label="Continue Chat"
-                  :padded="false"
-                  class="text-sandy-brown-500 hover:text-sandy-brown-400"
-              />
-            </template>
-          </UCard>
-        </div>
-
-        <!-- Placeholder for when there are no recent chats -->
-        <div
-            v-else
-            class="text-center py-10 px-6 bg-eerie-black-800 rounded-lg border border-dashed border-eerie-black-400"
+      <!-- History List -->
+      <div v-else class="space-y-4">
+        <UCard
+            v-for="chat in conversations"
+            :key="chat.id"
+            class="hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer bg-eerie-black-400 border border-eerie-black-600"
+            @click="navigateToChat(chat.id)"
         >
-          <p class="text-eerie-black-200">You have no recent chats.</p>
-          <p class="text-eerie-black-400 mt-2">Start a new conversation to see it here!</p>
-        </div>
-      </div>
-
-      <!-- View All History Link -->
-      <div class="text-center mt-12">
-        <UButton
-            to="/history"
-            label="View All History"
-            variant="link"
-            size="lg"
-            class="text-sandy-brown-500 hover:text-sandy-brown-400 font-semibold"
-            trailing-icon="i-heroicons-arrow-right"
-        />
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold text-lg text-sunglow-300 truncate">{{ chat.title }}</h3>
+              <p class="text-sm text-eerie-black-700 mt-1">
+                Started on: {{ new Date(chat.createdAt).toLocaleDateString() }}
+              </p>
+            </div>
+            <UIcon name="i-heroicons-chevron-right-20-solid" class="text-eerie-black-700" />
+          </div>
+        </UCard>
       </div>
 
     </div>
@@ -79,17 +53,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '../../stores/user.js';
+
+// This tells Nuxt to run our 'auth' middleware before rendering this page
+definePageMeta({
+  middleware: 'auth'
+});
 
 const router = useRouter();
+const userStore = useUserStore();
 
-// --- Mock Data ---
-const recentChats = ref([
-  { id: 'convo-1', title: 'iPhone 11 not turning on', lastMessageDate: '2025-08-15T10:00:00Z' },
-  { id: 'convo-2', title: 'How to make sourdough bread', lastMessageDate: '2025-08-14T15:30:00Z' },
-  { id: 'convo-3', title: 'Planning a trip to Japan', lastMessageDate: '2025-08-12T09:12:00Z' },
-]);
+const conversations = ref([]);
+const isLoading = ref(true);
+const error = ref(null);
+
+// --- Fetch History from Backend ---
+onMounted(async () => {
+  // Ensure we have a userId before fetching
+  if (!userStore.userId) {
+    error.value = new Error("User is not authenticated.");
+    isLoading.value = false;
+    return;
+  }
+
+  try {
+    const response = await $fetch(`/api/history?userId=${userStore.userId}`, {
+      method: 'GET'
+    });
+    conversations.value = response;
+  } catch (e) {
+    console.error("Failed to fetch history:", e);
+    error.value = e;
+  } finally {
+    isLoading.value = false;
+  }
+});
 
 // --- Navigation ---
 const navigateToChat = (chatId) => {

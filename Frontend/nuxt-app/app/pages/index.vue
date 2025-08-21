@@ -23,7 +23,7 @@
             to="/chat"
             label="Start a New Chat"
             size="xl"
-            class="bg-maize-400 text-bittersweet-500 font-nunito hover:bg-accent-brown font-bold px-8 py-4 rounded-full shadow-lg transition-transform transform hover:scale-105"
+            class="bg-maize-400 text-bittersweet-300 font-nunito hover:bg-accent-brown font-bold px-8 py-4 rounded-full shadow-lg transition-transform transform hover:scale-105"
             icon="i-heroicons-sparkles-20-solid"
         />
       </div>
@@ -85,7 +85,7 @@
             label="View All History"
             variant="link"
             size="lg"
-            class="text-primary-orange hover:text-accent-brown font-semibold"
+            class="text-sandy-brown-500 hover:text-accent-brown font-semibold"
         />
       </div>
 
@@ -101,9 +101,9 @@ const router = useRouter();
 
 // --- Mock Data ---
 const recentChats = ref([
-  { id: 'convo-1', title: 'iPhone 11 not turning on', lastMessageDate: '2025-08-15T10:00:00Z' },
-  { id: 'convo-2', title: 'How to make sourdough bread', lastMessageDate: '2025-08-14T15:30:00Z' },
-  { id: 'convo-3', title: 'Planning a trip to Japan', lastMessageDate: '2025-08-12T09:12:00Z' },
+  { id: 'convo-1', title: 'iPhone not turning on', lastMessageDate: '2025-08-15T10:00:00Z' },
+  { id: 'convo-2', title: 'Difference between GPU and CPU', lastMessageDate: '2025-08-14T15:30:00Z' },
+  { id: 'convo-3', title: 'What is NACS?', lastMessageDate: '2025-08-12T09:12:00Z' },
 ]);
 
 // --- Navigation ---
