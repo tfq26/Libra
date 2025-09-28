@@ -5,10 +5,14 @@
   "scripts": {
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "cd Frontend && bun run dev",
-    "start:backend": "cd Backend && func start",
-    "install:all": "npm install -g concurrently && cd Frontend/nuxt-app && bun install && cd ../../Backend && npm install"
+    "start:backend": "cd Backend && npm install && func start",
+    "install:all": "npm install -g concurrently && cd frontend && bun install && cd ../Backend && npm install"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  "workspaces": [
+    "frontend",
+    "Backend"
+  ]
 }
