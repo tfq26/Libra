@@ -10,6 +10,9 @@
     "tailwind:build": "tailwindcss -i ./src/input.css -o ./src/output.css",
     "tailwind:watch": "tailwindcss -i ./src/input.css -o ./src/output.css --watch"
   },
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
     "@vicons/antd": "^0.13.0",
