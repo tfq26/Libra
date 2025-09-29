@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tailwind:build": "tailwindcss -i ./src/input.css -o ./src/output.css",
+    "tailwind:watch": "tailwindcss -i ./src/input.css -o ./src/output.css --watch"
   },
   "dependencies": {
-    "@clerk/clerk-js": "^5.93.0",
-    "@clerk/vue": "^1.13.1",
+    "@heroicons/vue": "^2.2.0",
     "axios": "^1.12.2",
     "pinia": "^3.0.3",
     "vue": "^3.5.21",
@@ -21,6 +22,9 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.13",
-    "vite": "^7.1.6"
+    "vite": "npm:rolldown-vite@7.1.12"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.1.12"
   }
 }

@@ -44,6 +44,7 @@ function countMessageTokens(messages) {
     return numTokens;
 }
 
+// MODIFIED: The core function for calling OpenAI with the new system prompt
 async function callOpenAI(prompt, history = [], imageUrl = null) {
     try {
         const apiKey = process.env.AzureOpenAIApiKey;
@@ -54,19 +55,25 @@ async function callOpenAI(prompt, history = [], imageUrl = null) {
         const MODEL_CONTEXT_WINDOW = 8192;
         const RESPONSE_BUFFER = 1500;
 
+        // MODIFIED: This is the new, detailed system prompt for the guided assistant.
         const systemMessage = {
             role: "system",
-            content: `You are Libra, an expert technical support agent and your job is to help the user with their 
-            technological issue. Please try to help them as they do not know anything about the issue and they are 
-            coming to you for help. If the user asks for help, please reassure them that you are there to help and
-            start by asking any clarifying questions, making sure to define any unknown terms and keeping questions 
-            simple but thorough. When you give directions, please give each step one at a time and give one solution
-            at a time. If the user says that the solution works, then help them through everything and if not, give 
-            them more solutions. If the problem could not be solved after exhausting all solutions, please refer them
-            to helpful websites and provide customer support phone numbers or emails. Please do not break character and
-            if the user asks an off topic question, please respond with a respectful response and maybe even a tech joke
-            occasionally.` // Your full system prompt
+            content: `You are Libra, a step-by-step diagnostic assistant. Your goal is to help a user solve a technical problem one step at a time.
+        
+        CRITICAL RULES:
+        1.  **One Step at a Time:** Provide only ONE clear, concise instruction or question in each response. Do not provide lists of steps.
+        2.  **Classify Your Response:** At the end of EVERY response, you MUST include a classification tag for the type of step you provided. The user will not see this tag.
+        3.  **Use ONLY these tags:**
+            * \`[step_type: definitive]\` when you propose a solution to see if it fixed the problem (e.g., "Try restarting the device.").
+            * \`[step_type: transition]\` when you ask the user to perform an action or check something to gather more information (e.g., "Can you check if the power light is on?").
+            * \`[step_type: clarification]\` when you are explaining a concept or asking a clarifying question (e.g., "When you say it's 'not working', do you mean it's slow or completely disconnected?").
+        4.  **Wait for User Response:** Base your next step on the user's button press (e.g., if they say 'It didn't work', provide an alternative solution).
+        
+        **Example Interaction:**
+        * User Prompt: "My Wi-Fi is not working."
+        * Your Response: "I see. First, could you check if the Wi-Fi icon on your router is lit up or blinking? [step_type: transition]"`
         };
+
         let userMessage = { role: "user", content: prompt };
         if (imageUrl) {
             userMessage.content = [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: imageUrl } }];
@@ -103,15 +110,29 @@ async function callOpenAI(prompt, history = [], imageUrl = null) {
     }
 }
 
+// NEW: A helper function to parse the AI's response for a step_type tag
+function parseAIResponse(rawResponse) {
+    const regex = /\[step_type:\s*(\w+)]/;
+    const match = rawResponse.match(regex);
 
-// --- Main Chat HTTP Trigger (Now handles GET and POST) ---
+    if (match) {
+        const cleanMessage = rawResponse.replace(regex, '').trim();
+        const stepType = match[1];
+        return { cleanMessage, stepType };
+    } else {
+        console.warn("AI response missing a [step_type] tag. Applying fallback.");
+        return {
+            cleanMessage: rawResponse,
+            stepType: 'clarification' // Safe default
+        };
+    }
+}
+
+// --- Main Chat HTTP Trigger (Modified) ---
 app.http('chat', {
-    methods: ['GET', 'POST'], // Now accepts both methods
+    methods: ['GET', 'POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
-        context.log(`Chat function processed a ${request.method} request.`);
-
-        // --- Handle POST for sending a new message ---
         if (request.method === 'POST') {
             try {
                 const body = await request.json();
@@ -125,10 +146,10 @@ app.http('chat', {
                 let history = [];
 
                 if (conversationId) {
-                    const { resource: existingConversation } = await container.item(conversationId, userId).read();
-                    if (existingConversation) {
-                        conversation = existingConversation;
-                        history = existingConversation.messages;
+                    const { resource: existing } = await container.item(conversationId, userId).read();
+                    if (existing) {
+                        conversation = existing;
+                        history = existing.messages;
                     }
                 }
 
@@ -144,18 +165,31 @@ app.http('chat', {
                 }
 
                 const aiResponseText = await callOpenAI(prompt, history);
+                
+                // MODIFIED: Parse the AI response to extract the message and stepType
+                const { cleanMessage, stepType } = parseAIResponse(aiResponseText);
 
                 conversation.messages.push({ role: "user", content: prompt, timestamp: new Date().toISOString() });
-                conversation.messages.push({ role: "assistant", content: aiResponseText, timestamp: new Date().toISOString() });
+                conversation.messages.push({ role: "assistant", content: cleanMessage, timestamp: new Date().toISOString() });
 
-                if (conversation.messages.length === 4) {
-                    const titlePrompt = `Summarize this into a 5-word title: User: ${conversation.messages[0].content} Assistant: ${conversation.messages[1].content}`;
-                    const newTitle = await callOpenAI(titlePrompt, []);
-                    conversation.title = newTitle;
+                // MODIFIED: Title generation now happens after the first real user message
+                if (conversation.messages.length === 2) {
+                    const titlePrompt = `Summarize this chat into a 5-word title: User: "${conversation.messages[0].content}"`;
+                    const titleResponse = await callOpenAI(titlePrompt, []);
+                    // Ensure the title itself doesn't contain a step_type tag
+                    conversation.title = parseAIResponse(titleResponse).cleanMessage;
                 }
 
                 await container.items.upsert(conversation);
-                return { jsonBody: { response: aiResponseText, conversationId: conversation.id } };
+
+                // MODIFIED: Return the new JSON structure with the stepType
+                return { 
+                    jsonBody: { 
+                        response: cleanMessage, 
+                        stepType: stepType, 
+                        conversationId: conversation.id 
+                    } 
+                };
 
             } catch (error) {
                 context.log("Error in chat function (POST):", error);

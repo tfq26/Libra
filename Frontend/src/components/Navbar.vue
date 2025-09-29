@@ -1,71 +1,88 @@
 <template>
-    <nav class="bg-platinum-200 dark:bg-eerie_black-700 shadow-md fixed w-full z-10">
-      <div class="container mx-auto py-4 px-6 sm:px-8 flex justify-between items-center">
-        <div class="flex items-center">
-          <svg class="h-8 w-8 text-saffron-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2-3 .895-3 2 1.343 2 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <nav class="bg-gray-800 p-4 shadow-lg fixed top-0 w-full z-10">
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <router-link to="/" class="flex items-center space-x-3 hover:opacity-90 transition-opacity">
+          <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m0 0l-1 1M14 8h-4"></path>
           </svg>
-          <router-link to="/" class="ml-3 text-2xl font-bold text-eerie_black-500 dark:text-platinum-500">
-            Libra
+          <span class="text-white text-xl font-bold tracking-wider">Libra Chat Support</span>
+        </router-link>
+  
+        <div class="hidden md:flex items-center space-x-6">
+          <router-link 
+            to="/" 
+            class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            :class="{ 'text-white bg-gray-700': $route.path === '/' }"
+          >
+            Home
+          </router-link>
+          <router-link 
+            to="/chat" 
+            class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            :class="{ 'text-white bg-gray-700': $route.path === '/chat' || $route.path.startsWith('/chat/') }"
+          >
+            Chat
+          </router-link>
+          <router-link 
+            to="/history" 
+            class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            :class="{ 'text-white bg-gray-700': $route.path === '/history' || $route.path.startsWith('/history/') }"
+          >
+            History
           </router-link>
         </div>
-        <nav class="hidden sm:flex space-x-6">
-          <router-link
-            v-for="route in navRoutes"
-            :key="route.name"
-            :to="route.path"
-            class="text-eerie_black-400 dark:text-platinum-400 hover:text-saffron-500 transition-colors duration-300"
-          >
-            {{ route.name }}
-          </router-link>
-        </nav>
-        <div class="flex items-center">
-          <button 
-            @click="toggleDarkMode"
-            class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
-            aria-label="Toggle dark mode"
-          >
-            <span v-if="darkMode">☀️</span>
-            <span v-else>🌙</span>
+  
+        <div class="flex items-center space-x-4">
+          <span class="text-gray-300 text-sm hidden sm:inline">
+            User ID: <span class="font-medium text-blue-300">{{ userId }}</span>
+          </span>
+  
+          <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="md:hidden text-gray-400 hover:text-white p-2 rounded-md">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path v-if="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
+        </div>
+      </div>
+  
+      <div v-if="isMobileMenuOpen" class="md:hidden mt-2">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+          <router-link 
+            to="/" 
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+            :class="{ 'text-white bg-gray-700': $route.path === '/' }"
+            @click="isMobileMenuOpen = false"
+          >
+            Home
+          </router-link>
+          <router-link 
+            to="/chat" 
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+            :class="{ 'text-white bg-gray-700': $route.path === '/chat' || $route.path.startsWith('/chat/') }"
+            @click="isMobileMenuOpen = false"
+          >
+            Chat
+          </router-link>
+          <router-link 
+            to="/history" 
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+            :class="{ 'text-white bg-gray-700': $route.path === '/history' || $route.path.startsWith('/history/') }"
+            @click="isMobileMenuOpen = false"
+          >
+            History
+          </router-link>
         </div>
       </div>
     </nav>
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { ref } from 'vue';
+  import { useRoute } from 'vue-router';
   
-  // Dark mode state
-  const darkMode = ref(false);
-  
-  // Access the router instance
-  const router = useRouter();
-  
-  // Filter routes for navigation links
-  const navRoutes = router.getRoutes().filter(route => 
-    route.name && ['Home', 'Chat'].includes(route.name)
-  );
-  
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    darkMode.value = !darkMode.value;
-    if (darkMode.value) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
-    }
-  };
-  
-  // Check for saved theme preference
-  onMounted(() => {
-    const savedTheme = localStorage.getItem('darkMode');
-    if (savedTheme === 'true' || (savedTheme === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      darkMode.value = true;
-      document.documentElement.classList.add('dark');
-    }
-  });
+  // State is correctly defined here
+  const userId = ref('user-123-test');
+  const isMobileMenuOpen = ref(false);
+  const route = useRoute(); // useRoute is necessary for checking $route.path
   </script>

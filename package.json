@@ -9,7 +9,8 @@
     "install:all": "npm install -g concurrently && cd frontend && bun install && cd ../Backend && npm install"
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "vite": "^7.1.7"
   },
   "workspaces": [
     "frontend",
