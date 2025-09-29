@@ -59,19 +59,27 @@ async function callOpenAI(prompt, history = [], imageUrl = null) {
         const systemMessage = {
             role: "system",
             content: `You are Libra, a step-by-step diagnostic assistant. Your goal is to help a user solve a technical problem one step at a time.
-        
-        CRITICAL RULES:
-        1.  **One Step at a Time:** Provide only ONE clear, concise instruction or question in each response. Do not provide lists of steps.
-        2.  **Classify Your Response:** At the end of EVERY response, you MUST include a classification tag for the type of step you provided. The user will not see this tag.
-        3.  **Use ONLY these tags:**
-            * \`[step_type: definitive]\` when you propose a solution to see if it fixed the problem (e.g., "Try restarting the device.").
-            * \`[step_type: transition]\` when you ask the user to perform an action or check something to gather more information (e.g., "Can you check if the power light is on?").
-            * \`[step_type: clarification]\` when you are explaining a concept or asking a clarifying question (e.g., "When you say it's 'not working', do you mean it's slow or completely disconnected?").
-        4.  **Wait for User Response:** Base your next step on the user's button press (e.g., if they say 'It didn't work', provide an alternative solution).
-        
-        **Example Interaction:**
-        * User Prompt: "My Wi-Fi is not working."
-        * Your Response: "I see. First, could you check if the Wi-Fi icon on your router is lit up or blinking? [step_type: transition]"`
+
+            CRITICAL RULES:
+            1.  **One Step at a Time:** Provide only ONE clear, concise instruction or question in each response.
+            2.  **Provide Dynamic Options:** After your response, you MUST provide between 2 and 4 relevant button options for the user.
+            3.  **Options Must Be ANSWERS:** The options you provide must be potential ANSWERS to your question, not generic actions like "I understand" or "Continue".
+            4.  **Handle Yes/No Questions:** If your question can be answered with a simple yes or no, you MUST provide the options exactly as: [options: "Yes", "No"].
+            5.  **Format Correctly:** You MUST format your options inside a special tag like this: [options: "Option 1", "Option 2", "Option 3"]. The user will not see this tag.
+            6.  Concluding the Chat: When the user's problem is fully resolved or if you have exhausted all solutions, your final response must be a concluding summary. After this summary, you MUST use the special tag: [done].
+
+            Example of a Final Message:
+            Your Response: "Great! I'm glad to hear that everything is working now. If you have any other issues, please don't hesitate to start a new chat. Have a great day! [done]"
+
+            **Example 1 (Multi-Choice):**
+            * Your Response: "I see. First, could you check if the Wi-Fi icon on your router is lit up or blinking? [options: "The light is solid green", "The light is blinking", "The light is off"]"
+
+            **Example 2 (Yes/No):**
+            * Your Response: "In the 'Apps' section, is the toggle next to Safari enabled? [options: "Yes", "No"]"
+            
+            **Example 3 (Definitive Step):**
+            * Your Response: "Okay, please try restarting your device. Let me know if that solves the issue. [options: "That fixed it!", "The issue is still there"]"
+            `
         };
 
         let userMessage = { role: "user", content: prompt };
@@ -110,20 +118,37 @@ async function callOpenAI(prompt, history = [], imageUrl = null) {
     }
 }
 
-// NEW: A helper function to parse the AI's response for a step_type tag
+// MODIFIED: This function now parses for an [options: ...] tag and returns an array.
 function parseAIResponse(rawResponse) {
-    const regex = /\[step_type:\s*(\w+)]/;
+    // Check for the 'done' tag first
+    if (rawResponse.includes('[done]')) {
+        return {
+            cleanMessage: rawResponse.replace('[done]', '').trim(),
+            options: [],
+            isDone: true
+        };
+    }
+    const regex = /\[options:\s*([^\]]+)]/;
     const match = rawResponse.match(regex);
 
-    if (match) {
+    if (match && match[1]) {
         const cleanMessage = rawResponse.replace(regex, '').trim();
-        const stepType = match[1];
-        return { cleanMessage, stepType };
+        try {
+            // The AI gives us a string like: "Option 1", "Option 2"
+            // We wrap it in brackets to make it a valid JSON array string: ["Option 1", "Option 2"]
+            const optionsArray = JSON.parse(`[${match[1]}]`);
+            return { cleanMessage, options: optionsArray };
+        } catch (e) {
+            console.error("Failed to parse AI options, applying fallback.", e);
+            // Fallback if the AI's formatting is broken
+            return { cleanMessage, options: ["Continue"] };
+        }
     } else {
-        console.warn("AI response missing a [step_type] tag. Applying fallback.");
+        // Fallback if the AI forgets the tag completely
+        console.warn("AI response missing an [options] tag. Applying fallback.");
         return {
             cleanMessage: rawResponse,
-            stepType: 'clarification' // Safe default
+            options: ["I understand", "I don't understand", "I have a question"]
         };
     }
 }
@@ -166,27 +191,32 @@ app.http('chat', {
 
                 const aiResponseText = await callOpenAI(prompt, history);
                 
-                // MODIFIED: Parse the AI response to extract the message and stepType
-                const { cleanMessage, stepType } = parseAIResponse(aiResponseText);
+                // MODIFIED: Parse for the 'options' array instead of 'stepType'
+                const { cleanMessage, options, isDone } = parseAIResponse(aiResponseText);
 
                 conversation.messages.push({ role: "user", content: prompt, timestamp: new Date().toISOString() });
                 conversation.messages.push({ role: "assistant", content: cleanMessage, timestamp: new Date().toISOString() });
 
-                // MODIFIED: Title generation now happens after the first real user message
+                // MODIFIED: Title generation uses the new parser
                 if (conversation.messages.length === 2) {
                     const titlePrompt = `Summarize this chat into a 5-word title: User: "${conversation.messages[0].content}"`;
                     const titleResponse = await callOpenAI(titlePrompt, []);
-                    // Ensure the title itself doesn't contain a step_type tag
                     conversation.title = parseAIResponse(titleResponse).cleanMessage;
+                }
+
+                // NEW: If the conversation is done, set a flag in the database
+                if (isDone) {
+                    conversation.isDone = true;
                 }
 
                 await container.items.upsert(conversation);
 
-                // MODIFIED: Return the new JSON structure with the stepType
+                // MODIFIED: Return the isDone flag in the JSON response
                 return { 
                     jsonBody: { 
                         response: cleanMessage, 
-                        stepType: stepType, 
+                        options: options, 
+                        isDone: isDone, // Send the flag to the frontend
                         conversationId: conversation.id 
                     } 
                 };

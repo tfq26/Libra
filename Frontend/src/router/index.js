@@ -18,6 +18,11 @@ const routes = [
     path: '/history',
     name: 'History',
     component: History
+  },
+  {
+    path: '/chat/:id',
+    name: 'Chat::id',
+    component: Chat
   }
 ];
 

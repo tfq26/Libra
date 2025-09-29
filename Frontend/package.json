@@ -12,8 +12,11 @@
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
+    "@vicons/antd": "^0.13.0",
     "axios": "^1.12.2",
     "pinia": "^3.0.3",
+    "primeicons": "^7.0.0",
+    "react-icons": "^5.5.0",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1"
   },

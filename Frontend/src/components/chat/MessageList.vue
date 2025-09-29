@@ -2,7 +2,8 @@
     <div
       id="messages-container"
       ref="messagesContainer"
-      class="flex-grow overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50 space-y-4 shadow-inner custom-scrollbar"
+      class="flex-grow overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50 space-y-4 shadow-inner 
+      custom-scrollbar min-h-[calc(100vh-16rem)]"
     >
       <MessageBubble
         v-for="(msg, index) in messages"

@@ -1,1 +1,63 @@
 @import "tailwindcss";
+
+@theme {
+  /* Night Palette */
+  --color-night-100: #020202;
+  --color-night-200: #040404;
+  --color-night-300: #060606;
+  --color-night-400: #090908;
+  --color-night-500: #0a0a09;
+  --color-night-600: #3e3e38;
+  --color-night-700: #727267;
+  --color-night-800: #a2a298;
+  --color-night-900: #d0d0cc;
+  --color-night: #0a0a09; /* DEFAULT */
+
+  /* Ochre Palette */
+  --color-ochre-100: #261801;
+  --color-ochre-200: #4d2f03;
+  --color-ochre-300: #734704;
+  --color-ochre-400: #9a5e06;
+  --color-ochre-500: #c17607;
+  --color-ochre-600: #f69a0f;
+  --color-ochre-700: #f8b34b;
+  --color-ochre-800: #fbcc87;
+  --color-ochre-900: #fde6c3;
+  --color-ochre: #c17607; /* DEFAULT */
+
+  /* Lion Palette */
+  --color-lion-100: #251d0f;
+  --color-lion-200: #4a3a1e;
+  --color-lion-300: #6f572d;
+  --color-lion-400: #94743c;
+  --color-lion-500: #b68f4c;
+  --color-lion-600: #c5a671;
+  --color-lion-700: #d4bc95;
+  --color-lion-800: #e2d3b8;
+  --color-lion-900: #f1e9dc;
+  --color-lion: #b68f4c; /* DEFAULT */
+
+  /* Sunset Palette */
+  --color-sunset-100: #503200;
+  --color-sunset-200: #9f6500;
+  --color-sunset-300: #ef9700;
+  --color-sunset-400: #ffb93f;
+  --color-sunset-500: #ffd791;
+  --color-sunset-600: #ffdea5;
+  --color-sunset-700: #ffe6bc;
+  --color-sunset-800: #ffefd2;
+  --color-sunset-900: #fff7e9;
+  --color-sunset: #ffd791; /* DEFAULT */
+
+  /* Timberwolf Palette */
+  --color-timberwolf-100: #2d2b29;
+  --color-timberwolf-200: #595752;
+  --color-timberwolf-300: #86827b;
+  --color-timberwolf-400: #afaca8;
+  --color-timberwolf-500: #d8d7d5;
+  --color-timberwolf-600: #e0dfdd;
+  --color-timberwolf-700: #e7e7e6;
+  --color-timberwolf-800: #efefee;
+  --color-timberwolf-900: #f7f7f7;
+  --color-timberwolf: #d8d7d5; /* DEFAULT */
+}
