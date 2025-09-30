@@ -2,7 +2,8 @@
   "name": "libra2-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "src/functions/*.js",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "func start",
     "test": "echo \"No tests yet...\""

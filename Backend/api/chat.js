@@ -1,8 +1,6 @@
 import { app } from '@azure/functions';
-import { BlobServiceClient } from '@azure/storage-blob';
 import { CosmosClient } from '@azure/cosmos';
 import { v4 as uuidv4 } from 'uuid';
-import busboy from 'busboy';
 import axios from 'axios';
 import { get_encoding } from "tiktoken";
 
@@ -14,20 +12,6 @@ const containerId = "Conversations";
 const database = cosmosClient.database(databaseId);
 const container = database.container(containerId);
 
-// --- Helper function to set up the database and container with a Partition Key ---
-async function setupCosmosDB() {
-    await cosmosClient.databases.createIfNotExists({ id: databaseId });
-    await database.containers.createIfNotExists({
-        id: containerId,
-        partitionKey: { paths: ["/userId"] }
-    });
-    console.log("Cosmos DB database and container are ready with /userId partition key.");
-}
-
-// Call setup on startup
-setupCosmosDB().catch(console.error);
-
-// --- Token Counting and OpenAI Call (remains the same) ---
 function countMessageTokens(messages) {
     const encoding = get_encoding("cl100k_base");
     let numTokens = 0;
@@ -249,33 +233,6 @@ app.http('chat', {
                 context.log("Error in chat function (GET):", error);
                 return { status: 500, body: "Error fetching conversation." };
             }
-        }
-    }
-});
-
-// --- HTTP Trigger for Fetching Conversation History List ---
-app.http('history', {
-    methods: ['GET'],
-    authLevel: 'anonymous',
-    handler: async (request, context) => {
-        context.log('History function processed a request.');
-        try {
-            const userId = request.query.get('userId');
-            if (!userId) {
-                return { status: 400, body: "User ID is required." };
-            }
-
-            const querySpec = {
-                query: "SELECT c.id, c.title, c.createdAt FROM c WHERE c.userId = @userId ORDER BY c.createdAt DESC",
-                parameters: [ { name: "@userId", value: userId } ]
-            };
-
-            const { resources: conversations } = await container.items.query(querySpec).fetchAll();
-            return { jsonBody: conversations };
-
-        } catch (error) {
-            context.log("Error in history function:", error);
-            return { status: 500, body: "Error fetching conversation history." };
         }
     }
 });
