@@ -49,9 +49,10 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D1B2E835F2444E888992DFECD3049F11 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_034B918A242E4429B43F013D7D26DE77 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_89A21E232F9541538F9BE94D73B2BE25 }}
+          # CRITICAL FIX: You must update these secrets in GitHub to match your "Azure for Students" subscription.
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # Deploy the Static Web App and API together from the original source structure
       - name: Deploy Static Web App
@@ -75,4 +76,5 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
           action: "close"
-          app_location: "Frontend"
+          
+
