@@ -65,6 +65,10 @@ jobs:
           name: fullstack-app
           path: .
 
+      - name: Install Azure Functions Core Tools
+        run: |
+          npm install -g azure-functions-core-tools@4 --unsafe-perm true
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -83,10 +87,12 @@ jobs:
 
       # Deploy Backend (Azure Function App)
       - name: Deploy Azure Function App
-        uses: Azure/functions-action@v1
+        uses: Azure/functions-action@v1.5.3
         with:
           app-name: 'libra2app'
-          package: Backend
+          package: 'Backend'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          scm-do-build-during-deployment: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
