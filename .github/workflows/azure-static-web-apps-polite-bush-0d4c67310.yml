@@ -49,27 +49,32 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          # CRITICAL FIX: You must update these secrets in GitHub to match your "Azure for Students" subscription.
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # ADDED: Debugging step to verify secrets
+      # IMPROVED: More robust debugging step to verify secrets
       - name: Verify Secrets
         run: |
-          echo "Verifying Azure Login Secrets..."
-          echo "Client ID Length: ${{ env.CLIENT_ID_LEN }}"
-          echo "Client ID Preview: ${{ env.CLIENT_ID_PREVIEW }}..."
+          CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
+          SWA_TOKEN="${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}"
+
+          if [ -z "$CLIENT_ID" ]; then
+            echo "::error::AZURE_CLIENT_ID secret is not set!"
+            exit 1
+          else
+            echo "✅ AZURE_CLIENT_ID is set."
+            echo "   - First 5 chars: ${CLIENT_ID:0:5}..."
+          fi
           
-          echo "Verifying SWA Deployment Token..."
-          echo "Token Length: ${{ env.TOKEN_LEN }}"
-          echo "Token Preview: ${{ env.TOKEN_PREVIEW }}...${{ env.TOKEN_SUFFIX }}"
-        env:
-          CLIENT_ID_LEN: ${{ secrets.AZURE_CLIENT_ID && 'set' || 'not-set' }}
-          CLIENT_ID_PREVIEW: ${{ secrets.AZURE_CLIENT_ID }}
-          TOKEN_LEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 && 'set' || 'not-set' }}
-          TOKEN_PREVIEW: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
-          TOKEN_SUFFIX: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
+          if [ -z "$SWA_TOKEN" ]; then
+            echo "::error::AZURE_STATIC_WEB_APPS_API_TOKEN... secret is not set!"
+            exit 1
+          else
+            echo "✅ SWA Token is set."
+            echo "   - First 5 chars: ${SWA_TOKEN:0:5}..."
+            echo "   - Last 5 chars: ...${SWA_TOKEN: -5}"
+          fi
 
       # Deploy the Static Web App and API together from the original source structure
       - name: Deploy Static Web App
@@ -77,7 +82,6 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
           action: "upload"
-          # Now we point to the source folders since we haven't used artifacts
           app_location: "Frontend"
           output_location: "dist"
           api_location: "Backend"
