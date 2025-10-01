@@ -59,10 +59,10 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "upload"
-          # Point to the pre-built assets and skip the action's build
-          app_location: "Frontend/dist" # Point to the build output
-          api_location: "Backend"        # Point to the API folder
-          skip_app_build: true
+          app_location: "Frontend"       # Source folder
+          output_location: "dist"        # Where your build command outputs
+          api_location: "Backend"        # Your Azure Functions backend
+          skip_app_build: true           # Because you already built manually
           skip_api_build: true
 
   # This job closes the PR preview environment
