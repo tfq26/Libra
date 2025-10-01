@@ -59,6 +59,15 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_034B918A242E4429B43F013D7D26DE77 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_89A21E232F9541538F9BE94D73B2BE25 }}
 
+      - name: Ensure Node 20 is set on Function App
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az functionapp config set \
+              --resource-group YOUR_RESOURCE_GROUP \
+              --name libra2app \
+              --linux-fx-version "NODE|20-lts"
+
       - name: Deploy to Azure Functions
       uses: Azure/functions-action@v2
       with:
