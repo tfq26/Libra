@@ -60,8 +60,11 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_89A21E232F9541538F9BE94D73B2BE25 }}
 
       - name: Deploy to Azure Functions
-        uses: Azure/functions-action@v1
-        with:
-          app-name: 'libra2app'
-          slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+      uses: Azure/functions-action@v2
+      with:
+        app-name: 'libra2app'
+        slot-name: 'Production'
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        runtime: 'node'
+        runtime-version: '20'
+          
