@@ -96,18 +96,18 @@ jobs:
       - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
         with:
-          # This token MUST be correct. Reset it in the Azure portal if you have any doubts.
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
           action: "upload"
-          # The app_location is "." because the artifact downloads the built files (from Frontend/dist) to the root.
           app_location: "."
+          # CRITICAL FIX: Explicitly tell the action where the API code is.
+          api_location: "Backend"
 
-      # Deploy Backend (Azure Function App)
+      # Deploy Backend (Azure Function App) - This step is now redundant if you use the integrated API feature above.
+      # You can deploy the API along with the SWA. However, if you are managing the Function App separately, you can keep it.
       - name: Deploy Azure Function App
         uses: Azure/functions-action@v1.5.3
         with:
           app-name: 'libra2app'
-          # The package is "Backend" because the artifact downloads the Backend folder to the root.
           package: 'Backend'
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
           scm-do-build-during-deployment: true
@@ -122,4 +122,5 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
           action: "close"
-          app_location: "."
+          # This job doesn't have the source code, so app_location should be removed. The token is sufficient.
+
