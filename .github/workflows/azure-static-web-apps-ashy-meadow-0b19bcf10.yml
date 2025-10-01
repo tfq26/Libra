@@ -53,16 +53,29 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Deploy the Static Web App and API together from the original source structure
+      # NEW: This step safely prints parts of your secrets for verification
+      - name: Verify Secrets
+        run: |
+          echo "Verifying secrets..."
+          CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
+          SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          SWA_TOKEN="${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}"
+          
+          echo "  - Client ID starts with: ${CLIENT_ID:0:5}..."
+          echo "  - Subscription ID starts with: ${SUB_ID:0:5}..."
+          echo "  - SWA Token starts with: ${SWA_TOKEN:0:5}..."
+          echo "  - SWA Token ends with: ...${SWA_TOKEN: -5}"
+
+      # Deploy the Static Web App and API together
       - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "upload"
-          app_location: "Frontend"       # Source folder
-          output_location: "dist"        # Where your build command outputs
-          api_location: "Backend/api"        # Your Azure Functions backend
-          skip_app_build: true           # Because you already built manually
+          # Point to the pre-built assets and skip the action's build
+          app_location: "Frontend/dist" # Point to the build output
+          api_location: "Backend/api"    # CORRECTED: Point to the folder with your function files
+          skip_app_build: true
           skip_api_build: true
 
   # This job closes the PR preview environment
@@ -76,6 +89,6 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "close"
-          app_location: "Frontend"
+          app_location: "Frontend/dist"
           api_location: "Backend/api"
 
