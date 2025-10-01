@@ -61,7 +61,7 @@ jobs:
           action: "upload"
           app_location: "Frontend"       # Source folder
           output_location: "dist"        # Where your build command outputs
-          api_location: "Backend"        # Your Azure Functions backend
+          api_location: "Backend/api"        # Your Azure Functions backend
           skip_app_build: true           # Because you already built manually
           skip_api_build: true
 
@@ -77,5 +77,5 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "close"
           app_location: "Frontend"
-          api_location: "Backend"
+          api_location: "Backend/api"
 
