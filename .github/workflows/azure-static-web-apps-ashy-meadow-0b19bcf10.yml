@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: Azure Full Stack CI/CD (Single Job)
 
 on:
   push:
@@ -9,50 +9,71 @@ on:
     branches:
       - master
 
+env:
+  NODE_VERSION: '20'
+
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  build_and_deploy:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    # This job handles both build and deploy for master pushes and open PRs
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     permissions:
-       id-token: write
-       contents: read
+      id-token: write
+      contents: read
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          submodules: true
-          lfs: false
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Build Frontend
+      - name: Install & Build Frontend
+        run: |
+          cd Frontend
+          npm install
+          npm run build
+
+      # Build Backend (Functions)
+      - name: Install & Build Backend
+        run: |
+          cd Backend
+          npm install
+          npm run build --if-present
+          npm test --if-present
+      
+      # Login to Azure AFTER building, right before deployment
+      - name: Login to Azure
+        uses: azure/login@v2
         with:
-           script: |
-               const coredemo = require('@actions/core')
-               return await coredemo.getIDToken()
-           result-encoding: string
-      - name: Build And Deploy
-        id: builddeploy
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Deploy the Static Web App and API together from the original source structure
+      - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "./Frontend" # App source code path
-          api_location: "Backend" # Api source code path - optional
-          output_location: "dist" # Built app content directory - optional
-          github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### End of Repository/Build Configurations ######
+          # Point to the pre-built assets and skip the action's build
+          app_location: "Frontend/dist" # Point to the build output
+          api_location: "Backend"        # Point to the API folder
+          skip_app_build: true
+          skip_api_build: true
 
+  # This job closes the PR preview environment
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
     steps:
       - name: Close Pull Request
-        id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "close"
+
