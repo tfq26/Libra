@@ -1,4 +1,4 @@
-name: Azure Full Stack CI/CD
+name: Azure Libra Full Stack CI/CD
 
 on:
   push:
