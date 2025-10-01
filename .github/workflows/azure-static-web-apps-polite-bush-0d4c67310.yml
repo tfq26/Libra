@@ -1,5 +1,4 @@
 name: Azure Full Stack CI/CD
-name: Azure Full Stack CI/CD
 
 on:
   push:
@@ -11,7 +10,7 @@ on:
       - master
 
 env:
-  NODE_VERSION: '20' # Supported by Azure Functions and modern frontends
+  NODE_VERSION: '20'
 
 jobs:
   build:
@@ -54,25 +53,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    needs: build
     permissions:
-      id-token: write
-      contents: read
-
       id-token: write
       contents: read
 
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
         with:
-          name: fullstack-app
-          path: .
-
-      - name: Login to Azure
-        uses: azure/login@v2
           name: fullstack-app
           path: .
 
@@ -107,7 +95,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Close Pull Request Job
     steps:
-      - name: Close PR environment
       - name: Close PR environment
         uses: Azure/static-web-apps-deploy@v1
         with:
