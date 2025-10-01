@@ -54,6 +54,23 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # ADDED: Debugging step to verify secrets
+      - name: Verify Secrets
+        run: |
+          echo "Verifying Azure Login Secrets..."
+          echo "Client ID Length: ${{ env.CLIENT_ID_LEN }}"
+          echo "Client ID Preview: ${{ env.CLIENT_ID_PREVIEW }}..."
+          
+          echo "Verifying SWA Deployment Token..."
+          echo "Token Length: ${{ env.TOKEN_LEN }}"
+          echo "Token Preview: ${{ env.TOKEN_PREVIEW }}...${{ env.TOKEN_SUFFIX }}"
+        env:
+          CLIENT_ID_LEN: ${{ secrets.AZURE_CLIENT_ID && 'set' || 'not-set' }}
+          CLIENT_ID_PREVIEW: ${{ secrets.AZURE_CLIENT_ID }}
+          TOKEN_LEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 && 'set' || 'not-set' }}
+          TOKEN_PREVIEW: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
+          TOKEN_SUFFIX: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
+
       # Deploy the Static Web App and API together from the original source structure
       - name: Deploy Static Web App
         uses: Azure/static-web-apps-deploy@v1
@@ -76,5 +93,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_BUSH_0D4C67310 }}
           action: "close"
-          
 
