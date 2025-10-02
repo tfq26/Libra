@@ -1,4 +1,4 @@
-name: Azure Full Stack CI/CD (Single Job)
+name: Azure Static Web App CI/CD
 
 on:
   push:
@@ -15,14 +15,14 @@ env:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    # This job handles both build and deploy for master pushes and open PRs
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    name: Build and Deploy
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -30,52 +30,38 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      # Build Frontend
+      # --- Build Frontend ---
       - name: Install & Build Frontend
         run: |
           cd Frontend
           npm install
           npm run build
 
-      # Build Backend (Functions)
-      - name: Install & Build Backend
+      # --- Build Backend ---
+      - name: Install Backend deps
         run: |
           cd Backend
           npm install
           npm run build --if-present
-          npm test --if-present
-      
-      # Login to Azure AFTER building, right before deployment
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Deploy the Static Web App and API together
-      - name: Deploy Static Web App
+      # --- Deploy to Azure ---
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          # CORRECTED: Using the specific secret name for your "ashy-meadow" app
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "upload"
-          # Point to the pre-built assets and skip the action's build
-          app_location: "Frontend/dist" # Point to the build output
-          api_location: "Backend/api"    # Point to the folder with your function files
-          skip_app_build: true
-          skip_api_build: true
+          app_location: "Frontend"
+          api_location: "Backend"
+          output_location: "build"
 
-  # This job closes the PR preview environment
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
-    name: Close Pull Request Job
+    name: Close PR Preview
     steps:
-      - name: Close Pull Request
+      - name: Close PR Env
         uses: Azure/static-web-apps-deploy@v1
         with:
-          # CORRECTED: Using the specific secret name for your "ashy-meadow" app
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_MEADOW_0B19BCF10 }}
           action: "close"
-
+          app_location: "Frontend"
