@@ -11,8 +11,8 @@ import ErrorPage from '../pages/Error.vue'; // Renamed to avoid conflict with na
 // --- Route Definitions ---
 export const routes = [
   { path: '/', name: 'Home', component: Home },
-  { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
-  { path: '/chat/:id', name: 'ChatSession', component: Chat, meta: { requiresAuth: true } },
+  { path: '/conversation', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
+  { path: '/conversation/:id', name: 'ChatSession', component: Chat, meta: { requiresAuth: true } },
   { path: '/history', name: 'History', component: History, meta: { requiresAuth: true } },
   { path: '/sign-in', name: 'SignIn', component: SignIn, meta: { guestOnly: true } },
   { path: '/sign-up', name: 'SignUp', component: SignUp, meta: { guestOnly: true } },
