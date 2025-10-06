@@ -4,29 +4,27 @@
     {
       "src": "Frontend/package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "config": { "distDir": "dist" }
     },
     {
       "src": "Backend/api/*.js",
       "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/Backend/api/conversation(.*)",
-      "dest": "/Backend/api/conversation.js"
+      "source": "/Backend/api/conversation(.*)",
+      "destination": "/Backend/api/conversation.js" 
     },
     
     {
-      "src": "/Backend/api/history",
-      "dest": "/Backend/api/history.js"
+      "source": "/Backend/api/history",
+      "destination": "/Backend/api/history.js" 
     },
     
     {
-      "src": "/(.*)",
-      "dest": "/Frontend/dist/$1"
+      "source": "/(.*)",
+      "destination": "/Frontend/$1"
     }
   ]
 }
