@@ -101,7 +101,7 @@ async function loadChatHistory(id) {
   errorMessage.value = null;
   
   try {
-    const token = await getToken();
+    const token = await getToken().value;
     // 🔑 FIX 1: Check if token is null (failed retrieval) and throw a standard Error object.
     if (!token) throw new Error('Authentication token could not be retrieved.');
     
@@ -162,7 +162,7 @@ async function sendMessage(promptText) {
   await scrollToBottom();
   
   try {
-    const token = await getToken();
+    const token = await getToken().value;
     if (!token) {
       throw new Error('Authentication required. Please sign in again.');
     }

@@ -137,7 +137,7 @@ export async function withAuth(fetchFunction) {
     throw new Error('Authentication required');
   }
   
-  const token = await getToken();
+  const token = await getToken().value;
   if (!token) {
     throw new Error('Failed to get authentication token');
   }
