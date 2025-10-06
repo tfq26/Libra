@@ -19,11 +19,12 @@
       "dest": "/Backend/api/$1"
     },
     {
-      "handle": "filesystem"
+      "src": "/_next/static/(.*)",
+      "dest": "/Frontend/.next/static/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/Frontend/$1"
     }
   ]
 }
