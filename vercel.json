@@ -4,32 +4,36 @@
     {
       "src": "Frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist"
+      }
     },
     {
       "src": "Backend/api/*.js",
       "use": "@vercel/node"
     }
   ],
-  "rewrites": [
+  "routes": [
+    // 1. API: CONVERSATION ENDPOINT
+    // Maps the incoming request /Backend/api/conversation(...) to the function file.
     {
-      "source": "/Backend/api/conversation(.*)",
-      "destination": "/Backend/api/conversation.js" 
+      "src": "/Backend/api/conversation(.*)",
+      "dest": "/Backend/api/conversation.js"
     },
     
+    // 2. API: HISTORY ENDPOINT
+    // Maps the incoming request /Backend/api/history to the function file.
     {
-      "source": "/Backend/api/history",
-      "destination": "/Backend/api/history.js" 
-    },
-
-    {
-      "source": "/(.*\\.(?:js|css|jpg|jpeg|png|gif|svg|ico|webmanifest|ttf|woff|woff2|eot|html))",
-      "destination": "/Frontend/dist/$1"
+      "src": "/Backend/api/history",
+      "dest": "/Backend/api/history.js"
     },
     
+    // 3. STATIC FILES & SPA FALLBACK (CRITICAL FIX)
+    // This catches all static files (like /assets/...) AND client routes (like /messenger).
+    // It maps them all to the correct output folder: /Frontend/dist/.
     {
-      "source": "/(.*)",
-      "destination": "/Frontend/dist/index.html"
+      "src": "/(.*)",
+      "dest": "/Frontend/dist/$1" // 🎯 FIX: Explicitly targets the 'dist' folder.
     }
   ]
 }
