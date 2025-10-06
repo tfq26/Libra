@@ -20,8 +20,8 @@
     },
     
     {
-      "source": "/_next/static/(.*)",
-      "destination": "/Frontend/.next/static/$1" 
+      "source": "/(.*\\.(?:js|css|jpg|jpeg|png|gif|svg|ico|webmanifest))",
+      "destination": "/Frontend/dist/$1"
     },
     
     {
