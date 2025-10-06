@@ -4,9 +4,8 @@
     {
       "src": "Frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { 
-        "distDir": ".output/public",
-        "outputDirectory": "dist"
+      "config": {
+        "distDir": "dist"
       }
     },
     {
@@ -20,20 +19,11 @@
       "dest": "/Backend/api/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/Frontend/$1"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/Frontend/index.html"
+      "dest": "/index.html"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_API_URL": "/api"
-    }
-  }
+  ]
 }
