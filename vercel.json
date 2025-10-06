@@ -14,26 +14,19 @@
     }
   ],
   "routes": [
-    // 1. API: CONVERSATION ENDPOINT
-    // Maps the incoming request /Backend/api/conversation(...) to the function file.
     {
       "src": "/Backend/api/conversation(.*)",
       "dest": "/Backend/api/conversation.js"
     },
     
-    // 2. API: HISTORY ENDPOINT
-    // Maps the incoming request /Backend/api/history to the function file.
     {
       "src": "/Backend/api/history",
       "dest": "/Backend/api/history.js"
     },
     
-    // 3. STATIC FILES & SPA FALLBACK (CRITICAL FIX)
-    // This catches all static files (like /assets/...) AND client routes (like /messenger).
-    // It maps them all to the correct output folder: /Frontend/dist/.
     {
       "src": "/(.*)",
-      "dest": "/Frontend/dist/$1" // 🎯 FIX: Explicitly targets the 'dist' folder.
+      "dest": "/Frontend/dist/$1"
     }
   ]
 }
