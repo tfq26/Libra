@@ -2,10 +2,8 @@ import { CosmosClient } from '@azure/cosmos';
 
 // Initialize CosmosDB client
 const cosmosClient = new CosmosClient(process.env.COSMOSDB_CONNECTION_STRING);
-const database = cosmosClient.database('LibraChatDB');
+const database = cosmosClient.database('libraapp');
 const container = database.container('Conversations');
-
-executionCount = 0;
 
 /**
  * Vercel Serverless Function for fetching chat history
