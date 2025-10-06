@@ -43,7 +43,6 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       sourcemap: mode !== 'production',
-      minify: mode === 'production' ? 'terser' : false,
       rollupOptions: {
         output: {
           // ✅ CORRECTED SECTION
