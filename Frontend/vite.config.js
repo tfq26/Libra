@@ -46,12 +46,24 @@ export default defineConfig(({ mode }) => {
       minify: mode === 'production' ? 'terser' : false,
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vue': ['vue', 'vue-router', 'pinia'],
-            'vendor': ['axios', 'lodash']
-          }
-        }
-      }
+          // ✅ CORRECTED SECTION
+          manualChunks(id) {
+            // Check if the module ID is from node_modules
+            if (id.includes('node_modules')) {
+              // Group Vue, Vue Router, and Pinia into a 'vue' chunk
+              if (
+                id.includes('vue') ||
+                id.includes('vue-router') ||
+                id.includes('pinia')
+              ) {
+                return 'vue';
+              }
+              // Group other dependencies like axios and lodash into a 'vendor' chunk
+              return 'vendor';
+            }
+          },
+        },
+      },
     },
 
     // Environment variables
