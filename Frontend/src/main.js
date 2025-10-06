@@ -5,111 +5,148 @@ import App from './App.vue';
 import './style.css';
 import axios from 'axios';
 import { clerkPlugin } from '@clerk/vue';
-import { setupErrorHandlers, handleApiError, AppError, createErrorNavigator } from './utils/errorHandler';
-// Create app
-const app = createApp(App);
-// Create and use pinia
-const pinia = createPinia();
+import {
+  setupErrorHandlers,
+  handleApiError,
+  AppError,
+  createErrorNavigator
+} from './utils/errorHandler';
+import { Clerk } from '@clerk/clerk-js';
 
-
-// IMPORTANT: The key is now proven to be loaded from the environment
+// ======================================================
+// 🌍 Environment Validation
+// ======================================================
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!CLERK_PUBLISHABLE_KEY) {
   throw new AppError(
-    "Missing VITE_CLERK_PUBLISHABLE_KEY environment variable",
+    'Missing VITE_CLERK_PUBLISHABLE_KEY environment variable',
     'MISSING_ENV_VARIABLE',
     { variable: 'VITE_CLERK_PUBLISHABLE_KEY' }
   );
 }
 
-// Configure axios
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '';
+// ======================================================
+// 🚀 Initialize Clerk
+// ======================================================
+const clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
 
-// Add request interceptor for auth headers
-axios.interceptors.request.use(config => {
-  // You can add auth tokens here if needed
-  // const token = localStorage.getItem('token');
-  // if (token) {
-  //   config.headers.Authorization = `Bearer ${token}`;
-  // }
-  return config;
-}, error => {
-  return Promise.reject(handleApiError(error));
-});
+// Handle Clerk initialization
+async function initializeApp() {
+  try {
+    // Load Clerk
+    await clerk.load();
+    
+    // Create app instance
+    const app = createApp(App);
+    const pinia = createPinia();
 
-// Add response interceptor for error handling
-axios.interceptors.response.use(
-  response => response,
-  error => {
-    // Handle API errors globally
-    return Promise.reject(handleApiError(error));
+    // ======================================================
+    // 🧱 Plugin Registration
+    // ======================================================
+    app.use(pinia);
+    app.use(router);
+    
+    // Register Clerk plugin
+    app.use(clerkPlugin, {
+      publishableKey: CLERK_PUBLISHABLE_KEY,
+    });
+
+    // ======================================================
+    // 🌐 Axios Configuration
+    // ======================================================
+    axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '';
+
+    // Request interceptor
+    axios.interceptors.request.use(
+      async (config) => {
+        // Add auth token to requests if available
+        if (clerk.session) {
+          const token = await clerk.session?.getToken();
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+        }
+        return config;
+      },
+      error => Promise.reject(handleApiError(error))
+    );
+
+    // Response interceptor
+    axios.interceptors.response.use(
+      response => response,
+      error => {
+        // Handle 401 Unauthorized
+        if (error.response?.status === 401) {
+          // You can add redirect to login here if needed
+          console.warn('Session expired or invalid. Please sign in again.');
+        }
+        return Promise.reject(handleApiError(error));
+      }
+    );
+
+    // Make axios and error handling available globally
+    app.config.globalProperties.$http = axios;
+    app.config.globalProperties.$handleError = createErrorNavigator(router);
+
+    // ======================================================
+    // ⚙️ Global Error Handling
+    // ======================================================
+    app.config.errorHandler = (err, vm, info) => {
+      console.error('Vue error:', { err, vm, info });
+      if (err && !err.handled) {
+        app.config.globalProperties.$handleError(err);
+      }
+      return false;
+    };
+
+    // Setup error handlers
+    setupErrorHandlers(app);
+
+    // Global error listeners
+    const handleUnhandledRejection = (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      event.preventDefault();
+      if (event.reason && !event.reason.handled) {
+        app.config.globalProperties.$handleError(event.reason);
+      }
+    };
+
+    const handleGlobalError = (message, source, lineno, colno, error) => {
+      console.error('Uncaught error:', { message, source, lineno, colno, error });
+      if (error && !error.handled) {
+        app.config.globalProperties.$handleError(error);
+      }
+      return false;
+    };
+
+    // Add event listeners
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.onerror = handleGlobalError;
+
+    // ======================================================
+    // 🚀 Mount the App
+    // ======================================================
+    app.mount('#app');
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.onerror = null;
+    };
+
+  } catch (error) {
+    console.error('Failed to initialize application:', error);
+    // Render error UI
+    document.getElementById('app').innerHTML = `
+      <div style="padding: 2rem; text-align: center; font-family: sans-serif;">
+        <h1>Application Error</h1>
+        <p>Failed to initialize the application. Please refresh the page or contact support.</p>
+        <p><small>${error.message}</small></p>
+      </div>
+    `;
   }
-);
+}
 
-// Make axios and error handling available globally
-app.config.globalProperties.$http = axios;
-app.config.globalProperties.$handleError = createErrorNavigator(router);
-
-// Global error handler for Vue
-app.config.errorHandler = (err, vm, info) => {
-  console.error('Vue error:', { err, vm, info });
-  
-  // Navigate to error page for unhandled errors
-  if (err && !err.handled) {
-    app.config.globalProperties.$handleError(err);
-  }
-  
-  // Prevent the error from being thrown again
-  return false;
-};
-
-// =========================================================
-// PLUGIN INSTALLATION ORDER FIX (CRITICAL FOR ROUTER)
-// =========================================================
-
-// 1. Install Pinia
-app.use(pinia);
-
-// Install Router first to ensure router-view is registered and ready
-app.use(router);
-
-
-// Initialize Clerk Plugin (installed after the Router is fully stable)
-app.use(clerkPlugin, {
-  publishableKey: CLERK_PUBLISHABLE_KEY,
-  // Redirection URLs remain commented out to prevent startup errors.
-  // fallbackRedirectUrl: "/chat", 
-});
-
-// Setup General Error Handlers (must be after all plugins that define their own errors)
-setupErrorHandlers(app); 
-
-// Mount the app
-app.mount('#app'); // This call should now successfully render router-view
-
-// Global error handler for unhandled promise rejections (non-navigation)
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
-  
-  // Prevent the default browser handler
-  event.preventDefault();
-  
-  // Check if the reason is a recognized AppError or unhandled
-  if (event.reason && !event.reason.handled) {
-    app.config.globalProperties.$handleError(event.reason);
-  }
-});
-
-// Global error handler for uncaught exceptions
-window.onerror = function(message, source, lineno, colno, error) {
-  console.error('Uncaught error:', { message, source, lineno, colno, error });
-  
-  // Navigate to error page
-  if (error && !error.handled) {
-    app.config.globalProperties.$handleError(error);
-  }
-  
-  // Let the default handler run as well
-  return false;
-};
+// Start the app
+initializeApp();

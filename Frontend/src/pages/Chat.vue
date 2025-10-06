@@ -1,5 +1,9 @@
 <template>
-  <div v-if="clerkAuth.isLoaded.value && !clerkAuth.isSignedIn.value" class="flex items-center justify-center h-full text-center p-8">
+  <div v-if="!isLoaded" class="flex items-center justify-center h-full">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 dark:border-sunset-400"></div>
+  </div>
+
+  <div v-else-if="!isSignedIn" class="flex items-center justify-center h-full text-center p-8">
     <Error :message="'Please sign in to access this chat'" code="402" />
   </div>
 
@@ -8,7 +12,7 @@
 
       <header class="mb-2 flex items-start flex-shrink-0 dark:text-sunset-300 justify-start">
         <div class="border-b border-gray-700 w-full pb-2">
-          <h1 class="text-5xl font-bold text-gray-800 dark:text-sunset-200 truncate text-start">{{ chatTitle }}</h1>
+          <h1 class="text-5xl font-bold text-gray-800 dark:text-sunset-200 truncate text-start">{{ chatTitle || 'New Chat' }}</h1>
         </div>
       </header>
 
@@ -16,6 +20,7 @@
         ref="messageListComp"
         :messages="filteredMessages"
         :is-loading="isLoadingChat"
+        class="flex-1 overflow-y-auto"
       />
 
       <Error
@@ -25,7 +30,7 @@
       />
 
       <div class="mt-2 flex-shrink-0">
-        <div v-if="inputMode === 'buttons' && actionOptions.length > 0 && !isLoadingChat" class="flex items-end space-x-2">
+        <div v-if="inputMode === 'buttons' && actionOptions && actionOptions.length > 0 && !isLoadingChat" class="flex items-end space-x-2">
           <ActionButtons class="flex-grow" :options="actionOptions" @response="handleButtonResponse" />
 
           <button @click="inputMode = 'text'" class="p-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-lg transition" title="Type a custom message">
@@ -46,190 +51,198 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watchEffect } from 'vue'; // <-- watchEffect added
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuth } from '@clerk/vue';
-import { sendChatMessage, loadConversation } from '../functions/chat-api.js';
-// Import all the necessary components
+// NOTE: Assuming your custom useAuth is correctly imported from '@/utils/auth'
+import { useAuth } from '@/utils/auth'; 
+import { sendChatMessage, loadConversation } from '../functions/chat-api';
 import MessageList from '../components/chat/MessageList.vue';
 import MessageInput from '../components/chat/MessageInput.vue';
-import Error from '../pages/Error.vue';
-import ActionButtons from '../components/chat/ActionButtons.vue';
+import Error from './Error.vue';
+import { nextTick } from 'vue';
 
-// --- Clerk Auth Check ---
-const clerkAuth = useAuth(); // <--- Initialize Clerk Auth
+// Auth
+const { isLoaded, isSignedIn, userId, user, getToken } = useAuth();
 
-// --- State for a single chat session ---
+// Chat state
 const messages = ref([]);
-const currentConversationId = ref(null);
 const currentPrompt = ref('');
-const isLoadingChat = ref(false);
 const chatTitle = ref('');
 const chatSubtitle = ref('');
 const messageListComp = ref(null);
 const errorMessage = ref(null);
-
-// NEW: State for managing the input mode and button options
-const inputMode = ref('text'); // 'text' or 'buttons'
+const isLoadingChat = ref(false);
+const inputMode = ref('text');
 const actionOptions = ref([]);
+const currentConversationId = ref(null);
 
 const route = useRoute();
 const router = useRouter();
 
+// Computed
 const isChatting = computed(() => messages.value.length > 0);
-const filteredMessages = computed(() => messages.value.filter(msg => msg.role !== 'system'));
+const filteredMessages = computed(() => 
+  messages.value.filter(msg => msg.role !== 'system')
+);
 
-
+// Methods
 async function scrollToBottom() {
   await nextTick();
-  const container = messageListComp.value?.$el.querySelector('#messages-container');
+  const container = messageListComp.value?.$el;
   if (container) {
     container.scrollTop = container.scrollHeight;
   }
 }
 
-// --- NEW: Function to load an existing chat ---
 async function loadChatHistory(id) {
-  if (!clerkAuth.isSignedIn.value) return; // Prevent API call if not signed in
-
+  if (!isSignedIn.value) return;
+  
   isLoadingChat.value = true;
   errorMessage.value = null;
+  
   try {
-    // Await the token safely (getToken returns a Promise)
-    const token = await clerkAuth.getToken(); 
+    const token = await getToken();
+    // 🔑 FIX 1: Check if token is null (failed retrieval) and throw a standard Error object.
+    if (!token) throw new Error('Authentication token could not be retrieved.');
+    
     const conversation = await loadConversation(id, token);
     messages.value = conversation.messages || [];
     chatTitle.value = conversation.title;
-    chatSubtitle.value = `Conversation started on ${new Date(conversation.createdAt).toLocaleDateString()}`;
     currentConversationId.value = conversation.id;
-
-    // Check the last message from the assistant to restore buttons
+    
     const lastMessage = messages.value[messages.value.length - 1];
-    if(lastMessage?.role === 'assistant' && lastMessage.options) {
+    if (lastMessage?.role === 'assistant' && lastMessage.options) {
       actionOptions.value = lastMessage.options;
       inputMode.value = 'buttons';
-    } else {
-      inputMode.value = 'text';
     }
-
   } catch (error) {
-    console.error("Failed to load conversation:", error);
-    errorMessage.value = "Could not load the requested chat. It might not exist or access is denied.";
-    startNewChat();
+    console.error('Error loading chat:', error);
+    // 🔑 FIX 2: Ensure we log/display a standard message and not the error object directly.
+    errorMessage.value = error.message || 'Failed to load chat history.';
   } finally {
     isLoadingChat.value = false;
-    await scrollToBottom();
   }
-}
-
-function clearErrorAndRetry() {
-  errorMessage.value = null;
-  const chatId = route.params.id;
-  if (chatId) {
-    loadChatHistory(chatId);
-  } else {
-    startNewChat();
-  }
-}
-
-function startNewChat() {
-  currentConversationId.value = null;
-  messages.value = [];
-  currentPrompt.value = '';
-  errorMessage.value = null;
-  inputMode.value = 'text';
-  actionOptions.value = [];
-  chatTitle.value = "New Chat";
-  chatSubtitle.value = "Describe your issue to begin.";
-  if (route.params.id) {
-    router.push('/chat');
-  }
-  nextTick(() => document.querySelector('input')?.focus());
 }
 
 async function handleButtonResponse(responseText) {
-  if (!clerkAuth.isSignedIn.value) return;
+  if (!isSignedIn.value) return;
   messages.value.push({ role: 'user', content: responseText });
   await scrollToBottom();
   await sendMessage(responseText);
 }
 
 async function handleTextInputSend() {
-    if (!clerkAuth.isSignedIn.value) return;
-    await sendMessage(currentPrompt.value);
-    currentPrompt.value = '';
+  if (!isSignedIn.value) return;
+  const message = currentPrompt.value.trim();
+  if (!message) return;
+  
+  currentPrompt.value = '';
+  await sendMessage(message);
 }
 
-async function sendMessage(prompt) {
-  if (!clerkAuth.isSignedIn.value) return; // Final auth check
-
-  const promptText = prompt.trim();
-  if (!promptText || isLoadingChat.value) return;
-
-  errorMessage.value = null;
+async function sendMessage(promptText) {
+  if (!isSignedIn.value || isLoadingChat.value) return;
+  
   isLoadingChat.value = true;
-  actionOptions.value = [];
-
-  if (currentConversationId.value === null) {
-    chatTitle.value = promptText.substring(0, 30) + '...';
+  errorMessage.value = null;
+  
+  // Add user message to chat
+  if (messages.value.length === 0) {
+    chatTitle.value = promptText.substring(0, 30);
     chatSubtitle.value = '';
   }
-
-  // Only push if it's not a duplicate of the last message (e.g., from a button click leading here)
-  if (messages.value.length === 0 || messages.value[messages.value.length - 1]?.content !== promptText) {
-    messages.value.push({ role: 'user', content: promptText });
-  }
-
+  
+  messages.value.push({ 
+    role: 'user', 
+    content: promptText,
+    timestamp: new Date().toISOString()
+  });
+  
   await scrollToBottom();
-
+  
   try {
-    const token = await clerkAuth.getToken(); // <--- Get the auth token
-    const data = await sendChatMessage(promptText, currentConversationId.value, token); // <--- Pass the token
-
-    messages.value.push({ role: 'assistant', content: data.response });
-    actionOptions.value = data.options || []; // Ensure it's an array
-    inputMode.value = actionOptions.value.length > 0 ? 'buttons' : 'text'; // Determine input mode
-
-    if (data.isDone) {
-            inputMode.value = 'text';
-            actionOptions.value = [];
-
-            setTimeout(() => {
-                router.push('/dashboard');
-            }, 3000);
-        }
-
-    if (!currentConversationId.value) {
-      currentConversationId.value = data.conversationId;
+    const token = await getToken();
+    if (!token) {
+      throw new Error('Authentication required. Please sign in again.');
     }
-
+    
+    const data = await sendChatMessage(
+      promptText, 
+      currentConversationId.value, 
+      token
+    );
+    
+    // Add assistant response
+    messages.value.push({ 
+      role: 'assistant', 
+      content: data.response,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Handle action buttons if present
+    actionOptions.value = data.options || [];
+    inputMode.value = actionOptions.value.length > 0 ? 'buttons' : 'text';
+    
+    // Handle conversation completion
+    if (data.isDone) {
+      inputMode.value = 'text';
+      actionOptions.value = [];
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 3000);
+    }
+    
+    // Update conversation ID if this is a new conversation
+    if (!currentConversationId.value && data.conversationId) {
+      currentConversationId.value = data.conversationId;
+      // Update URL to reflect the new conversation ID
+      router.replace({ 
+        params: { id: data.conversationId } 
+      });
+    }
   } catch (error) {
-    console.error("Error sending message:", error);
-    errorMessage.value = error.message;
-    inputMode.value = 'text';
-    // Logic to clean up if the message push before the try block was based on an assumption
-    // For simplicity, we'll keep the message there for now and let the user re-try or see the error
+    console.error('Error sending message:', error);
+    errorMessage.value = error.message || 'Failed to send message.';
+    
+    // If it's an auth error, you might want to redirect to login
+    if (error.message.includes('auth') || error.message.includes('token')) {
+      router.push({ name: 'sign-in', query: { redirect: route.fullPath } });
+    }
   } finally {
     isLoadingChat.value = false;
     scrollToBottom();
   }
 }
 
-// --- CORRECTED: Lifecycle Hook Logic ---
-// We replace onMounted with watchEffect to react to the reactive clerkAuth.isLoaded Ref
-watchEffect(() => {
-  // Check if Clerk SDK has finished loading and we have a valid sign-in status
-  if (clerkAuth.isLoaded.value) {
-    const chatId = route.params.id;
-    
-    if (clerkAuth.isSignedIn.value) {
-      // User is signed in, proceed to load chat or start new one
-      if (chatId) {
-        loadChatHistory(chatId);
-      } else {
-        startNewChat();
-      }
+// Lifecycle
+onMounted(() => {
+  if (isSignedIn.value && route.params.id) {
+    loadChatHistory(route.params.id);
+  }
+});
+
+// Watch for route changes
+watch(
+  () => route.params.id,
+  (newId) => {
+    if (newId && isSignedIn.value) {
+      loadChatHistory(newId);
+    } else {
+      // Reset for new chat
+      messages.value = [];
+      chatTitle.value = '';
+      currentConversationId.value = null;
+      inputMode.value = 'text';
+      actionOptions.value = [];
     }
+  },
+  { immediate: true }
+);
+
+// Watch auth state
+watch([isLoaded, isSignedIn], ([loaded, signedIn]) => {
+  if (loaded && signedIn && route.params.id) {
+    loadChatHistory(route.params.id);
   }
 });
 </script>

@@ -61,36 +61,28 @@ export async function loadConversation(conversationId) {
  * @param {string|null} conversationId - Optional conversation ID for continuing a conversation
  * @returns {Promise<Object>} The updated conversation object
  */
-export async function sendChatMessage(message, conversationId = null) {
-  try {
-    const response = await api.post('/chat', {
-      message,
-      conversationId,
-      timestamp: new Date().toISOString()
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error sending message:', error);
-    
-    // Handle specific error cases
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      if (error.response.status === 401) {
-        // Handle unauthorized (e.g., redirect to login)
-        console.error('Authentication required');
-      } else if (error.response.status === 429) {
-        // Handle rate limiting
-        console.error('Rate limit exceeded');
+export async function sendChatMessage(message, conversationId, token) {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          message,
+          conversationId
+        })
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send message');
       }
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('No response from server');
-    } else {
-      // Something happened in setting up the request
-      console.error('Error setting up request:', error.message);
+  
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
     }
-    
-    throw error;
   }
-}
