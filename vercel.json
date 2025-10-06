@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { 
+        "distDir": ".output/public",
+        "outputDirectory": "dist"
+      }
+    },
+    {
+      "src": "Backend/api/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/Backend/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/Frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/Frontend/index.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_API_URL": "/api"
+    }
+  }
+}

@@ -45,7 +45,7 @@
         <div class="flex w-full flex-col justify-center space-y-4 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-4">
           <router-link 
             to="/chat" 
-            class="inline-block w-full sm:w-auto transform rounded-lg bg-lion-600 px-8 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-lion-700 hover:shadow-xl"
+            class="inline-block w-full sm:w-auto transform rounded-lg bg-lion-600 px-8 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-sunset-300 hover:shadow-xl"
           >
             Start Chatting Now
           </router-link>
@@ -72,7 +72,7 @@
               <div class="mb-3 text-lion-500">
                 <i :class="feature.icon" class="flex h-8 w-8 items-center justify-center text-3xl"></i>
               </div>
-              <h3 class="text-xl font-semibold mb-2">{{ feature.title }}</h3>
+              <h3 class="text-xl text-sunset-300 font-semibold mb-2">{{ feature.title }}</h3>
               <p class="text-gray-600">{{ feature.description }}</p>
             </div>
           </transition>

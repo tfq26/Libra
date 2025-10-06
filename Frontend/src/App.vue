@@ -1,20 +1,28 @@
-<script setup>
-import Navbar from './components/Navbar.vue';
-</script>
-
 <template>
-  <div class="h-screen flex flex-col bg-sunset-800">
+  <div id="app" class="h-screen flex flex-col font-inter antialiased bg-gray-50 dark:bg-ochre-900 text-gray-900 dark:text-gray-50">
     <Navbar />
-
     <main class="flex-1 overflow-y-auto md:pt-16 pb-16 md:pb-0">
-      <router-view v-slot="{ Component }">
+      <!-- Use router-view directly without v-slot for simpler setup -->
+      <router-view v-slot="{ Component: PageComponent }">
         <transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <component :is="PageComponent" v-if="PageComponent" :key="$route.fullPath" />
         </transition>
       </router-view>
     </main>
   </div>
 </template>
+
+<script>
+import { defineComponent } from 'vue';
+import Navbar from './components/Navbar.vue';
+
+export default defineComponent({
+  name: 'App',
+  components: {
+    Navbar
+  }
+});
+</script>
 
 <style>
 /* No changes needed here */

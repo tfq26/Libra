@@ -1,7 +1,15 @@
 {
     "version": 2,
-    "builds": [
-      { "src": "api/**/*.js", "use": "@vercel/node" }
-    ]
+    "functions": {
+      "api/**/*.js": {
+        "runtime": "nodejs20.x"
+      }
+    },
+    "env": {
+      "CosmosDBConnectionString": "@cosmosdb_connection_string",
+      "AzureOpenAIApiKey": "@azure_openai_api_key",
+      "AzureOpenAIEndpoint": "@azure_openai_endpoint",
+      "AzureOpenAIDeploymentName": "@azure_openai_deployment_name"
+    }
   }
   

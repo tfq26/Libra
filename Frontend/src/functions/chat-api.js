@@ -1,70 +1,96 @@
-// src/functions/chat-api.js
+import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
-// --- CONFIGURATION ---
-const AZURE_FUNCTION_BASE_URL = 'http://localhost:7071/api';
-const USER_ID = 'user-123-test'; // Hardcoded user ID for demonstration
+// Create an axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true, // Important for cookies/auth
+});
+
+// Add a request interceptor to add auth tokens if available
+api.interceptors.request.use(
+  (config) => {
+    // Add auth token if available
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 /**
- * Fetches the list of conversation titles (id, title, createdAt) for a specific user.
- * @returns {Promise<Array<{id: string, title: string, createdAt: string}>>}
+ * Fetch conversation history for a user
+ * @param {string} userId - The ID of the user
+ * @returns {Promise<Array>} Array of conversation objects
  */
-async function fetchConversationHistory() {
-    try {
-        const response = await fetch(`${AZURE_FUNCTION_BASE_URL}/history?userId=${USER_ID}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error("API Error: Failed to fetch history:", error);
-        throw new Error("Could not load conversation history list.");
-    }
+export async function fetchConversationHistory(userId) {
+  try {
+    const response = await api.get('/history', { params: { userId } });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching conversation history:', error);
+    throw error;
+  }
 }
 
 /**
- * Fetches the full message history for a specific conversation.
- * @param {string} conversationId - The ID of the conversation to load.
- * @returns {Promise<Object>} The conversation object containing messages and title.
+ * Load a specific conversation
+ * @param {string} conversationId - The ID of the conversation to load
+ * @returns {Promise<Object>} The conversation object
  */
-async function loadConversation(conversationId) {
-    try {
-        const response = await fetch(`${AZURE_FUNCTION_BASE_URL}/chat?id=${conversationId}&userId=${USER_ID}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error("API Error: Failed to load conversation:", error);
-        throw new Error("Could not load conversation details.");
-    }
+export async function loadConversation(conversationId) {
+  try {
+    const response = await api.get('/chat', { params: { id: conversationId } });
+    return response.data;
+  } catch (error) {
+    console.error('Error loading conversation:', error);
+    throw error;
+  }
 }
 
 /**
- * Sends a new chat message or continues an existing conversation.
- * @param {string} prompt - The user's message.
- * @param {string | null} conversationId - The ID of the current conversation, or null for a new one.
- * @returns {Promise<{response: string, conversationId: string}>} The AI response and the (potentially new) conversation ID.
+ * Send a chat message
+ * @param {string} message - The message text
+ * @param {string|null} conversationId - Optional conversation ID for continuing a conversation
+ * @returns {Promise<Object>} The updated conversation object
  */
-async function sendChatMessage(prompt, conversationId) {
-    try {
-        const payload = {
-            prompt: prompt,
-            conversationId: conversationId,
-            userId: USER_ID
-        };
-
-        const response = await fetch(`${AZURE_FUNCTION_BASE_URL}/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-             const errorBody = await response.json().catch(() => ({ message: 'Unknown error' }));
-             throw new Error(`API call failed with status ${response.status}: ${errorBody.message || 'Server error'}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("API Error: Failed to send message:", error);
-        throw new Error("Failed to get response from AI model.");
+export async function sendChatMessage(message, conversationId = null) {
+  try {
+    const response = await api.post('/chat', {
+      message,
+      conversationId,
+      timestamp: new Date().toISOString()
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error sending message:', error);
+    
+    // Handle specific error cases
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      if (error.response.status === 401) {
+        // Handle unauthorized (e.g., redirect to login)
+        console.error('Authentication required');
+      } else if (error.response.status === 429) {
+        // Handle rate limiting
+        console.error('Rate limit exceeded');
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response from server');
+    } else {
+      // Something happened in setting up the request
+      console.error('Error setting up request:', error.message);
     }
+    
+    throw error;
+  }
 }
-
-export { fetchConversationHistory, loadConversation, sendChatMessage };

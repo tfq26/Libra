@@ -1,65 +1,106 @@
-import axios from "axios";
-import { CosmosClient } from "@azure/cosmos";
-import { v4 as uuidv4 } from "uuid";
+import { Router } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { CosmosClient } from '@azure/cosmos';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
-const cosmosClient = new CosmosClient(process.env.COSMOSDB_CONNECTION_STRING);
+const router = Router();
+
+// Initialize CosmosDB client
 const database = cosmosClient.database("LibraChatDB");
 const container = database.container("Conversations");
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
+// POST /api/chat - Send a chat message
+router.post('/', async (req, res, next) => {
   try {
     const { userId, conversationId, message } = req.body;
+    // Input validation
     if (!userId || !message) {
-      return res.status(400).json({ error: "userId and message are required" });
-    }
-
-    // Create new conversation if none exists
-    let convoId = conversationId;
-    if (!convoId) {
-      convoId = uuidv4();
-      await container.items.create({
-        id: convoId,
-        userId,
-        title: message.substring(0, 30),
-        createdAt: new Date().toISOString(),
-        messages: []
+      return res.status(StatusCodes.BAD_REQUEST).json({ 
+        error: 'userId and message are required',
+        received: { userId: Boolean(userId), message: Boolean(message) },
+        timestamp: new Date().toISOString()
       });
     }
-
-    // Send to OpenAI (replace with your Azure OpenAI endpoint)
-    const response = await axios.post(
-      process.env.OPENAI_ENDPOINT,
-      {
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "user", content: message }
-        ]
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": process.env.OPENAI_KEY
+    
+    let convoId = conversationId;
+    let conversation;
+    
+    try {
+      // Create new conversation if none exists
+      if (!convoId) {
+        convoId = uuidv4();
+        const newConversation = {
+          id: convoId,
+          userId,
+          title: message.substring(0, 30),
+          messages: [{
+            id: uuidv4(),
+            role: 'user',
+            content: message,
+            timestamp: new Date().toISOString()
+          }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        await container.items.create(newConversation);
+        conversation = newConversation;
+      } else {
+        // Add message to existing conversation
+        const { resource: existingConvo } = await container.item(convoId, userId).read();
+        if (!existingConvo) {
+          return res.status(StatusCodes.NOT_FOUND).json({ 
+            error: 'Conversation not found',
+            timestamp: new Date().toISOString()
+          });
         }
+        
+        existingConvo.messages = existingConvo.messages || [];
+        existingConvo.messages.push({
+          id: uuidv4(),
+          role: 'user',
+          content: message,
+          timestamp: new Date().toISOString()
+        });
+        existingConvo.updatedAt = new Date().toISOString();
+        await container.item(convoId, userId).replace(existingConvo);
+        conversation = existingConvo;
       }
-    );
 
-    const reply = response.data?.choices?.[0]?.message?.content || "No reply";
+      // Here you would typically call your AI service
+      // const aiResponse = await callAIService(message);
+      
+      // For now, we'll just echo the message back
+      const aiResponse = `You said: ${message}`;
 
-    // Save message & reply to CosmosDB
-    const { resource } = await container.item(convoId, userId).read();
-    resource.messages.push(
-      { role: "user", content: message, createdAt: new Date().toISOString() },
-      { role: "assistant", content: reply, createdAt: new Date().toISOString() }
-    );
-    await container.items.upsert(resource);
+      // Add AI response to conversation
+      conversation.messages = conversation.messages || [];
+      conversation.messages.push({
+        id: uuidv4(),
+        role: 'assistant',
+        content: aiResponse,
+        timestamp: new Date().toISOString()
+      });
+      conversation.updatedAt = new Date().toISOString();
+      await container.item(convoId, userId).replace(conversation);
 
-    return res.status(200).json({ conversationId: convoId, reply });
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        conversationId: convoId,
+        message: aiResponse,
+        messages: conversation.messages,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error('Database operation failed:', error);
+      throw new Error('Failed to process chat message');
+    }
   } catch (error) {
-    console.error("Error in chat function:", error?.response?.data || error.message);
-    return res.status(500).json({ error: "Error processing chat" });
+    console.error('Chat error:', error);
+    next(error);
   }
-}
+});
+
+export default router;

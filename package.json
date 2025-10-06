@@ -1,0 +1,19 @@
+{
+  "name": "libra",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"bun run dev:frontend\" \"bun run dev:backend\"",
+    "dev:frontend": "cd Frontend && bun run dev",
+    "dev:backend": "cd Backend && bun run dev",
+    "build": "cd Frontend && bun run build",
+    "start": "cd Frontend && bun run preview",
+    "vercel-build": "bun run build"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
