@@ -11,6 +11,7 @@ const api = axios.create({
 });
 
 // Add a request interceptor to add auth tokens if available
+// NOTE: Interceptor token is for non-Clerk routes (using localStorage token)
 api.interceptors.request.use(
   (config) => {
     // Add auth token if available
@@ -25,13 +26,12 @@ api.interceptors.request.use(
   }
 );
 
-/**
- * Fetch conversation history for a user
- * @param {string} userId - The ID of the user
- * @returns {Promise<Array>} Array of conversation objects
- */
+// ----------------------------------------------------------------------
+// Fetch Conversation History (remains the same)
+// ----------------------------------------------------------------------
 export async function fetchConversationHistory(userId) {
   try {
+    // This correctly hits: API_BASE_URL + /history (e.g., /Backend/api/history)
     const response = await api.get('/history', { params: { userId } });
     return response.data;
   } catch (error) {
@@ -40,13 +40,12 @@ export async function fetchConversationHistory(userId) {
   }
 }
 
-/**
- * Load a specific conversation
- * @param {string} conversationId - The ID of the conversation to load
- * @returns {Promise<Object>} The conversation object
- */
+// ----------------------------------------------------------------------
+// Load Conversation (remains the same)
+// ----------------------------------------------------------------------
 export async function loadConversation(conversationId) {
   try {
+    // This correctly hits: API_BASE_URL + /conversation (e.g., /Backend/api/conversation)
     const response = await api.get('/conversation', { params: { id: conversationId } });
     return response.data;
   } catch (error) {
@@ -55,34 +54,42 @@ export async function loadConversation(conversationId) {
   }
 }
 
+// ----------------------------------------------------------------------
+// Send Chat Message (CRITICAL FIX APPLIED)
+// ----------------------------------------------------------------------
 /**
  * Send a chat message
  * @param {string} message - The message text
- * @param {string|null} conversationId - Optional conversation ID for continuing a conversation
+ * @param {string|null} conversationId - Optional conversation ID
+ * @param {string} token - Clerk JWT token (passed from Chat.vue)
  * @returns {Promise<Object>} The updated conversation object
  */
 export async function sendChatMessage(message, conversationId, token) {
     try {
-      const response = await fetch('/conversation', {
-        method: 'POST',
+      // 🔑 FIX: Switch to use the 'api' (axios) instance. 
+      // Axios correctly prepends API_BASE_URL (/Backend/api) to the endpoint (/conversation).
+      const response = await api.post('/conversation', {
+        message,
+        conversationId
+      }, {
+        // Since we are using the Clerk token, we manually set the Authorization header
+        // to override any token set by the interceptor from localStorage.
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          message,
-          conversationId
-        })
+        }
       });
   
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send message');
-      }
-  
-      return await response.json();
+      // Axios automatically throws on 4xx/5xx responses and parses JSON
+      return response.data;
+
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        // If the server sends back a proper JSON error response (e.g., 400 or 500)
+        console.error(`API Error ${error.response.status}:`, error.response.data);
+        throw new Error(error.response.data.message || `API call failed with status ${error.response.status}`);
+      }
+      // Re-throw if it's a network error or client-side error
       console.error('API Error:', error);
-      throw error;
+      throw new Error(error.message || 'Network or client error during message send.');
     }
-  }
+}
