@@ -18,12 +18,6 @@
       "source": "/Backend/api/(.*)",
       "destination": "/Backend/api/$1" 
     },
-    
-    {
-      "source": "/(.*\\.(?:js|css|jpg|jpeg|png|gif|svg|ico|webmanifest))",
-      "destination": "/Frontend/dist/$1"
-    },
-    
     {
       "source": "/(.*)",
       "destination": "/Frontend/dist/index.html"
