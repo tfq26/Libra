@@ -1,20 +1,43 @@
-import { Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
+// New/Updated Backend/api/chat.js (Mimicking your working history.js structure)
+
 import { CosmosClient } from '@azure/cosmos';
 import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
+import { StatusCodes } from 'http-status-codes';
 
-const router = Router();
+// Initialize CosmosDB client (use environment variables)
+const cosmosClient = new CosmosClient(process.env.COSMOSDB_CONNECTION_STRING);
+const database = cosmosClient.database('LibraChatDB');
+const container = database.container('Conversations');
 
-// Initialize CosmosDB client
-const database = cosmosClient.database("LibraChatDB");
-const container = database.container("Conversations");
+/**
+ * Vercel Serverless Function for sending a chat message
+ * POST /Backend/api/chat
+ */
+export default async function handler(req, res) {
+  // Set headers for Vercel CORS compatibility
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-// POST /api/chat - Send a chat message
-router.post('/', async (req, res, next) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST', 'OPTIONS']);
+    return res.status(405).json({ 
+      error: 'Method not allowed',
+      allowedMethods: ['POST', 'OPTIONS'],
+      timestamp: new Date().toISOString()
+    });
+  }
+
   try {
-    const { userId, conversationId, message } = req.body;
-    // Input validation
+    // Vercel auto-parses the body for standard content types
+    const { userId, conversationId, message } = req.body; 
+    
+    // Input validation (now using simple checks)
     if (!userId || !message) {
       return res.status(StatusCodes.BAD_REQUEST).json({ 
         error: 'userId and message are required',
@@ -22,12 +45,12 @@ router.post('/', async (req, res, next) => {
         timestamp: new Date().toISOString()
       });
     }
-    
+
     let convoId = conversationId;
     let conversation;
     
+    // --- Database Logic ---
     try {
-      // Create new conversation if none exists
       if (!convoId) {
         convoId = uuidv4();
         const newConversation = {
@@ -47,7 +70,6 @@ router.post('/', async (req, res, next) => {
         await container.items.create(newConversation);
         conversation = newConversation;
       } else {
-        // Add message to existing conversation
         const { resource: existingConvo } = await container.item(convoId, userId).read();
         if (!existingConvo) {
           return res.status(StatusCodes.NOT_FOUND).json({ 
@@ -68,13 +90,10 @@ router.post('/', async (req, res, next) => {
         conversation = existingConvo;
       }
 
-      // Here you would typically call your AI service
-      // const aiResponse = await callAIService(message);
-      
-      // For now, we'll just echo the message back
-      const aiResponse = `You said: ${message}`;
+      // --- AI Logic ---
+      const aiResponse = `You said: ${message}`; // Placeholder
 
-      // Add AI response to conversation
+      // Add AI response and update DB
       conversation.messages = conversation.messages || [];
       conversation.messages.push({
         id: uuidv4(),
@@ -85,22 +104,32 @@ router.post('/', async (req, res, next) => {
       conversation.updatedAt = new Date().toISOString();
       await container.item(convoId, userId).replace(conversation);
 
+      // 🎯 CRITICAL: Send a clean, complete JSON response
       return res.status(StatusCodes.OK).json({
         success: true,
         conversationId: convoId,
-        message: aiResponse,
+        response: aiResponse, // Renamed 'message' to 'response' for client compatibility
         messages: conversation.messages,
         timestamp: new Date().toISOString()
       });
       
     } catch (error) {
+      // Database logic failed
       console.error('Database operation failed:', error);
-      throw new Error('Failed to process chat message');
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          error: 'Failed to process chat message',
+          message: error.message,
+          timestamp: new Date().toISOString()
+      });
     }
+    
   } catch (error) {
-    console.error('Chat error:', error);
-    next(error);
+    // Outer handler failed (e.g., body parsing issue)
+    console.error('Chat function execution error:', error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: 'An unexpected error occurred',
+        message: error.message,
+        timestamp: new Date().toISOString()
+    });
   }
-});
-
-export default router;
+}

@@ -55,7 +55,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 // NOTE: Assuming your custom useAuth is correctly imported from '@/utils/auth'
 import { useAuth } from '@/utils/auth'; 
-import { sendChatMessage, loadConversation } from '../functions/chat-api';
+import { sendChatMessage, loadConversation } from '../functions/conversation-api';
 import MessageList from '../components/chat/MessageList.vue';
 import MessageInput from '../components/chat/MessageInput.vue';
 import Error from './Error.vue';

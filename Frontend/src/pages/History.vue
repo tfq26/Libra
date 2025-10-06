@@ -74,7 +74,7 @@
 import { ref, onMounted, watchEffect } from 'vue'; // <-- watchEffect added
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '@clerk/vue';
-import { fetchConversationHistory } from '../functions/chat-api.js';
+import { fetchConversationHistory } from '../functions/conversation-api.js';
 import Error from '../pages/Error.vue';
 
 // --- Clerk Auth Check ---
