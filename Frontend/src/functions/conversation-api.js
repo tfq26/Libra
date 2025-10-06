@@ -47,7 +47,7 @@ export async function fetchConversationHistory(userId) {
  */
 export async function loadConversation(conversationId) {
   try {
-    const response = await api.get('/chat', { params: { id: conversationId } });
+    const response = await api.get('/conversation', { params: { id: conversationId } });
     return response.data;
   } catch (error) {
     console.error('Error loading conversation:', error);
@@ -63,7 +63,7 @@ export async function loadConversation(conversationId) {
  */
 export async function sendChatMessage(message, conversationId, token) {
     try {
-      const response = await fetch('/chat', {
+      const response = await fetch('/conversation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
