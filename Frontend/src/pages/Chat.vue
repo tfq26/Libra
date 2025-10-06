@@ -155,7 +155,8 @@ async function sendMessage(promptText) {
   messages.value.push({ 
     role: 'user', 
     content: promptText,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    userId: userId
   });
   
   await scrollToBottom();
@@ -169,14 +170,16 @@ async function sendMessage(promptText) {
     const data = await sendChatMessage(
       promptText, 
       currentConversationId.value, 
-      token
+      token,
+      userId.value
     );
     
     // Add assistant response
     messages.value.push({ 
       role: 'assistant', 
       content: data.response,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      userId: userId.value
     });
     
     // Handle action buttons if present

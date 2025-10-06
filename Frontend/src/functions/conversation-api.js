@@ -64,13 +64,14 @@ export async function loadConversation(conversationId) {
  * @param {string} token - Clerk JWT token (passed from Chat.vue)
  * @returns {Promise<Object>} The updated conversation object
  */
-export async function sendChatMessage(message, conversationId, token) {
+export async function sendChatMessage(message, conversationId, token, userId) {
     try {
       // 🔑 FIX: Switch to use the 'api' (axios) instance. 
       // Axios correctly prepends API_BASE_URL (/Backend/api) to the endpoint (/conversation).
       const response = await api.post('/conversation', {
         message,
-        conversationId
+        conversationId,
+        userId
       }, {
         // Since we are using the Clerk token, we manually set the Authorization header
         // to override any token set by the interceptor from localStorage.
