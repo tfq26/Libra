@@ -53,9 +53,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// NOTE: Assuming your custom useAuth is correctly imported from '@/utils/auth'
 import { useAuth } from '@/utils/auth'; 
-import { sendChatMessage, loadConversation } from '../functions/conversation-api';
+import { sendChatMessage, loadConversation } from '../functions/conversation-api'; // Removed loadChatHistory import
 import MessageList from '../components/chat/MessageList.vue';
 import MessageInput from '../components/chat/MessageInput.vue';
 import Error from './Error.vue';
@@ -94,11 +93,10 @@ async function scrollToBottom() {
   }
 }
 
+// 🔑 FIXED: loadChatHistory defined in the component scope
 async function loadChatHistory(id) {
-  // 1. CRITICAL INITIAL GUARD: Check essential authentication state BEFORE API setup.
-  // We check isSignedIn, userId (for the partition key), and getToken.value (the function itself).
+  // 1. CRITICAL INITIAL GUARD (Fixes TypeError: W is not a constructor)
   if (!isSignedIn.value || !userId.value || typeof getToken.value !== 'function') {
-    // If the component is still loading auth data, just exit quietly.
     return;
   }
   
@@ -106,19 +104,17 @@ async function loadChatHistory(id) {
   errorMessage.value = null;
   
   try {
-    // 2. TOKEN RETRIEVAL: Access the function using .value, then await the call.
-    const token = await getToken.value(); // 🔑 FIX: Access function via .value, then call.
+    // 2. TOKEN RETRIEVAL: Correctly call the function via .value
+    const token = await getToken.value(); 
 
     if (!token) {
-      // If the function returns null, throw a controlled error.
       throw new Error('Authentication token could not be retrieved. Please sign in again.');
     }
     
-    // 3. API CALL: Pass token and userId (for authorization/partition key, assuming loadConversation needs it).
-    // Note: If loadConversation needs userId, you must modify its signature to accept it.
-    const conversation = await loadConversation(id, token, userId.value);
+    // 3. API CALL: Pass token and userId.value (for Partition Key/Authorization)
+    const conversation = await loadConversation(id, token, userId.value); 
     
-    // 4. State Update (Simplified)
+    // 4. State Update
     messages.value = conversation.messages || [];
     chatTitle.value = conversation.title;
     currentConversationId.value = conversation.id;
@@ -158,6 +154,12 @@ async function handleTextInputSend() {
 async function sendMessage(promptText) {
   if (!isSignedIn.value || isLoadingChat.value) return;
   
+  // CRITICAL GUARD: Ensure userId is available before proceeding
+  if (!userId.value || typeof getToken.value !== 'function') {
+    console.warn("Auth state not fully loaded for sendMessage.");
+    return;
+  }
+
   isLoadingChat.value = true;
   errorMessage.value = null;
   
@@ -171,13 +173,15 @@ async function sendMessage(promptText) {
     role: 'user', 
     content: promptText,
     timestamp: new Date().toISOString(),
-    userId: userId
+    userId: userId.value // Use .value consistently
   });
   
   await scrollToBottom();
   
   try {
-    const token = await getToken().value;
+    // 🔑 FIX: Correctly call getToken.value()
+    const token = await getToken.value();
+    
     if (!token) {
       throw new Error('Authentication required. Please sign in again.');
     }
@@ -186,7 +190,7 @@ async function sendMessage(promptText) {
       promptText, 
       currentConversationId.value, 
       token,
-      userId.value
+      userId.value // 🔑 FIX: Correctly pass the string value
     );
     
     // Add assistant response
@@ -222,9 +226,8 @@ async function sendMessage(promptText) {
     console.error('Error sending message:', error);
     errorMessage.value = error.message || 'Failed to send message.';
     
-    // If it's an auth error, you might want to redirect to login
     if (error.message.includes('auth') || error.message.includes('token')) {
-      router.push({ name: 'sign-in', query: { redirect: route.fullPath } });
+      router.push({ name: 'SignIn', query: { redirect: route.fullPath } });
     }
   } finally {
     isLoadingChat.value = false;
@@ -232,20 +235,14 @@ async function sendMessage(promptText) {
   }
 }
 
-// Lifecycle
-onMounted(() => {
-  if (isSignedIn.value && route.params.id) {
-    loadChatHistory(route.params.id);
-  }
-});
-
-// Watch for route changes
+// Watch for route changes (must be here)
 watch(
   () => route.params.id,
   (newId) => {
-    if (newId && isSignedIn.value) {
+    // If the new ID is present AND auth is ready, load history
+    if (newId && isSignedIn.value && userId.value) {
       loadChatHistory(newId);
-    } else {
+    } else if (!newId) {
       // Reset for new chat
       messages.value = [];
       chatTitle.value = '';
@@ -257,10 +254,13 @@ watch(
   { immediate: true }
 );
 
-// Watch auth state
-watch([isLoaded, isSignedIn], ([loaded, signedIn]) => {
-  if (loaded && signedIn && route.params.id) {
+// Watch auth state (Stabilized trigger for initial load)
+watch([isLoaded, isSignedIn, userId], ([loaded, signedIn, currentUserId]) => {
+  // Only trigger loadChatHistory if ALL dependencies are ready and we have an ID
+  if (loaded && signedIn && currentUserId && route.params.id) {
     loadChatHistory(route.params.id);
   }
 });
+
+// NOTE: onMounted is now redundant since the watchers handle the initial load
 </script>

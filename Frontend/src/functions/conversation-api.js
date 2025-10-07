@@ -11,10 +11,8 @@ const api = axios.create({
 });
 
 // Add a request interceptor to add auth tokens if available
-// NOTE: Interceptor token is for non-Clerk routes (using localStorage token)
 api.interceptors.request.use(
   (config) => {
-    // Add auth token if available
     const token = localStorage.getItem('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -31,7 +29,6 @@ api.interceptors.request.use(
 // ----------------------------------------------------------------------
 export async function fetchConversationHistory(userId) {
   try {
-    // This correctly hits: API_BASE_URL + /history (e.g., /Backend/api/history)
     const response = await api.get('/history', { params: { userId } });
     return response.data;
   } catch (error) {
@@ -41,8 +38,13 @@ export async function fetchConversationHistory(userId) {
 }
 
 // ----------------------------------------------------------------------
-// Load Conversation (remains the same)
+// Load Conversation (GET)
 // ----------------------------------------------------------------------
+/**
+ * @param {string} conversationId 
+ * @param {string} token 
+ * @param {string} userId - Used as the partition key on the backend
+ */
 export async function loadConversation(conversationId, token, userId) { 
   try {
     const response = await api.get('/conversation', { 
@@ -51,7 +53,7 @@ export async function loadConversation(conversationId, token, userId) {
       },
       params: { 
         id: conversationId,
-        userId: userId // 👈 Sends userId in URL query: ?id=...&userId=...
+        userId: userId 
       } 
     });
     return response.data;
@@ -62,41 +64,32 @@ export async function loadConversation(conversationId, token, userId) {
 }
 
 // ----------------------------------------------------------------------
-// Send Chat Message (CRITICAL FIX APPLIED)
+// Send Chat Message (POST)
 // ----------------------------------------------------------------------
 /**
- * Send a chat message
- * @param {string} message - The message text
- * @param {string|null} conversationId - Optional conversation ID
- * @param {string} token - Clerk JWT token (passed from Chat.vue)
- * @returns {Promise<Object>} The updated conversation object
+ * @param {string} message 
+ * @param {string|null} conversationId 
+ * @param {string} token 
+ * @param {string} userId 
  */
 export async function sendChatMessage(message, conversationId, token, userId) {
     try {
-      // 🔑 FIX: Switch to use the 'api' (axios) instance. 
-      // Axios correctly prepends API_BASE_URL (/Backend/api) to the endpoint (/conversation).
       const response = await api.post('/conversation', {
         message,
         conversationId,
         userId
       }, {
-        // Since we are using the Clerk token, we manually set the Authorization header
-        // to override any token set by the interceptor from localStorage.
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-  
-      // Axios automatically throws on 4xx/5xx responses and parses JSON
       return response.data;
 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        // If the server sends back a proper JSON error response (e.g., 400 or 500)
         console.error(`API Error ${error.response.status}:`, error.response.data);
         throw new Error(error.response.data.message || `API call failed with status ${error.response.status}`);
       }
-      // Re-throw if it's a network error or client-side error
       console.error('API Error:', error);
       throw new Error(error.message || 'Network or client error during message send.');
     }
