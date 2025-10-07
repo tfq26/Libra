@@ -4,24 +4,28 @@
     {
       "src": "Frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist",
+        "ignoreBuildStep": "git diff --quiet HEAD^ HEAD Frontend/"
+      }
     },
     {
-      "src": "Backend/api/*.js",
-      "use": "@vercel/node"
+      "src": "Backend/api/**/*.js",
+      "use": "@vercel/node",
+      "config": {
+        "ignoreBuildStep": "git diff --quiet HEAD^ HEAD Backend/api/"
+      }
     }
   ],
   "rewrites": [
     {
-      "source": "/Backend/api/conversation(.*)",
-      "destination": "/Backend/api/conversation.js" 
+      "source": "/api/conversation/:match*",
+      "destination": "/Backend/api/conversation.js"
     },
-    
     {
-      "source": "/Backend/api/history",
-      "destination": "/Backend/api/history.js" 
+      "source": "/api/history/:match*",
+      "destination": "/Backend/api/history.js"
     },
-    
     {
       "source": "/(.*)",
       "destination": "/Frontend/dist/index.html"
