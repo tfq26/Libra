@@ -43,10 +43,17 @@ export async function fetchConversationHistory(userId) {
 // ----------------------------------------------------------------------
 // Load Conversation (remains the same)
 // ----------------------------------------------------------------------
-export async function loadConversation(conversationId) {
+export async function loadConversation(conversationId, token, userId) { 
   try {
-    // This correctly hits: API_BASE_URL + /conversation (e.g., /Backend/api/conversation)
-    const response = await api.get('/conversation', { params: { id: conversationId } });
+    const response = await api.get('/conversation', { 
+      headers: {
+        'Authorization': `Bearer ${token}` 
+      },
+      params: { 
+        id: conversationId,
+        userId: userId // 👈 Sends userId in URL query: ?id=...&userId=...
+      } 
+    });
     return response.data;
   } catch (error) {
     console.error('Error loading conversation:', error);
