@@ -143,9 +143,17 @@ async function handleButtonResponse(responseText) {
 }
 
 async function handleTextInputSend() {
-  if (!isSignedIn.value) return;
+  if (!isSignedIn.value) return; // Check 1: User signed in?
+  
   const message = currentPrompt.value.trim();
   if (!message) return;
+  
+  // 🔑 FIX: Add an explicit check for the userId here as well, 
+  // preventing the call to sendMessage if the core ID is missing.
+  if (!userId.value) { 
+      console.warn("Cannot send message: User ID is unavailable.");
+      return;
+  }
   
   currentPrompt.value = '';
   await sendMessage(message);
