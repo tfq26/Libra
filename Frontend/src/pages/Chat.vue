@@ -95,17 +95,30 @@ async function scrollToBottom() {
 }
 
 async function loadChatHistory(id) {
-  if (!isSignedIn.value) return;
+  // 1. CRITICAL INITIAL GUARD: Check essential authentication state BEFORE API setup.
+  // We check isSignedIn, userId (for the partition key), and getToken.value (the function itself).
+  if (!isSignedIn.value || !userId.value || typeof getToken.value !== 'function') {
+    // If the component is still loading auth data, just exit quietly.
+    return;
+  }
   
   isLoadingChat.value = true;
   errorMessage.value = null;
   
   try {
-    const token = await getToken().value;
-    // 🔑 FIX 1: Check if token is null (failed retrieval) and throw a standard Error object.
-    if (!token) throw new Error('Authentication token could not be retrieved.');
+    // 2. TOKEN RETRIEVAL: Access the function using .value, then await the call.
+    const token = await getToken.value(); // 🔑 FIX: Access function via .value, then call.
+
+    if (!token) {
+      // If the function returns null, throw a controlled error.
+      throw new Error('Authentication token could not be retrieved. Please sign in again.');
+    }
     
-    const conversation = await loadConversation(id, token);
+    // 3. API CALL: Pass token and userId (for authorization/partition key, assuming loadConversation needs it).
+    // Note: If loadConversation needs userId, you must modify its signature to accept it.
+    const conversation = await loadConversation(id, token, userId.value);
+    
+    // 4. State Update (Simplified)
     messages.value = conversation.messages || [];
     chatTitle.value = conversation.title;
     currentConversationId.value = conversation.id;
@@ -114,10 +127,12 @@ async function loadChatHistory(id) {
     if (lastMessage?.role === 'assistant' && lastMessage.options) {
       actionOptions.value = lastMessage.options;
       inputMode.value = 'buttons';
+    } else {
+      inputMode.value = 'text';
     }
+    
   } catch (error) {
     console.error('Error loading chat:', error);
-    // 🔑 FIX 2: Ensure we log/display a standard message and not the error object directly.
     errorMessage.value = error.message || 'Failed to load chat history.';
   } finally {
     isLoadingChat.value = false;
