@@ -53,15 +53,17 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+// Import the fixed custom useAuth
 import { useAuth } from '@/utils/auth'; 
-import { sendChatMessage, loadConversation } from '../functions/conversation-api'; // Removed loadChatHistory import
+import { sendChatMessage, loadConversation } from '../functions/conversation-api';
 import MessageList from '../components/chat/MessageList.vue';
 import MessageInput from '../components/chat/MessageInput.vue';
 import Error from './Error.vue';
 import { nextTick } from 'vue';
 
-// Auth
-const { isLoaded, isSignedIn, userId, user, getToken } = useAuth();
+// --- Auth: Destructure the stable token function and core Refs ---
+// 🔑 FIX: Renamed 'getToken' to 'getAuthToken' and removed 'user' which was unused
+const { isLoaded, isSignedIn, userId, getAuthToken } = useAuth(); 
 
 // Chat state
 const messages = ref([]);
@@ -93,10 +95,10 @@ async function scrollToBottom() {
   }
 }
 
-// 🔑 FIXED: loadChatHistory defined in the component scope
 async function loadChatHistory(id) {
-  // 1. CRITICAL INITIAL GUARD (Fixes TypeError: W is not a constructor)
-  if (!isSignedIn.value || !userId.value || typeof getToken.value !== 'function') {
+  // CRITICAL INITIAL GUARD: Only proceed if signed in and userId is available.
+  // The complex getToken checks are now inside getAuthToken().
+  if (!isSignedIn.value || !userId.value) {
     return;
   }
   
@@ -104,17 +106,16 @@ async function loadChatHistory(id) {
   errorMessage.value = null;
   
   try {
-    // 2. TOKEN RETRIEVAL: Correctly call the function via .value
-    const token = await getToken.value(); 
+    // 🔑 FIX 1: Use the simple, stable function call
+    const token = await getAuthToken(); 
 
     if (!token) {
       throw new Error('Authentication token could not be retrieved. Please sign in again.');
     }
     
-    // 3. API CALL: Pass token and userId.value (for Partition Key/Authorization)
+    // API CALL: Pass token and userId.value
     const conversation = await loadConversation(id, token, userId.value); 
     
-    // 4. State Update
     messages.value = conversation.messages || [];
     chatTitle.value = conversation.title;
     currentConversationId.value = conversation.id;
@@ -143,13 +144,12 @@ async function handleButtonResponse(responseText) {
 }
 
 async function handleTextInputSend() {
-  if (!isSignedIn.value) return; // Check 1: User signed in?
+  if (!isSignedIn.value) return; 
   
   const message = currentPrompt.value.trim();
   if (!message) return;
   
-  // 🔑 FIX: Add an explicit check for the userId here as well, 
-  // preventing the call to sendMessage if the core ID is missing.
+  // 🔑 FIX 2: Strict guard ensures userId is ready before calling sendMessage
   if (!userId.value) { 
       console.warn("Cannot send message: User ID is unavailable.");
       return;
@@ -160,14 +160,9 @@ async function handleTextInputSend() {
 }
 
 async function sendMessage(promptText) {
-  if (!isSignedIn.value || isLoadingChat.value) return;
+  // FINAL GUARD: Only need to check isSignedIn and userId.value (handled in handleTextInputSend)
+  if (!isSignedIn.value || !userId.value || isLoadingChat.value) return; 
   
-  // CRITICAL GUARD: Ensure userId is available before proceeding
-  if (!userId.value || typeof getToken.value !== 'function') {
-    console.warn("Auth state not fully loaded for sendMessage.");
-    return;
-  }
-
   isLoadingChat.value = true;
   errorMessage.value = null;
   
@@ -187,18 +182,18 @@ async function sendMessage(promptText) {
   await scrollToBottom();
   
   try {
-    // 🔑 FIX: Correctly call getToken.value()
-    const token = await getToken.value();
+    // 🔑 FIX 3: Use the simple, stable function call
+    const token = await getAuthToken();
     
     if (!token) {
-      throw new Error('Authentication required. Please sign in again.');
+      throw new Error('Authentication required. Failed to retrieve token.');
     }
     
     const data = await sendChatMessage(
       promptText, 
       currentConversationId.value, 
       token,
-      userId.value // 🔑 FIX: Correctly pass the string value
+      userId.value // Correctly pass the string value
     );
     
     // Add assistant response
@@ -251,7 +246,7 @@ watch(
     if (newId && isSignedIn.value && userId.value) {
       loadChatHistory(newId);
     } else if (!newId) {
-      // Reset for new chat
+      // Reset for new chat when navigating from /chat/:id to /chat
       messages.value = [];
       chatTitle.value = '';
       currentConversationId.value = null;
@@ -263,12 +258,11 @@ watch(
 );
 
 // Watch auth state (Stabilized trigger for initial load)
+// 🔑 FIX: The dependency list is now simpler and correctly relies on the state variables
 watch([isLoaded, isSignedIn, userId], ([loaded, signedIn, currentUserId]) => {
   // Only trigger loadChatHistory if ALL dependencies are ready and we have an ID
   if (loaded && signedIn && currentUserId && route.params.id) {
     loadChatHistory(route.params.id);
   }
 });
-
-// NOTE: onMounted is now redundant since the watchers handle the initial load
 </script>
