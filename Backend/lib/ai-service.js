@@ -80,9 +80,9 @@ export function parseAIResponse(rawResponse) {
 // --- OpenAI API Call ---
 export async function callOpenAI(prompt, history = [], imageUrl = null) {
     try {
-        const apiKey = process.env.AzureOpenAIApiKey;
-        const endpoint = process.env.AzureOpenAIEndpoint;
-        const deploymentName = process.env.AzureOpenAIDeploymentName;
+        const apiKey = process.env.OPENAI_API_KEY;
+        const endpoint = process.env.OPENAI_ENDPOINT;
+        const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT_NAME;
         const apiVersion = "2024-02-15-preview";
 
         const MODEL_CONTEXT_WINDOW = 8192;
