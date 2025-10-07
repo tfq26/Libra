@@ -13,11 +13,11 @@
   ],
   "rewrites": [
     {
-      "source": "/api/conversation/:match*",
+      "source": "/Backend/api/conversation/:match*",
       "destination": "/Backend/api/conversation.js"
     },
     {
-      "source": "/api/history/:match*",
+      "source": "/Backend/api/history/:match*",
       "destination": "/Backend/api/history.js"
     },
     {
