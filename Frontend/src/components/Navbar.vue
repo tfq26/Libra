@@ -1,8 +1,6 @@
 <template>
   <div>
-    <!-- Desktop Floating Navigation (Hidden on mobile) -->
     <div class="hidden md:flex fixed top-6 right-6 z-50 flex-row items-center space-x-3">
-      <!-- Standard Navigation Links -->
       <router-link 
         to="/"
         class="bg-ochre-800 hover:bg-ochre-700 text-white p-4 rounded-full shadow-md transition flex items-center justify-center"
@@ -30,16 +28,17 @@
         <i class="pi pi-book"></i>
       </router-link>
 
-      <!-- Clerk Auth Logic for Desktop -->
-      <template v-if="isLoaded">
-        <template v-if="isSignedIn">
-          <!-- Signed In: Clerk User Button (wrapped to match button size) -->
-          <div class="p-1 rounded-full bg-ochre-800 shadow-md">
-            <UserButton after-sign-out-url="/" />
-          </div>
+      <template v-if="!authStore.loading">
+        <template v-if="authStore.isAuthenticated">
+          <button
+            @click="handleLogout"
+            class="bg-ochre-800 hover:bg-ochre-700 text-white p-4 rounded-full shadow-md transition flex items-center justify-center"
+            title="Sign Out"
+          >
+            <i class="pi pi-sign-out"></i>
+          </button>
         </template>
         <template v-else>
-          <!-- Signed Out: Sign In Link -->
           <router-link 
             to="/sign-in"
             class="bg-ochre-800 hover:bg-ochre-700 text-white p-4 rounded-full shadow-md transition flex items-center justify-center"
@@ -53,10 +52,8 @@
     </div>
 
 
-    <!-- Mobile Bottom Navigation (Hidden on desktop) -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-ochre-800 shadow-t-lg z-50">
       <div class="flex justify-around items-center h-16">
-        <!-- Standard Navigation Links -->
         <router-link 
           to="/"
           class="flex flex-col items-center justify-center w-full h-full transition-colors duration-200"
@@ -84,20 +81,17 @@
           <span class="text-xs mt-1">History</span>
         </router-link>
 
-        <!-- Clerk Auth Logic for Mobile -->
-        <template v-if="isLoaded">
-          <template v-if="isSignedIn">
-            <!-- Signed In: Profile/User Button Link -->
-            <div class="flex flex-col p-0 items-center justify-center w-full h-full transition-colors duration-200 text-white">
-                <!-- Placing UserButton here to handle profile access and sign out -->
-                <div class="h-4 w-auto mb-1">
-                    <UserButton after-sign-out-url="/" />
-                </div>
-                <span class="text-xs">Profile</span>
-            </div>
+        <template v-if="!authStore.loading">
+          <template v-if="authStore.isAuthenticated">
+            <button
+              @click="handleLogout"
+              class="flex flex-col items-center justify-center w-full h-full transition-colors duration-200 text-ochre-300 hover:text-white"
+            >
+              <i class="pi pi-sign-out text-xl"></i>
+              <span class="text-xs mt-1">Sign Out</span>
+            </button>
           </template>
           <template v-else>
-            <!-- Signed Out: Sign In Link -->
             <router-link 
               to="/sign-in"
               class="flex flex-col items-center justify-center w-full h-full transition-colors duration-200"
@@ -114,11 +108,21 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
-import 'primeicons/primeicons.css'
-import { useAuth, UserButton } from '@clerk/vue'; // <--- New Clerk Imports
+import { useRoute, useRouter } from 'vue-router';
+import 'primeicons/primeicons.css';
+import { useAuthStore } from '../stores/auth'; // Import your Pinia auth store
 
-// Fetch auth state from Clerk
-const { isLoaded, isSignedIn } = useAuth(); // <--- New Clerk Hook
+// Get the auth store and router instances
+const authStore = useAuthStore();
+const router = useRouter();
 const route = useRoute();
+
+/**
+ * Handles the user logout process.
+ */
+const handleLogout = async () => {
+  await authStore.logout();
+  // Redirect to the home page after logout to ensure a clean state
+  router.push('/'); 
+};
 </script>

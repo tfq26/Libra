@@ -1,21 +1,6 @@
 <template>
-  <div v-if="clerkAuth.isLoaded.value && !clerkAuth.isSignedIn.value" class="flex items-center justify-center h-full text-center p-8">
-    <div class="max-w-md">
-      <h2 class="text-3xl font-bold text-lion-600 dark:text-lion-400 mb-4">History Access Restricted</h2>
-      <p class="text-gray-700 dark:text-gray-300 mb-6">Please sign in to view your past conversations.</p>
-      <router-link
-        to="/sign-in"
-        class="inline-block transform rounded-lg bg-lion-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-lion-700"
-      >
-        Go to Sign In
-      </router-link>
-    </div>
-  </div>
-  <div v-else-if="!clerkAuth.isLoaded.value || isLoadingHistory" class="flex items-center justify-center h-full">
-    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-500 dark:border-lion-400"></div>
-  </div>
-  <div v-else class="h-full w-full flex flex-col text-gray-800 p-4">
 
+  <div class="text-gray-800 p-4">
     <header class="flex-shrink-0 mb-4 mt-10">
       <div class="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
         <h2 class="text-5xl font-semibold dark:text-sunset-200">Chat History</h2>
@@ -37,7 +22,7 @@
 
     <ul class="flex-grow divide-y divide-gray-200 overflow-y-auto custom-scrollbar">
       <li v-if="conversations.length === 0" class="text-gray-500 text-sm italic px-2 py-4 text-center dark:text-sunset-300">
-        No conversations yet.
+        No conversations yet. Start a new one!
       </li>
 
       <li
@@ -48,7 +33,7 @@
           :to="`/chat/${conv.id}`"
           :class="[
             'block p-4 rounded-lg transition duration-150 mt-2 mr-2',
-            conv.id === currentConversationId
+            conv.id === route.params.id
               ? 'bg-blue-600 text-white shadow-lg'
               : 'bg-gray-50 hover:bg-gray-100 dark:bg-ochre-800 dark:hover:bg-ochre-700 dark:text-sunset-200'
           ]"
@@ -59,7 +44,7 @@
             </h3>
             <span :class="[
                 'text-sm',
-                conv.id === currentConversationId ? 'text-blue-200' : 'text-gray-500 dark:text-sunset-300'
+                conv.id === route.params.id ? 'text-blue-200' : 'text-gray-500 dark:text-sunset-300'
             ]">
               {{ formatDate(conv.createdAt) }}
             </span>
@@ -71,34 +56,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect } from 'vue'; // <-- watchEffect added
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuth } from '@clerk/vue';
+import { useAuthStore } from '../stores/auth'; // 👈 Switched to Firebase auth store
 import { fetchConversationHistory } from '../functions/conversation-api.js';
 import Error from '../pages/Error.vue';
 
-// --- Clerk Auth Check ---
-const clerkAuth = useAuth(); // <--- Initialize Clerk Auth
-
-const conversations = ref([]);
-const isLoadingHistory = ref(true); // Default to true until loaded
-const errorMessage = ref(null);
+const authStore = useAuthStore(); // 👈 Instantiate Firebase auth store
 const router = useRouter();
 const route = useRoute();
-const currentConversationId = route.params.id || null;
+
+const conversations = ref([]);
+const isLoadingHistory = ref(false);
+const errorMessage = ref(null);
 
 async function fetchHistory() {
-  if (!clerkAuth.isSignedIn.value) { // Prevent fetching if not signed in
-    isLoadingHistory.value = false;
-    return;
-  }
+  if (!authStore.isAuthenticated) return;
 
   isLoadingHistory.value = true;
   errorMessage.value = null;
   try {
-    const token = await clerkAuth.getToken(); // Get the auth token
-    // NOTE: You'll need to modify fetchConversationHistory to accept and use the token
-    conversations.value = await fetchConversationHistory(token); 
+    const token = await authStore.getToken();
+    const userId = authStore.userId;
+    // 💡 NOTE: Ensure your 'fetchConversationHistory' function accepts userId and token
+    conversations.value = await fetchConversationHistory(userId, token); 
   } catch (error) {
     console.error("Failed to fetch conversation history:", error);
     errorMessage.value = "Failed to load history. Please try again.";
@@ -109,8 +90,7 @@ async function fetchHistory() {
 
 function formatDate(dateString) {
   if (!dateString) return '';
-  const d = new Date(dateString);
-  return d.toLocaleDateString(undefined, {
+  return new Date(dateString).toLocaleDateString(undefined, {
     month: 'short', day: 'numeric', year: 'numeric'
   });
 }
@@ -119,21 +99,20 @@ function startNewChat() {
   router.push('/chat');
 }
 
-// --- CORRECTED: Lifecycle Hook Logic ---
-// We replace onMounted with watchEffect to react to the reactive clerkAuth.isLoaded Ref
-watchEffect(() => {
-  // Check if Clerk SDK has finished loading
-  if (clerkAuth.isLoaded.value) {
-    
-    if (clerkAuth.isSignedIn.value) {
-      // User is signed in, fetch history
+// Watch for changes in authentication state
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthenticated) => {
+    if (isAuthenticated) {
+      // If user is logged in, fetch their history
       fetchHistory();
     } else {
-      // If not signed in, ensure spinner stops and template renders restricted access
-      isLoadingHistory.value = false;
+      // If user logs out, clear the history list
+      conversations.value = [];
     }
-  }
-});
+  },
+  { immediate: true } // This runs the check as soon as the component loads
+);
 </script>
 
 <style scoped>

@@ -1,42 +1,162 @@
 <template>
-    <div class="flex w-full min-h-screen items-center justify-center py-12 px-4">
-      <div class="flex w-full max-w-md flex-col items-center justify-center text-center p-8 rounded-xl shadow-2xl bg-white dark:bg-gray-800 border border-lion-100 dark:border-gray-700">
-        <img 
-          src="../assets/libra-svgrepo-com-light.svg" 
-          alt="Libra Logo" 
-          class="h-12 w-12 mb-6 text-lion-400"
-        />
-        <h2 class="text-3xl font-extrabold mb-8 text-lion-400 dark:text-lion-400">
-          Join the Libra Community
-        </h2>
-        <!-- The Clerk SignUp component -->
-        <SignUp 
-          path="/sign-up"
-          :appearance="{
-              variables: {
-                  colorPrimary: '#D89745', // Use a color close to lion-600
-                  colorText: '#374151', 
-                  colorTextOnPrimaryBackground: '#FFFFFF',
-                  colorBackground: '#FFFFFF',
-              },
-              elements: {
-                  card: 'shadow-none border-none bg-transparent',
-                  formButtonPrimary: 'bg-lion-600 hover:bg-lion-700 text-white rounded-lg p-3 text-base font-medium transition-all duration-300',
-                  headerTitle: 'text-2xl font-bold text-gray-800 dark:text-gray-100',
-                  headerSubtitle: 'text-gray-600 dark:text-gray-300',
-                  rootBox: 'w-full',
-                  
-              }
-          }"
-        />
-        <router-link to="/sign-in" class="mt-4 text-sm text-lion-600 hover:text-lion-700 dark:text-lion-400 dark:hover:text-lion-500 transition-colors">
-          Already have an account? Sign In
-        </router-link>
+  <div class="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <transition
+      appear
+      enter-active-class="transition-transform duration-500 ease-out"
+      enter-from-class="scale-95 opacity-0"
+      enter-to-class="scale-100 opacity-100"
+    >
+      <div class="w-full max-w-md space-y-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+          <img 
+            src="../assets/libra-svgrepo-com-light.svg" 
+            alt="Libra Logo" 
+            class="mx-auto h-12 w-auto transition-transform duration-300 hover:scale-110"
+          />
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-black">
+            Create your account
+          </h2>
+        </div>
+
+        <div class="mt-8 py-8 px-4 shadow-xl ring-1 ring-gray-900/5 bg-sunset-700 sm:rounded-xl sm:px-10">
+          <form class="space-y-6" @submit.prevent="handleSignUp">
+            <div>
+              <label for="email" class="block text-sm font-medium text-black">
+                Email address
+              </label>
+              <div class="mt-1">
+                <input
+                  id="email"
+                  v-model="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  class="block w-full appearance-none rounded-lg border border-gray-300 bg-sunset-500 px-3 py-2 text-black placeholder-gray-400 shadow-sm transition-colors duration-200 focus:border-lion-500 focus:outline-none focus:ring-lion-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="password" class="block text-sm font-medium text-black">
+                Password
+              </label>
+              <div class="mt-1">
+                <input
+                  id="password"
+                  v-model="password"
+                  name="password"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  class="block w-full appearance-none rounded-lg border border-gray-300 bg-sunset-500 px-3 py-2 text-black placeholder-gray-400 shadow-sm transition-colors duration-200 focus:border-lion-500 focus:outline-none focus:ring-lion-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="confirm-password" class="block text-sm font-medium text-black">
+                Confirm Password
+              </label>
+              <div class="mt-1">
+                <input
+                  id="confirm-password"
+                  v-model="confirmPassword"
+                  name="confirm-password"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  class="block w-full appearance-none rounded-lg border border-gray-300 bg-sunset-500 px-3 py-2 text-black placeholder-gray-400 shadow-sm transition-colors duration-200 focus:border-lion-500 focus:outline-none focus:ring-lion-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div v-if="error" class="rounded-md border border-red-400 bg-red-100 p-3 text-red-700 dark:border-red-600 dark:bg-red-900 dark:text-red-300">
+              <p>{{ error }}</p>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                :disabled="loading"
+                class="flex w-full justify-center rounded-lg border border-transparent bg-lion-600 py-2 px-4 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-[1.01] hover:bg-sunset-300 focus:outline-none focus:ring-2 focus:ring-lion-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-800"
+              >
+                <span v-if="loading">Creating account...</span>
+                <span v-else>Sign up</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600 dark:text-timberwolf-300">
+              Already have an account?
+              <router-link
+                to="/sign-in"
+                class="font-medium text-lion-600 transition-colors duration-200 hover:text-sunset-300 dark:text-lion-400 dark:hover:text-sunset-300"
+              >
+                Sign In
+              </router-link>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
-  </template>
-  
-  <script setup>
-  import { SignUp } from '@clerk/vue';
-  </script>
-  
+    </transition>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const loading = ref(false);
+const error = ref('');
+
+const handleSignUp = async () => {
+  // --- 1. Client-side validation ---
+  if (!email.value || !password.value || !confirmPassword.value) {
+    error.value = 'Please fill out all fields.';
+    return;
+  }
+  if (password.value !== confirmPassword.value) {
+    error.value = 'Passwords do not match.';
+    return;
+  }
+  if (password.value.length < 6) {
+    error.value = 'Password must be at least 6 characters long.';
+    return;
+  }
+
+  try {
+    loading.value = true;
+    error.value = '';
+    
+    // --- 2. Call the Pinia store action ---
+    const result = await authStore.register(email.value, password.value);
+    
+    // --- 3. Redirect on success ---
+    if (result.success) {
+      router.push('/dashboard');
+    } else {
+      // Use the error from the store if registration fails
+      error.value = result.error || 'Failed to create an account.';
+    }
+  } catch (err) {
+    // This catches unexpected errors
+    console.error('Sign up error:', err);
+    error.value = 'An unexpected error occurred. Please try again.';
+  } finally {
+    loading.value = false;
+  }
+};
+</script>
+
+<style scoped>
+/* No scoped styles needed as all styling is handled by Tailwind classes */
+</style>

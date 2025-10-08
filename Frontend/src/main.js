@@ -1,152 +1,146 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import router from './router';
+import router, { setupNavigationGuards } from './router'; // 👈 Import the new function
 import App from './App.vue';
 import './style.css';
 import axios from 'axios';
-import { clerkPlugin } from '@clerk/vue';
-import {
-  setupErrorHandlers,
-  handleApiError,
-  AppError,
-  createErrorNavigator
-} from './utils/errorHandler';
-import { Clerk } from '@clerk/clerk-js';
+import { useAuthStore } from './stores/auth';
+import { auth } from './firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+
+// PrimeVue
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import Aura from '@primeuix/themes/aura';
+// Initialize Pinia
+const pinia = createPinia();
+
+// Create app instance
+const app = createApp(App);
+
+app.use(PrimeVue, {
+  // Default theme configuration
+  theme: {
+      preset: Aura,
+      options: {
+          prefix: 'p',
+          darkModeSelector: 'system',
+          cssLayer: false
+      }
+  }
+});
 
 // ======================================================
-// 🌍 Environment Validation
+// 🧱 Plugin Registration
 // ======================================================
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+app.use(pinia);
+app.use(router);
+app.use(ToastService); // This line makes the $toast service available globally
 
-if (!CLERK_PUBLISHABLE_KEY) {
-  throw new AppError(
-    'Missing VITE_CLERK_PUBLISHABLE_KEY environment variable',
-    'MISSING_ENV_VARIABLE',
-    { variable: 'VITE_CLERK_PUBLISHABLE_KEY' }
-  );
-}
+// Initialize auth state before setting up interceptors
+const authStore = useAuthStore();
 
-// ======================================================
-// 🚀 Initialize Clerk
-// ======================================================
-const clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
+// Axios configuration
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '';
 
-// Handle Clerk initialization
-async function initializeApp() {
+// Request interceptor to add auth token
+axios.interceptors.request.use(
+  async (config) => {
+    // The 'requiresAuth' flag is a custom config option you can add to axios requests
+    // to bypass this interceptor if needed.
+    if (config.requiresAuth !== false && authStore.isAuthenticated) {
+      try {
+        const token = await authStore.getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Error getting auth token:', error);
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor for handling 401 Unauthorized
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      authStore.logout();
+      // Optionally show a toast message on logout
+      app.config.globalProperties.$toast.add({
+        severity: 'warn',
+        summary: 'Session Expired',
+        detail: 'You have been logged out. Please log in again.',
+        life: 5000
+      });
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Global error handler
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Vue error handler:', err, info);
+  const message = err.message || 'An unexpected application error occurred.';
+  app.config.globalProperties.$toast.add({
+    severity: 'error',
+    summary: 'Application Error',
+    detail: message,
+    life: 5000
+  });
+  // Prevents the error from propagating further
+  return false;
+};
+
+// Global unhandled promise rejection handler
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  const message = event.reason?.message || 'An unhandled promise rejection occurred.';
+  app.config.globalProperties.$toast.add({
+    severity: 'error',
+    summary: 'Unhandled Error',
+    detail: message,
+    life: 5000
+  });
+});
+
+
+// Wait for auth state to be initialized before mounting the app
+const initApp = async () => {
   try {
-    // Load Clerk
-    await clerk.load();
-    
-    // Create app instance
-    const app = createApp(App);
-    const pinia = createPinia();
-
-    // ======================================================
-    // 🧱 Plugin Registration
-    // ======================================================
-    app.use(pinia);
-    app.use(router);
-    
-    // Register Clerk plugin
-    app.use(clerkPlugin, {
-      publishableKey: CLERK_PUBLISHABLE_KEY,
+    // This makes sure Firebase has checked the user's auth status
+    await new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        // You might want to initialize your authStore here as well
+        // authStore.user = user;
+        resolve();
+        unsubscribe();
+      });
     });
+    
+    // This runs after Firebase has checked the auth state.
+    setupNavigationGuards();
 
-    // ======================================================
-    // 🌐 Axios Configuration
-    // ======================================================
-    axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '';
-
-    // Request interceptor
-    axios.interceptors.request.use(
-      async (config) => {
-        // Add auth token to requests if available
-        if (clerk.session) {
-          const token = await clerk.session?.getToken();
-          if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-          }
-        }
-        return config;
-      },
-      error => Promise.reject(handleApiError(error))
-    );
-
-    // Response interceptor
-    axios.interceptors.response.use(
-      response => response,
-      error => {
-        // Handle 401 Unauthorized
-        if (error.response?.status === 401) {
-          // You can add redirect to login here if needed
-          console.warn('Session expired or invalid. Please sign in again.');
-        }
-        return Promise.reject(handleApiError(error));
-      }
-    );
-
-    // Make axios and error handling available globally
-    app.config.globalProperties.$http = axios;
-    app.config.globalProperties.$handleError = createErrorNavigator(router);
-
-    // ======================================================
-    // ⚙️ Global Error Handling
-    // ======================================================
-    app.config.errorHandler = (err, vm, info) => {
-      console.error('Vue error:', { err, vm, info });
-      if (err && !err.handled) {
-        app.config.globalProperties.$handleError(err);
-      }
-      return false;
-    };
-
-    // Setup error handlers
-    setupErrorHandlers(app);
-
-    // Global error listeners
-    const handleUnhandledRejection = (event) => {
-      console.error('Unhandled promise rejection:', event.reason);
-      event.preventDefault();
-      if (event.reason && !event.reason.handled) {
-        app.config.globalProperties.$handleError(event.reason);
-      }
-    };
-
-    const handleGlobalError = (message, source, lineno, colno, error) => {
-      console.error('Uncaught error:', { message, source, lineno, colno, error });
-      if (error && !error.handled) {
-        app.config.globalProperties.$handleError(error);
-      }
-      return false;
-    };
-
-    // Add event listeners
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    window.onerror = handleGlobalError;
-
-    // ======================================================
-    // 🚀 Mount the App
-    // ======================================================
+    // Mount the app
     app.mount('#app');
 
-    // Cleanup function
-    return () => {
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      window.onerror = null;
-    };
-
   } catch (error) {
-    console.error('Failed to initialize application:', error);
-    // Render error UI
-    document.getElementById('app').innerHTML = `
-      <div style="padding: 2rem; text-align: center; font-family: sans-serif;">
-        <h1>Application Error</h1>
-        <p>Failed to initialize the application. Please refresh the page or contact support.</p>
-        <p><small>${error.message}</small></p>
-      </div>
-    `;
+    console.error('Failed to initialize app:', error);
+    const appElement = document.getElementById('app');
+    if (appElement) {
+      appElement.innerHTML = `
+        <div style="padding: 2rem; font-family: sans-serif;">
+          <h1>Application Error</h1>
+          <p>Failed to initialize the application. Please try refreshing the page.</p>
+          <p>${error.message}</p>
+        </div>
+      `;
+    }
   }
-}
+};
 
 // Start the app
-initializeApp();
+initApp();

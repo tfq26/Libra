@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../stores/auth'; // 👈 Import the auth store
 
 // --- Component Imports ---
 import Home from '../pages/Home.vue';
@@ -36,10 +37,40 @@ export const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior: () => ({ top: 0 }), // Simplified scroll behavior
+  scrollBehavior: () => ({ top: 0 }),
 });
 
 // --- Helper Functions ---
+
+/**
+ * Sets up the global navigation guards.
+ * We call this function from `main.js` after Firebase has initialized.
+ */
+export function setupNavigationGuards() {
+  const authStore = useAuthStore();
+
+  router.beforeEach((to, from, next) => {
+    const requiresAuth = to.meta.requiresAuth;
+    const guestOnly = to.meta.guestOnly;
+    const isAuthenticated = authStore.isAuthenticated;
+
+    if (requiresAuth && !isAuthenticated) {
+      // ❗️ User tries to access a protected page but is not logged in.
+      // Redirect to the sign-in page, saving their intended destination.
+      next({
+        name: 'SignIn',
+        query: { redirect: to.fullPath } // Save the intended path
+      });
+    } else if (guestOnly && isAuthenticated) {
+      // ❗️ User is logged in but tries to access a guest-only page (like sign-in).
+      // Redirect them to the home page.
+      next({ name: 'Home' });
+    } else {
+      // ✅ All good, proceed to the page.
+      next();
+    }
+  });
+}
 
 /**
  * Programmatically navigates to the error page with details.

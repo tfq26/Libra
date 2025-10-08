@@ -2,10 +2,12 @@ import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
+import dotenv from 'dotenv';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory
+  // Load environment variables from the root .env file
+  dotenv.config({ path: '../../.env' });
   const env = loadEnv(mode, process.cwd(), '');
 
   return {

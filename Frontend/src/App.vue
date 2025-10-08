@@ -1,8 +1,8 @@
 <template>
-  <div id="app" class="h-screen flex flex-col font-inter antialiased bg-gray-50 dark:bg-ochre-900 text-gray-900 dark:text-gray-50">
+  <div id="app" class="min-h-screen bg-sunset-800">
+    <Toast />
     <Navbar />
-    <main class="flex-1 overflow-y-auto md:pt-16 pb-16 md:pb-0">
-      <!-- Use router-view directly without v-slot for simpler setup -->
+    <main class="container mx-auto px-4 py-8">
       <router-view v-slot="{ Component: PageComponent }">
         <transition name="fade" mode="out-in">
           <component :is="PageComponent" v-if="PageComponent" :key="$route.fullPath" />
@@ -12,16 +12,9 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
+<script setup>
 import Navbar from './components/Navbar.vue';
-
-export default defineComponent({
-  name: 'App',
-  components: {
-    Navbar
-  }
-});
+import Toast from 'primevue/toast'; // <-- This import was missing
 </script>
 
 <style>

@@ -1,13 +1,5 @@
 <template>
-  <div v-if="!isLoaded" class="flex items-center justify-center h-full">
-    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 dark:border-sunset-400"></div>
-  </div>
-
-  <div v-else-if="!isSignedIn" class="flex items-center justify-center h-full text-center p-8">
-    <Error :message="'Please sign in to access this chat'" code="402" />
-  </div>
-
-  <div v-else class="flex font-sans overflow-hidden h-full">
+  <div class="flex font-sans overflow-hidden h-full">
     <main class="flex-grow flex flex-col p-2 shadow-xl">
 
       <header class="mb-2 flex items-start flex-shrink-0 dark:text-sunset-300 justify-start">
@@ -51,19 +43,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// Import the fixed custom useAuth
-import { useAuth } from '@/utils/auth'; 
+import { useAuthStore } from '../stores/auth'; // NEW: Import the Pinia store
 import { sendChatMessage, loadConversation } from '../functions/conversation-api';
 import MessageList from '../components/chat/MessageList.vue';
 import MessageInput from '../components/chat/MessageInput.vue';
 import Error from './Error.vue';
-import { nextTick } from 'vue';
 
-// --- Auth: Destructure the stable token function and core Refs ---
-// 🔑 FIX: Renamed 'getToken' to 'getAuthToken' and removed 'user' which was unused
-const { isLoaded, isSignedIn, userId, getAuthToken } = useAuth(); 
+// --- Auth: Use the Pinia Store ---
+const authStore = useAuthStore(); // NEW: Instantiate the Pinia store
+
+// NEW: Create computed properties to map Pinia state to what the component expects.
+// This minimizes changes to the rest of the component's code.
+const isLoaded = computed(() => !authStore.loading);
+const isSignedIn = computed(() => authStore.isAuthenticated);
+const userId = computed(() => authStore.userId);
+const getAuthToken = authStore.getToken; // CHANGED: Directly assign the getToken function
 
 // Chat state
 const messages = ref([]);
