@@ -6,7 +6,7 @@
         <h2 class="text-5xl font-semibold dark:text-sunset-200">Chat History</h2>
         <button
           @click="startNewChat"
-          class="flex items-center px-4 py-2 bg-ochre-600 hover:bg-ochre-700 text-white font-medium rounded-lg shadow-md transition"
+          class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition"
         >
           <span class="mr-2 justify-center">➕</span> Start New Chat
         </button>
