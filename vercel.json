@@ -13,12 +13,18 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/Backend/api/$1"
+      "source": "/Backend/api/conversation(.*)",
+      "destination": "/Backend/api/conversation.js" 
     },
+    
+    {
+      "source": "/Backend/api/history",
+      "destination": "/Backend/api/history.js" 
+    },
+    
     {
       "source": "/(.*)",
-      "destination": "/Frontend/dist/index.html" 
+      "destination": "/Frontend/$1"
     }
   ]
 }
