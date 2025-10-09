@@ -174,7 +174,7 @@ const handleSignIn = async () => {
     await authStore.login(email.value, password.value);
     
     // Redirect to intended page or dashboard
-    const redirectPath = route.query.redirect || '/dashboard';
+    const redirectPath = route.query.redirect || '/';
     router.push(redirectPath);
 
   } catch (err) {
@@ -193,7 +193,7 @@ const signInWithGoogle = async () => {
     
     await signInWithPopup(auth, provider);
     
-    const redirectPath = route.query.redirect || '/dashboard';
+    const redirectPath = route.query.redirect || '/';
     router.push(redirectPath);
 
   } catch (err) {

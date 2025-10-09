@@ -142,7 +142,7 @@ const handleSignUp = async () => {
     
     // --- 3. Redirect on success ---
     if (result.success) {
-      router.push('/dashboard');
+      router.push('/');
     } else {
       // Use the error from the store if registration fails
       error.value = result.error || 'Failed to create an account.';

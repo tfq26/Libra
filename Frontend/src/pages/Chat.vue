@@ -209,7 +209,7 @@ async function sendMessage(promptText) {
       inputMode.value = 'text';
       actionOptions.value = [];
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/');
       }, 3000);
     }
     
