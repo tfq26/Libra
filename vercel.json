@@ -13,13 +13,8 @@
   ],
   "rewrites": [
     {
-      "source": "/Backend/api/conversation(.*)",
-      "destination": "/Backend/api/conversation.js" 
-    },
-    
-    {
-      "source": "/Backend/api/history",
-      "destination": "/Backend/api/history.js" 
+      "source": "/api/(.*)",
+      "destination": "/Backend/api/$1" 
     },
     
     {
