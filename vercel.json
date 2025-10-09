@@ -14,12 +14,12 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/Backend/api/$1" 
+      "destination": "/api/$1" 
     },
     
     {
       "source": "/(.*)",
-      "destination": "/Frontend/$1"
+      "destination": "/Frontend/dist/index.html"
     }
   ]
 }
