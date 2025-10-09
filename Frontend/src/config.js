@@ -2,7 +2,7 @@
 const isProduction = process.env.NODE_ENV === 'production';
 
 export const API_BASE_URL = isProduction
-  ? '/Backend/api' // Relative URL in production (same domain)
+  ? '/api' // Relative URL in production (same domain)
   : 'http://localhost:3001'; // Your backend URL in development
 
 export default {
