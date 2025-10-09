@@ -9,7 +9,9 @@
     "build": "cd Frontend && bun run build",
     "start": "cd Frontend && bun run preview",
     "vercel-build": "bun run build",
-    "preview": "cd Frontend && bun run preview"
+    "preview": "cd Frontend && bun run preview",
+    "build:backend": "cd Backend && bun run build",
+    "start:backend": "cd Backend && bun run start"
   },
   "dependencies": {
     "concurrently": "^8.2.0"

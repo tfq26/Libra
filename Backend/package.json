@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development node --watch index.js",
-    "start": "NODE_ENV=production node index.js",
+    "dev": "NODE_ENV=development node --watch init.js",
+    "start": "NODE_ENV=production node init.js",
     "test": "NODE_ENV=test jest",
     "lint": "eslint .",
     "format": "prettier --write ."
@@ -14,7 +14,7 @@
     "@azure/storage-blob": "^12.0.0",
     "axios": "^1.6.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "express": "^4.18.2",
     "firebase-admin": "^13.5.0",
     "h3": "^1.15.4",
