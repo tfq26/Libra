@@ -8,20 +8,20 @@
     >
       <div class="w-full max-w-md space-y-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
-          <img 
-            src="../assets/libra-svgrepo-com-light.svg" 
-            alt="Libra Logo" 
+          <img
+            :src="isDarkMode ? lightLogo : darkLogo"
+            alt="Libra Logo"
             class="mx-auto h-12 w-auto transition-transform duration-300 hover:scale-110"
           />
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-timberwolf-100">
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-timberwolf-900">
             Sign in to your account
           </h2>
         </div>
 
-        <div class="mt-8 py-8 px-4 shadow-xl ring-1 ring-gray-900/5 bg-sunset-700 sm:rounded-xl sm:px-10">
+        <div class="mt-8 py-8 px-4 shadow-xl ring-1 ring-gray-900/5 bg-sunset-700 dark:bg-sunset-400/40 sm:rounded-xl sm:px-10">
           <form class="space-y-6" @submit.prevent="handleSignIn">
             <div>
-              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-timberwolf-200">
+              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-timberwolf-900">
                 Email address
               </label>
               <div class="mt-1">
@@ -38,7 +38,7 @@
             </div>
 
             <div>
-              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-timberwolf-200">
+              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-timberwolf-900">
                 Password
               </label>
               <div class="mt-1">
@@ -67,7 +67,7 @@
                   type="checkbox"
                   class="h-4 w-4 rounded border-sunset-300 bg-sunset-600 text-lion-600 focus:ring-lion-500"
                 />
-                <label for="remember-me" class="ml-2 block text-sm text-gray-900 dark:text-timberwolf-200">
+                <label for="remember-me" class="ml-2 block text-sm text-gray-900 dark:text-timberwolf-900">
                   Remember me
                 </label>
               </div>
@@ -76,7 +76,7 @@
                 <a
                   href="#"
                   @click.prevent="handleRoute('/forgot-password')"
-                  class="font-medium text-lion-600 transition-colors duration-200 hover:text-sunset-300 dark:text-lion-400 dark:hover:text-sunset-300"
+                  class="font-medium text-lion-600 transition-colors duration-200 hover:text-sunset-300 dark:text-lion-900 dark:hover:text-sunset-400"
                 >
                   Forgot your password?
                 </a>
@@ -98,10 +98,10 @@
           <div class="mt-6">
             <div class="relative">
               <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300 dark:border-gray-600" />
+                <div class="w-full border-t border-gray-300 dark:border-timberwolf-600" />
               </div>
               <div class="relative flex justify-center text-sm">
-                <span class=" px-2 text-black bg-sunset-700">Or continue with</span>
+                <span class=" px-2 text-black bg-sunset-700 dark:bg-sunset-400 rounded-2xl">Or continue with</span>
               </div>
             </div>
 
@@ -127,12 +127,12 @@
           </div>
 
           <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600 dark:text-timberwolf-300">
+            <p class="text-sm text-gray-600 dark:text-timberwolf-900">
               Don't have an account?
               <a
                 href="#"
                 @click.prevent="handleRoute('/sign-up')"
-                class="font-medium text-lion-600 transition-colors duration-200 hover:text-sunset-300 dark:text-lion-400 dark:hover:text-sunset-300"
+                class="font-medium text-lion-600 transition-colors duration-200 hover:text-sunset-300 dark:text-lion-700 dark:hover:text-sunset-300"
               >
                 Sign up
               </a>
@@ -150,6 +150,8 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useToast } from 'primevue/usetoast';
 import { auth, GoogleAuthProvider, signInWithPopup } from '../firebase/config';
+import lightLogo from '../assets/libra-svgrepo-com-light.svg';
+import darkLogo from '../assets/libra-svgrepo-com-dark.svg'; // Assuming you have a dark version of the logo
 
 const router = useRouter();
 const route = useRoute();

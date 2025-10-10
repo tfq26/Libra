@@ -4,24 +4,42 @@ import { CosmosClient } from '@azure/cosmos';
 import { v4 as uuidv4 } from 'uuid';
 import { StatusCodes } from 'http-status-codes';
 import { callOpenAI, parseAIResponse } from '../lib/ai-service.js';
-
-// FIREBASE AUTH: Import Firebase Admin SDK
+// Removed path and fs imports as we rely solely on environment variables
 import admin from 'firebase-admin';
 
-// FIREBASE AUTH: Initialize Firebase Admin
-// This requires a FIREBASE_SERVICE_ACCOUNT_JSON environment variable.
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+// --- Vercel/Serverless Firebase Admin Initialization (MUST be based on ENV) ---
+let serviceAccount;
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+try {
+  // Rely exclusively on the base64 encoded environment variable for both dev and prod
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable is required.');
+  }
+  
+  // Decode the service account JSON string
+  const serviceAccountJson = Buffer.from(
+    process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 
+    'base64'
+  ).toString('utf8');
+  serviceAccount = JSON.parse(serviceAccountJson);
+
+  // Initialize Firebase Admin if not already initialized
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('[Firebase] Admin initialized successfully.');
+  }
+} catch (error) {
+  console.error('[Firebase] Initialization critical error:', error.message);
+  // Re-throw a simple error, Vercel will catch this and show a 500
+  throw new Error('Failed to initialize critical backend services.'); 
 }
+// --- END Firebase Init ---
 
 /**
  * FIREBASE AUTH: Verifies the Firebase ID token from the request's Authorization header.
- * @param {object} req - The incoming request object.
- * @returns {Promise<admin.auth.DecodedIdToken|null>} The decoded token or null if invalid.
+ * (Logic is retained, assuming external libraries like 'ai-service.js' are correctly resolved by Vercel)
  */
 async function verifyFirebaseToken(req) {
   const authHeader = req.headers.authorization;
@@ -45,78 +63,70 @@ const container = database.container('Conversations');
 
 /**
  * Vercel Serverless Function for handling chat messages (POST) and loading (GET)
- * Endpoint: /Backend/api/conversation
  */
 export default async function handler(req, res) {
-  // Set headers and handle OPTIONS (CORS) and METHOD NOT ALLOWED (405) checks
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Restored GET
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+  // Handle preflight request
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(StatusCodes.NO_CONTENT).end();
   }
+
+  // Check supported methods
   if (req.method !== 'POST' && req.method !== 'GET') {
-    res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
-    return res.status(StatusCodes.METHOD_NOT_ALLOWED).json({ 
+    return res.status(StatusCodes.METHOD_NOT_ALLOWED).json({
       error: 'Method not allowed',
-      allowedMethods: ['GET', 'POST', 'OPTIONS'],
-      timestamp: new Date().toISOString()
+      allowedMethods: ['GET', 'POST']
     });
   }
   
-  // FIREBASE AUTH: Verify the token before proceeding.
+  // Vercel automatically parses JSON bodies into req.body (no need for custom parsing)
+  const { userId, conversationId, message } = req.body || req.query;
+
+  // Verify Firebase authentication
   const decodedToken = await verifyFirebaseToken(req);
   if (!decodedToken) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Unauthorized: Invalid or missing token.' });
+    return res.status(StatusCodes.UNAUTHORIZED).json({ 
+      error: 'Unauthorized: Invalid or missing token.' 
+    });
+  }
+  
+  // Authorization Check: Ensure the user ID from the body/query matches the authenticated user
+  const clientUserId = userId || req.query.userId;
+  if (decodedToken.uid !== clientUserId) {
+    return res.status(StatusCodes.FORBIDDEN).json({ 
+      error: 'Forbidden: Cannot access resources for another user.' 
+    });
   }
 
   try {
-    // --- GET REQUEST LOGIC (FOR loadConversation) ---
+    // --- GET REQUEST LOGIC (LOAD CONVERSATION HISTORY) ---
     if (req.method === 'GET') {
-        const conversationId = req.query.id; 
-        const userId = req.query.userId; 
-
-        // FIREBASE AUTH: Ensure the authenticated user matches the requested user ID.
-        if (decodedToken.uid !== userId) {
-          return res.status(StatusCodes.FORBIDDEN).json({ error: 'Forbidden: You can only access your own conversations.' });
-        }
-
-        if (!conversationId || !userId) {
+        const id = req.query.id || conversationId;
+        
+        if (!id || !clientUserId) {
             return res.status(StatusCodes.BAD_REQUEST).json({ 
-                error: 'Conversation ID and User ID are required.',
-                timestamp: new Date().toISOString()
+                error: 'Conversation ID and User ID are required for GET request.',
             });
         }
-        try {
-            const { resource: conversation } = await container.item(conversationId, userId).read();
-            if (!conversation) {
-                return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found.' });
-            }
-            return res.status(StatusCodes.OK).json(conversation);
-        } catch (error) {
-            console.error('Database read failed:', error);
-            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                error: 'Failed to retrieve conversation from database.',
-                message: error.message
-            });
+        
+        // Use the authenticated user ID as partition key
+        const { resource: conversation } = await container.item(id, clientUserId).read();
+        
+        if (!conversation) {
+            return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found.' });
         }
+        return res.status(StatusCodes.OK).json(conversation);
     }
 
-    // --- POST REQUEST LOGIC (FOR sendChatMessage) ---
+    // --- POST REQUEST LOGIC (SEND MESSAGE) ---
     if (req.method === 'POST') {
-        const { userId, conversationId, message } = req.body; 
-        
-        // FIREBASE AUTH: Ensure the authenticated user matches the user ID in the body.
-        if (decodedToken.uid !== userId) {
-          return res.status(StatusCodes.FORBIDDEN).json({ error: 'Forbidden: You can only act on your own behalf.' });
-        }
-
-        if (!userId || !message) {
+        if (!message) {
           return res.status(StatusCodes.BAD_REQUEST).json({ 
-            error: 'userId and message are required',
-            received: { userId: Boolean(userId), message: Boolean(message) },
-            timestamp: new Date().toISOString()
+            error: 'Message is required.'
           });
         }
 
@@ -124,88 +134,79 @@ export default async function handler(req, res) {
         let conversation;
         let history = []; 
 
-        // --- Database Logic (Create or Update) ---
-        try {
-          if (!convoId) {
+        // 1. Load/Create Conversation
+        if (!convoId) {
             convoId = uuidv4();
             conversation = {
-              id: convoId,
-              userId,
-              title: message.substring(0, 30),
-              messages: [{
-                id: uuidv4(),
-                role: 'user',
-                content: message,
-                timestamp: new Date().toISOString()
-              }],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+                id: convoId,
+                userId: clientUserId,
+                title: message.substring(0, 30),
+                messages: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             };
-          } else {
-            const { resource: existingConvo } = await container.item(convoId, userId).read();
+        } else {
+            const { resource: existingConvo } = await container.item(convoId, clientUserId).read();
             if (!existingConvo) {
-              return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found' });
+                return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found' });
             }
             conversation = existingConvo;
-            history = existingConvo.messages; 
-            conversation.messages.push({
-              id: uuidv4(),
-              role: 'user',
-              content: message,
-              timestamp: new Date().toISOString()
-            });
-          }
+            history = existingConvo.messages;
+        }
 
-          // --- AI Logic: Call the external service ---
-          const aiResponseText = await callOpenAI(message, history); 
-          const { cleanMessage, options, isDone } = parseAIResponse(aiResponseText);
-          
-          conversation.messages.push({
+        // Add user message
+        conversation.messages.push({
+            id: uuidv4(),
+            role: 'user',
+            content: message,
+            timestamp: new Date().toISOString()
+        });
+
+        // 2. AI Logic: Call the external service
+        const aiResponseText = await callOpenAI(message, history); 
+        const { cleanMessage, options, isDone } = parseAIResponse(aiResponseText);
+        
+        // Add assistant response
+        conversation.messages.push({
             id: uuidv4(),
             role: 'assistant',
             content: cleanMessage,
-            timestamp: new Date().toISOString()
-          });
-          conversation.updatedAt = new Date().toISOString();
+            timestamp: new Date().toISOString(),
+            options: options.length > 0 ? options : undefined // Store options for history
+        });
+        conversation.updatedAt = new Date().toISOString();
 
-          if (history.length === 0) {
-              const titlePrompt = `Summarize this chat into a 5-word title: User: "${message}"`;
-              const titleResponseText = await callOpenAI(titlePrompt, []);
-              conversation.title = parseAIResponse(titleResponseText).cleanMessage;
-          }
+        // 3. Update Title (only on first message)
+        if (history.length === 0) {
+            const titlePrompt = `Summarize this chat into a 5-word title: User: "${message}"`;
+            const titleResponseText = await callOpenAI(titlePrompt, []);
+            conversation.title = parseAIResponse(titleResponseText).cleanMessage;
+        }
 
-          if (isDone) {
-              conversation.isDone = true;
-          }
+        if (isDone) {
+            conversation.isDone = true;
+        }
 
-          await container.items.upsert(conversation);
+        // 4. Save to Database
+        await container.items.upsert(conversation);
 
-          return res.status(StatusCodes.OK).json({
+        // 5. Send final response (MUST include options)
+        return res.status(StatusCodes.OK).json({
             success: true,
             conversationId: convoId,
             response: cleanMessage,
-            options: options,
+            options: options, // Critical for the new UI feature
             isDone: isDone,
             messages: conversation.messages,
             timestamp: new Date().toISOString()
-          });
-          
-        } catch (error) {
-          console.error('Database/AI Operation Failed:', error);
-          return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-              error: error.message || 'Failed to process chat message',
-              message: error.message,
-              timestamp: new Date().toISOString()
-          });
-        }
+        });
     }
-    
+
   } catch (error) {
     console.error('Chat function execution error:', error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'An unexpected error occurred',
-        message: error.message,
-        timestamp: new Date().toISOString()
+        error: error.message || 'An internal server error occurred.',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }

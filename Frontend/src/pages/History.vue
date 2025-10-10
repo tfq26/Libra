@@ -4,26 +4,20 @@
     <header class="flex-shrink-0 mb-4 mt-10">
       <div class="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
         <h2 class="text-5xl font-semibold dark:text-sunset-200">Chat History</h2>
-        <button
-          @click="startNewChat"
-          class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition"
-        >
-          <span class="mr-2 justify-center">➕</span> Start New Chat
-        </button>
       </div>
     </header>
 
-    <Error
-      v-if="errorMessage"
-      :message="errorMessage"
-      @dismiss="errorMessage = null"
-      class="flex-shrink-0 mb-2"
-    />
-
     <ul class="flex-grow divide-y divide-gray-200 overflow-y-auto custom-scrollbar">
-      <li v-if="conversations.length === 0" class="text-gray-500 text-sm italic px-2 py-4 text-center dark:text-sunset-300">
-        No conversations yet. Start a new one!
+      <li v-if="conversations.length === 0" class="text-gray-500 text-sm italic px-2 py-4 text-center dark:text-sunset-300 flex flex-col items-center space-y-4">
+          <p>No conversations yet. Start a new one!</p>
+          <button
+            @click="startNewChat"
+            class="px-4 py-2 bg-sunset-200 hover:bg-sunset-300 text-white font-medium rounded-lg shadow-md transition cursor-pointer"
+          >
+            <span class="mr-2 justify-center"></span> Start New Chat
+          </button>
       </li>
+      
 
       <li
         v-for="conv in conversations"

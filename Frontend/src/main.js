@@ -9,26 +9,90 @@ import { auth } from './firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 
 // PrimeVue
-import PrimeVue from 'primevue/config';
+import PrimeVue, { usePrimeVue } from 'primevue/config';
 import ToastService from 'primevue/toastservice';
+import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 // Initialize Pinia
 const pinia = createPinia();
-
 // Create app instance
 const app = createApp(App);
 
-app.use(PrimeVue, {
-  // Default theme configuration
-  theme: {
-      preset: Aura,
-      options: {
-          prefix: 'p',
-          darkModeSelector: 'system',
-          cssLayer: false
+const LibraTheme = definePreset(Aura, {
+  semantic: {
+    primary: {
+      50: '#fff7e9',
+      100: '#ffefd2',
+      200: '#ffe6bc',
+      300: '#ef9700',  // Main primary color (sunset-300)
+      400: '#ffb93f',
+      500: '#ffd791',
+      600: '#9f6500',
+      700: '#503200',
+      800: '#4a3a1e',
+      900: '#251d0f',
+      950: '#020202'
+    },
+    colorScheme: {
+      light: {
+        primary: {
+          color: '{primary.300}',
+          contrastColor: '#ffffff',
+          hoverColor: '{primary.400}',
+          activeColor: '{primary.200}'
+        },
+        surface: {
+          0: '#ffffff',
+          50: '#f7f7f7',
+          100: '#efefee',
+          200: '#e7e7e6',
+          300: '#e0dfdd',
+          400: '#d8d7d5',
+          500: '#afaca8',
+          600: '#86827b',
+          700: '#595752',
+          800: '#2d2b29',
+          900: '#0a0a09',
+          950: '#020202'
+        }
+      },
+      dark: {
+        primary: {
+          color: '{primary.400}',
+          contrastColor: '#ffffff',
+          hoverColor: '{primary.300}',
+          activeColor: '{primary.500}'
+        },
+        surface: {
+          0: '#020202',
+          50: '#0a0a09',
+          100: '#2d2b29',
+          200: '#595752',
+          300: '#86827b',
+          400: '#afaca8',
+          500: '#d8d7d5',
+          600: '#e0dfdd',
+          700: '#e7e7e6',
+          800: '#efefee',
+          900: '#f7f7f7',
+          950: '#ffffff'
+        }
       }
+    }
   }
 });
+
+app.use(PrimeVue, {
+  theme: {
+    preset: LibraTheme,
+    options: {
+      prefix: 'p',
+      darkModeSelector: '.dark',
+      cssLayer: false
+    }
+  },
+  ripple: true
+})
 
 // ======================================================
 // 🧱 Plugin Registration
@@ -39,7 +103,6 @@ app.use(ToastService); // This line makes the $toast service available globally
 
 // Initialize auth state before setting up interceptors
 const authStore = useAuthStore();
-
 // Axios configuration
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -126,6 +189,7 @@ const initApp = async () => {
 
     // Mount the app
     app.mount('#app');
+    console.log('✅ PrimeVue initialized with LibraTheme preset');
 
   } catch (error) {
     console.error('Failed to initialize app:', error);

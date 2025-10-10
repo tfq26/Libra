@@ -1,8 +1,8 @@
 <template>
-  <div id="app" class="min-h-screen bg-sunset-800">
-    <Toast />
+  <div id="app" class="flex flex-col h-screen bg-sunset-800 dark:bg-zinc-900">
+    <Toast position="top-center" autoZIndex />
     <Navbar />
-    <main class="container mx-auto px-4 py-8">
+    <main class="flex-grow overflow-y-auto p-4">
       <router-view v-slot="{ Component: PageComponent }">
         <transition name="fade" mode="out-in">
           <component :is="PageComponent" v-if="PageComponent" :key="$route.fullPath" />

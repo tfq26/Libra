@@ -85,6 +85,16 @@ export async function callOpenAI(prompt, history = [], imageUrl = null) {
         const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT_NAME;
         const apiVersion = "2024-02-15-preview";
 
+        if (!apiKey || !endpoint || !deploymentName) {
+            throw new Error('Missing required Azure OpenAI configuration. Please check your environment variables.');
+        }
+
+        // Minimal logging for production
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('[AI] Initializing with endpoint:', endpoint.split('/')[2]); // Just show domain
+            console.log('[AI] Using deployment:', deploymentName);
+        }
+
         const MODEL_CONTEXT_WINDOW = 8192;
         const RESPONSE_BUFFER = 1500;
 
@@ -108,15 +118,32 @@ export async function callOpenAI(prompt, history = [], imageUrl = null) {
             max_tokens: Math.min(maxTokensForResponse, 4096)
         };
 
+        // Ensure the endpoint ends with a slash for proper URL construction
+        const baseUrl = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
+        const apiUrl = `${baseUrl}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+        
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('[AI] Sending request to Azure OpenAI');
+        }
+        
         const response = await axios.post(
-            `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`,
+            apiUrl,
             payload,
-            { headers }
+            { 
+                headers,
+                timeout: 30000 // 30 second timeout
+            }
         );
+        
+        if (!response.data.choices || !response.data.choices[0] || !response.data.choices[0].message) {
+            console.error('Unexpected response format from Azure OpenAI:', JSON.stringify(response.data, null, 2));
+            throw new Error('Unexpected response format from Azure OpenAI');
+        }
+        
         return response.data.choices[0].message.content;
 
     } catch (error) {
-        console.error("Error calling Azure OpenAI:", error.message);
+        console.error('[AI] Error:', error.message);
         if (error.message.includes("The conversation history is too long")) {
             throw error;
         }
