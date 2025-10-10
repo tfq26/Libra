@@ -56,7 +56,7 @@
             </button>
           </div>
 
-          <div v-else class="flex w-full items-end gap-2">
+          <div v-else class="flex w-full items-end gap-2 mb-6">
             <MessageInput
               ref="messageInputComp"
               v-model="currentPrompt"
