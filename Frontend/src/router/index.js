@@ -12,8 +12,7 @@ import ErrorPage from '../pages/Error.vue';
 // --- Route Definitions ---
 export const routes = [
   { path: '', name: 'Home', component: Home, exact: true }, // Added 'exact: true' for clarity
-  { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
-  { path: '/chat/:id', name: 'ChatSession', component: Chat, meta: { requiresAuth: true } },
+  { path: '/chat/:id?', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
   { path: '/history', name: 'History', component: History, meta: { requiresAuth: true } },
   { path: '/sign-in', name: 'SignIn', component: SignIn, meta: { guestOnly: true } },
   { path: '/sign-up', name: 'SignUp', component: SignUp, meta: { guestOnly: true } },
