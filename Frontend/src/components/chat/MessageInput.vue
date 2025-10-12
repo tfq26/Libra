@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex items-center justify-center gap-2 mt-2 md:mt-3">
+  <div class="w-full flex items-center justify-center gap-2">
     <span class="p-input-icon-right flex-grow relative">
       <Textarea
         ref="textAreaRef"
@@ -10,9 +10,8 @@
         autoResize
         rows="1"
         cols="30"
-        class="mt-1 md:mt-1"
         @keydown.enter.prevent="handleKeydown"
-       />
+        @focus="handleFocus" />
       <i
         v-if="isLoading"
         class="pi pi-spinner pi-spin text-gray-400 absolute right-4 top-1/2 -translate-y-1/2"
@@ -21,7 +20,6 @@
 
     <Button
       icon="pi pi-send"
-      label="Send"
       :loading="isLoading"
       :disabled="!internalValue?.trim() || isLoading"
       @click="handleSend"
@@ -30,9 +28,9 @@
 </template>
 
 <script setup>
-import { ref, watch, defineExpose } from 'vue' // Import defineExpose
-import Textarea from 'primevue/textarea'
-import Button from 'primevue/button'
+import { ref, watch, defineExpose } from 'vue';
+import Textarea from 'primevue/textarea';
+import Button from 'primevue/button';
 
 const props = defineProps({
   modelValue: { type: String, required: true },
@@ -71,6 +69,14 @@ function focusInput() {
   if (textAreaRef.value?.$el?.querySelector('textarea')) {
     textAreaRef.value.$el.querySelector('textarea').focus();
   }
+}
+
+function handleFocus(event) {
+  // Use a small timeout to allow the keyboard animation to finish
+  setTimeout(() => {
+    // Scrolls the element into the middle of the visible screen
+    event.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
 }
 
 defineExpose({

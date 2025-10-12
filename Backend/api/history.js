@@ -1,30 +1,28 @@
 import { CosmosClient } from '@azure/cosmos';
 import admin from 'firebase-admin';
-import path from 'path';
-import fs from 'fs';
 
-// Initialize Firebase Admin if not already initialized
+// --- Vercel/Serverless Firebase Admin Initialization (Unified) ---
 if (!admin.apps.length) {
   try {
-    let serviceAccount;
-    if (process.env.NODE_ENV === 'production') {
-      if (!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
-        throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 is not set in production');
-      }
-      serviceAccount = JSON.parse(Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8'));
-    } else {
-      const serviceAccountPath = path.join(process.cwd(), 'Frontend', 'src', 'firebase', 'firebase-service-account.json');
-      serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable is required.');
     }
     
+    const serviceAccountJson = Buffer.from(
+      process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 
+      'base64'
+    ).toString('utf8');
+    const serviceAccount = JSON.parse(serviceAccountJson);
+
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
+    console.log('[Firebase] Admin initialized successfully for history API.');
+
   } catch (error) {
-    console.error('[Firebase] Initialization error:', error.message);
-    if (process.env.NODE_ENV === 'development') {
-      console.error(error.stack);
-    }
+    console.error('[Firebase] Initialization critical error:', error.message);
+    // This will prevent the function from running if Firebase fails to initialize
+    throw new Error('Failed to initialize critical backend services.'); 
   }
 }
 

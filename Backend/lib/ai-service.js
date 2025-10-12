@@ -114,7 +114,7 @@ export async function callOpenAI(prompt, history = [], imageUrl = null) {
         const headers = { 'Content-Type': 'application/json', 'api-key': apiKey };
         const payload = {
             messages,
-            model: "gpt-4o",
+            model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
             max_tokens: Math.min(maxTokensForResponse, 4096)
         };
 
