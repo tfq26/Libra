@@ -46,7 +46,7 @@
       />
       
       <transition name="fade-down">
-        <div v-if="isNavOpen" class="absolute top-14 right-0 w-48 bg-gray-800 rounded-md shadow-lg p-2 flex flex-col gap-1">
+        <div v-if="isNavOpen" class="absolute top-14 right-0 w-48 bg-timberwolf-100 rounded-md shadow-lg p-2 flex flex-col gap-1">
           <Button label="Home" icon="pi pi-home" class="p-button-text text-white justify-start" @click="navigateTo('/')" />
           <Button label="Chat" icon="pi pi-comment" class="p-button-text text-white justify-start" @click="navigateTo('/chat')" />
           <Button label="History" icon="pi pi-book" class="p-button-text text-white justify-start" @click="navigateTo('/history')" />

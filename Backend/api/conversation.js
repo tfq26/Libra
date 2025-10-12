@@ -67,7 +67,7 @@ const container = database.container('Conversations');
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Restored GET
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle preflight request
@@ -76,10 +76,10 @@ export default async function handler(req, res) {
   }
 
   // Check supported methods
-  if (req.method !== 'POST' && req.method !== 'GET') {
+  if (req.method !== 'POST' && req.method !== 'GET' && req.method !== 'PUT') {
     return res.status(StatusCodes.METHOD_NOT_ALLOWED).json({
       error: 'Method not allowed',
-      allowedMethods: ['GET', 'POST']
+      allowedMethods: ['GET', 'POST', 'PUT']
     });
   }
   
@@ -200,6 +200,33 @@ export default async function handler(req, res) {
             messages: conversation.messages,
             timestamp: new Date().toISOString()
         });
+    }
+
+    if (req.method === 'PUT') {
+      const { conversationId, messages, title } = req.body;
+
+      if (!conversationId || !clientUserId || !messages) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
+          error: 'conversationId, userId, and messages are required for an update.' 
+        });
+      }
+      
+      const { resource: existingConvo } = await container.item(conversationId, clientUserId).read();
+
+      if (!existingConvo) {
+        return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation to update not found.' });
+      }
+
+      const updatedConversation = {
+        ...existingConvo,
+        messages: messages,
+        title: title || existingConvo.title,
+        updatedAt: new Date().toISOString()
+      };
+
+      await container.items.upsert(updatedConversation);
+
+      return res.status(StatusCodes.OK).json({ success: true, message: 'Conversation saved.' });
     }
 
   } catch (error) {

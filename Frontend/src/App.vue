@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="flex flex-col h-full bg-sunset-800 dark:bg-zinc-900">
+  <div id="app" class="flex flex-col h-screen bg-sunset-800 dark:bg-zinc-900">
     <Toast position="top-center" autoZIndex />
     <Navbar />
 

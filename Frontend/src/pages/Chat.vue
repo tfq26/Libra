@@ -60,10 +60,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { sendChatMessage, loadConversation } from '../functions/conversation-api';
+import { sendChatMessage, loadConversation, saveConversation } from '../functions/conversation-api';
+
 import MessageList from '../components/chat/MessageList.vue';
 import ActionButtons from '../components/chat/ActionButtons.vue';
 import MessageInput from '../components/chat/MessageInput.vue';
@@ -184,23 +185,55 @@ async function sendMessage(text) {
   }
 }
 
-watch(() => route.params.id, (newId) => {
-  if (newId && isSignedIn.value && userId.value) loadChatHistory(newId);
-  else { /* new chat logic */ }
-}, { immediate: true });
+// 👇 ADD THIS FUNCTION
+/**
+ * Resets the chat state to a clean slate for a new conversation.
+ */
+function startNewChat() {
+  messages.value = [];
+  chatTitle.value = 'New Chat';
+  currentConversationId.value = null;
+  inputMode.value = 'text';
+  actionOptions.value = [];
+  currentPrompt.value = '';
+  errorMessage.value = null;
+}
 
-watch([isLoaded, isSignedIn, userId], ([loaded, signedIn, uid]) => {
-  if (loaded && signedIn && uid && route.params.id) loadChatHistory(route.params.id);
+// 👇 REPLACE your old watchers with this single, smarter one
+watch(
+  () => [route.params.id, isSignedIn.value],
+  ([newId, signedIn]) => {
+    // Only proceed if the authentication status is resolved
+    if (!authStore.loading && signedIn) {
+      if (newId) {
+        // If there's an ID in the URL, load that chat
+        loadChatHistory(newId);
+      } else {
+        // If there's no ID, start a fresh chat
+        startNewChat();
+      }
+    } else if (!authStore.loading && !signedIn) {
+      // If the user is not signed in, redirect them
+      router.push('/sign-in');
+    }
+  },
+  { immediate: true, deep: true }
+);
+
+// 4. Corrected the save logic
+onBeforeUnmount(async () => {
+  if (currentConversationId.value && messages.value.length > 0) {
+    const token = await getAuthToken(); // Get the token
+    await saveConversation(
+      currentConversationId.value,
+      messages.value,
+      chatTitle.value,
+      token, // Pass the token
+      userId.value
+    );
+  }
 });
 
-watch(inputMode, async (newMode) => {
-  if (newMode === 'text') {
-    await nextTick();
-    if (messageInputComp.value?.focusInput) {
-      messageInputComp.value.focusInput();
-    }
-  }
-});
 </script>
 
 <style scoped>

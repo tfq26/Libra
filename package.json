@@ -14,7 +14,7 @@
     "start:backend": "cd Backend && bun run start"
   },
   "dependencies": {
-    "concurrently": "^8.2.0",
+    "concurrently": "^9.2.1",
     "vercel": "^48.2.9"
   },
   "engines": {

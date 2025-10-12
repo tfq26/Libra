@@ -11,10 +11,10 @@
         v-for="(msg, index) in messages"
         :key="msg.id || index"
         :message="msg"
-        class="mt-2"
+        class="my-2"
       />
     </TransitionGroup>
-    <TypingIndicator v-if="isLoading" class="mt-2" />
+    <TypingIndicator v-if="isLoading" class="my-2" />
   </div>
 </template>
 
