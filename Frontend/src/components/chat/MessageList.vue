@@ -4,14 +4,14 @@
     ref="messagesContainer"
     class="flex-grow overflow-y-auto rounded-xl px-4 shadow-inner
            border border-gray-200 bg-sunset-600 dark:bg-timberwolf-100
-           min-h-[calc(100vh-14rem)] transition-colors duration-300"
+           min-h-[calc(100vh-14rem)] transition-colors duration-300 custom-scrollbar"
   >
-    <TransitionGroup name="fade" tag="div" class="space-y-4 space-x-2">
+    <TransitionGroup name="fade" tag="div" class="space-y-4">
       <MessageBubble
         v-for="(msg, index) in messages"
         :key="msg.id || index"
         :message="msg"
-        class="my-2"
+        @show-full-message="$emit('show-full-message', $event)"
       />
     </TransitionGroup>
     <TypingIndicator v-if="isLoading" class="my-2" />
@@ -22,6 +22,7 @@
 import { onUpdated, ref, nextTick, watch } from 'vue'; 
 import MessageBubble from './MessageBubble.vue';
 import TypingIndicator from './TypingIndicator.vue';
+import { TransitionGroup } from 'vue';
 
 const props = defineProps({
   messages: {
@@ -33,6 +34,9 @@ const props = defineProps({
     default: false
   }
 });
+
+// This line tells Vue that this component can emit an event called 'show-full-message'.
+defineEmits(['show-full-message']);
 
 const messagesContainer = ref(null);
 
@@ -91,3 +95,4 @@ onUpdated(async () => {
   background-color: rgba(100, 100, 100, 0.5);
 }
 </style>
+

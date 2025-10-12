@@ -1,120 +1,71 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <transition
-      appear
-      enter-active-class="transition-transform duration-500 ease-out"
-      enter-from-class="scale-95 opacity-0"
-      enter-to-class="scale-100 opacity-100"
-    >
-      <div class="w-full max-w-md space-y-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-          <img
-            :src="isDarkMode ? lightLogo : darkLogo"
-            alt="Libra Logo"
-            class="mx-auto h-12 w-auto transition-transform duration-300 hover:scale-110"
-          />
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-black dark:text-timberwolf-900">
-            Create your account
-          </h2>
-        </div>
-
-        <div class="mt-8 py-8 px-4 shadow-xl ring-1 ring-gray-900/5 bg-sunset-700 dark:bg-sunset-400/40 sm:rounded-xl sm:px-10">
-          <form class="space-y-6" @submit.prevent="handleSignUp">
-            <div>
-              <label for="email" class="block text-sm font-medium text-black dark:text-timberwolf-900">
-                Email address
-              </label>
-              <div class="mt-1">
-                <input
-                  id="email"
-                  v-model="email"
-                  name="email"
-                  type="email"
-                  autocomplete="email"
-                  required
-                  class="block w-full appearance-none rounded-lg border border-gray-300 bg-sunset-500 px-3 py-2 text-black
-                   placeholder-gray-400 shadow-sm transition-colors duration-200 focus:border-lion-500 focus:outline-none
-                    focus:ring-lion-500 sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label for="password" class="block text-sm font-medium text-black dark:text-timberwolf-900">
-                Password
-              </label>
-              <div class="mt-1">
-                <input
-                  id="password"
-                  v-model="password"
-                  name="password"
-                  type="password"
-                  autocomplete="new-password"
-                  required
-                  class="block w-full appearance-none rounded-lg border border-gray-300 bg-sunset-500 px-3 py-2 text-black placeholder-gray-400 shadow-sm transition-colors duration-200 focus:border-lion-500 focus:outline-none focus:ring-lion-500 sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label for="confirm-password" class="block text-sm font-medium text-black dark:text-timberwolf-900">
-                Confirm Password
-              </label>
-              <div class="mt-1">
-                <input
-                  id="confirm-password"
-                  v-model="confirmPassword"
-                  name="confirm-password"
-                  type="password"
-                  autocomplete="new-password"
-                  required
-                  class="block w-full appearance-none rounded-lg border border-gray-300 bg-sunset-500 px-3 py-2 text-black placeholder-gray-400 shadow-sm transition-colors duration-200 focus:border-lion-500 focus:outline-none focus:ring-lion-500 sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div v-if="error" class="rounded-md border border-red-400 bg-red-100 p-3 text-red-700 dark:border-red-600 dark:bg-red-900 dark:text-red-300">
-              <p>{{ error }}</p>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                :disabled="loading"
-                class="flex w-full justify-center rounded-lg border border-transparent bg-lion-600 dark:bg-ochre-600 py-2 px-4 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-[1.01]
-                 hover:bg-sunset-300 dark:hover:bg-sunset-400 focus:outline-none focus:ring-2 focus:ring-lion-500 focus:ring-offset-2 disabled:cursor-not-allowed cursor-pointer disabled:opacity-50 dark:focus:ring-offset-gray-800"
-              >
-                <span v-if="loading">Creating account...</span>
-                <span v-else>Sign up</span>
-              </button>
-            </div>
-          </form>
-
-          <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600 dark:text-timberwolf-900">
-              Already have an account?
-              <router-link
-                to="/sign-in"
-                class="font-medium text-lion-600 transition-colors duration-200 hover:text-sunset-300 dark:text-ochre-700 dark:hover:text-sunset-300"
-              >
-                Sign In
-              </router-link>
-            </p>
-          </div>
-        </div>
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md space-y-8">
+      <div>
+        <img
+          :src="isDarkMode ? darkLogo : lightLogo"
+          alt="Libra Logo"
+          class="mx-auto h-12 w-auto"
+        />
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          Create your account
+        </h2>
       </div>
-    </transition>
+
+      <form class="space-y-6" @submit.prevent="handleSignUp">
+        <div class="rounded-lg bg-sunset-600 dark:bg-sunset-400 p-8 shadow-lg">
+          <div class="flex flex-col gap-6">
+            <div>
+              <label for="email" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Email address</label>
+              <InputText id="email" v-model="email" type="email" class="w-full" required />
+            </div>
+
+            <div>
+              <label for="password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Password</label>
+              <Password id="password" v-model="password" class="w-full" :feedback="true" toggleMask required />
+            </div>
+            
+            <div>
+              <label for="confirm-password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Confirm Password</label>
+              <Password id="confirm-password" v-model="confirmPassword" class="w-full" :feedback="false" toggleMask required />
+            </div>
+          </div>
+          
+          <Message v-if="error" severity="error" class="mt-4 w-full">
+            {{ error }}
+          </Message>
+
+          <Button type="submit" label="Sign Up" class="w-full mt-6" :loading="loading" />
+        </div>
+      </form>
+      
+      <div class="text-center text-sm">
+        <p class="text-gray-600 dark:text-gray-400">
+          Already have an account?
+          <router-link to="/sign-in" class="font-medium text-primary hover:underline">
+            Sign in
+          </router-link>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Message from 'primevue/message';
+
 import lightLogo from '../assets/libra-svgrepo-com-light.svg';
-import darkLogo from '../assets/libra-svgrepo-com-dark.svg'; // Assuming you have a dark version of the logo
+import darkLogo from '../assets/libra-svgrepo-com-dark.svg';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const email = ref('');
@@ -123,12 +74,10 @@ const confirmPassword = ref('');
 const loading = ref(false);
 const error = ref('');
 
+const isDarkMode = computed(() => document.documentElement.classList.contains('dark'));
+
 const handleSignUp = async () => {
-  // --- 1. Client-side validation ---
-  if (!email.value || !password.value || !confirmPassword.value) {
-    error.value = 'Please fill out all fields.';
-    return;
-  }
+  // Client-side validation
   if (password.value !== confirmPassword.value) {
     error.value = 'Passwords do not match.';
     return;
@@ -138,30 +87,22 @@ const handleSignUp = async () => {
     return;
   }
 
+  loading.value = true;
+  error.value = '';
+
   try {
-    loading.value = true;
-    error.value = '';
+    // Call the register action. If it fails, it throws an error.
+    await authStore.register(email.value, password.value);
     
-    // --- 2. Call the Pinia store action ---
-    const result = await authStore.register(email.value, password.value);
-    
-    // --- 3. Redirect on success ---
-    if (result.success) {
-      router.push('/');
-    } else {
-      // Use the error from the store if registration fails
-      error.value = result.error || 'Failed to create an account.';
-    }
+    // On success, redirect.
+    const redirectPath = route.query.redirect || '/chat';
+    router.push(redirectPath);
+
   } catch (err) {
-    // This catches unexpected errors
     console.error('Sign up error:', err);
-    error.value = 'An unexpected error occurred. Please try again.';
+    error.value = 'Failed to create an account. The email may already be in use.';
   } finally {
     loading.value = false;
   }
 };
 </script>
-
-<style scoped>
-/* No scoped styles needed as all styling is handled by Tailwind classes */
-</style>

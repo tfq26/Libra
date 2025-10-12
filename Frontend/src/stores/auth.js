@@ -1,112 +1,81 @@
-// stores/auth.js
-
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { auth } from '../firebase/config'; // Make sure this path is correct
 import { 
-  auth, 
+  createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
-} from '../firebase/config'; // Make sure this path is correct
+  onIdTokenChanged // The recommended listener for handling tokens
+} from 'firebase/auth';
 
-export const useAuthStore = defineStore('auth', () => {
+export const useAuthStore = defineStore('auth', {
   // ======================================================
   // STATE ✨
   // ======================================================
-  const user = ref(null);
-  const loading = ref(true); // Start as true to handle initial auth check
-  const error = ref(null);
-
-  /**
-   * This is the core of the auth store. It sets up a real-time listener
-   * to Firebase's authentication state. It automatically updates the `user`
-   * state whenever a user logs in, logs out, or when the page is reloaded.
-   */
-  const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-    user.value = firebaseUser;
-    loading.value = false;
-  });
+  state: () => ({
+    user: null,
+    token: null, // We will now store the token directly in the state
+    loading: true, // Start in a loading state until the first auth check is complete
+  }),
 
   // ======================================================
-  // GETTERS 🤸 (as computed properties)
+  // GETTERS 🤸
   // ======================================================
-  const isAuthenticated = computed(() => !!user.value);
-  const userId = computed(() => user.value?.uid);
+  getters: {
+    isAuthenticated: (state) => !!state.user,
+    userId: (state) => state.user?.uid || null,
+  },
 
   // ======================================================
   // ACTIONS 🚀
   // ======================================================
+  actions: {
+    /**
+     * This is the core of the auth store. It sets up a persistent listener
+     * that automatically updates the user and token state. It runs once
+     * when the app starts and stays active.
+     */
+    initializeAuthListener() {
+      onIdTokenChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          // User is signed in or token has been refreshed
+          this.user = firebaseUser;
+          this.token = await firebaseUser.getIdToken();
+        } else {
+          // User is signed out
+          this.user = null;
+          this.token = null;
+        }
+        this.loading = false; // Auth state is now resolved
+      });
+    },
 
-  const login = async (email, password) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      user.value = userCredential.user; // State is updated by onAuthStateChanged, but this is faster
-      return { success: true, user: userCredential.user };
-    } catch (err) {
-      error.value = err.message; // Store a user-friendly error message
-      return { success: false, error: err.message };
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const register = async (email, password) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      user.value = userCredential.user;
-      return { success: true, user: userCredential.user };
-    } catch (err) {
-      error.value = err.message;
-      return { success: false, error: err.message };
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const logout = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-      await signOut(auth);
-      // user.value will be set to null automatically by onAuthStateChanged
-    } catch (err) {
-      error.value = err.message;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  /**
-   * Gets the current user's JWT token.
-   * This is essential for authenticating requests to your backend API.
-   */
-  const getToken = async () => {
-    if (!user.value) {
+    /**
+     * Gets the current user's JWT, forcing a refresh if it's expired.
+     * This is the safest way to get a token before an API call.
+     */
+    async getToken() {
+      if (auth.currentUser) {
+        // The 'true' argument forces a refresh if the token is about to expire
+        return await auth.currentUser.getIdToken(true);
+      }
       return null;
-    }
-    return await user.value.getIdToken();
-  };
+    },
 
-  // The 'unsubscribe' function can be called to clean up the listener,
-  // but for a global auth store, this is rarely needed.
+    async login(email, password) {
+      // The onIdTokenChanged listener will automatically update the state
+      await signInWithEmailAndPassword(auth, email, password);
+    },
 
-  return {
-    // State
-    user,
-    loading,
-    error,
-    // Getters
-    isAuthenticated,
-    userId,
-    // Actions
-    login,
-    register,
-    logout,
-    getToken
-  };
+    async register(email, password) {
+      // The listener will also handle this state update
+      await createUserWithEmailAndPassword(auth, email, password);
+    },
+
+
+
+    async logout() {
+      // The listener will set user and token to null
+      await signOut(auth);
+    },
+  },
 });

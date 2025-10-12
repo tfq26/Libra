@@ -1,41 +1,11 @@
-import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import api from './api'; // 👈 Import the shared api client
 
-// Create an axios instance with default config (No changes needed here)
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Interceptor to add auth token (No changes needed here)
-api.interceptors.request.use(
-  (config) => {
-    // Note: Using the authStore's getToken method is often safer than localStorage directly
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// --- Fetch Conversation History (No changes) ---
-export async function fetchConversationHistory(userId) {
-  try {
-    const response = await api.get('/history', { params: { userId } });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching conversation history:', error);
-    throw error;
-  }
-}
-
-// --- Load Conversation (GET) (No changes) ---
+/**
+ * Loads the full message history for a single conversation.
+ * @param {string} conversationId 
+ * @param {string} token 
+ * @param {string} userId
+ */
 export async function loadConversation(conversationId, token, userId) { 
   try {
     const response = await api.get('/conversation', { 
@@ -51,7 +21,13 @@ export async function loadConversation(conversationId, token, userId) {
   }
 }
 
-// --- Send Chat Message (POST) (No changes) ---
+/**
+ * Sends a new message to the conversation.
+ * @param {string} message 
+ * @param {string|null} conversationId 
+ * @param {string} token 
+ * @param {string} userId 
+ */
 export async function sendChatMessage(message, conversationId, token, userId) {
   try {
     const response = await api.post('/conversation', {
@@ -70,31 +46,29 @@ export async function sendChatMessage(message, conversationId, token, userId) {
   }
 }
 
-// --- 👇 ADD THIS NEW FUNCTION 👇 ---
-// ----------------------------------------------------------------------
-// Save Conversation State (PUT)
-// ----------------------------------------------------------------------
 /**
- * Saves the current state of a conversation to the database.
+ * Saves the current state of a conversation when the user leaves the page.
  * @param {string} conversationId
- * @param {Array} messages - The full array of message objects.
- * @param {string} title - The current chat title.
+ * @param {Array} messages
+ * @param {string} title
+ * @param {string} token
  * @param {string} userId
  */
-export async function saveConversation(conversationId, messages, title, userId) {
+export async function saveConversation(conversationId, messages, title, token, userId) {
   try {
-    // This function makes a PUT request to your new backend endpoint
     const response = await api.put('/conversation', {
       conversationId,
       messages,
       title,
       userId
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
     console.log('Conversation saved successfully.');
     return response.data;
   } catch (error) {
-    // We don't throw an error here because this is a background task.
-    // Failing to save shouldn't block the user from navigating away.
     console.error('Error saving conversation:', error);
   }
 }
