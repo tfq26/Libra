@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-[calc(100vh-5rem)]">
+  <div class="flex flex-col">
 
     <header class="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
       <h1 class="text-xl font-bold text-gray-800 dark:text-white truncate">
@@ -28,7 +28,7 @@
       </Dialog>
     </main>
 
-    <footer class="p-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+    <footer class="pt-4 pb-2 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
 
         <div v-if="inputMode === 'buttons' && actionOptions.length" class="flex flex-col gap-3">
     

@@ -3,17 +3,18 @@
     
     <Avatar
       v-if="message.role === 'assistant'"
-      icon="pi pi-sparkle"
       shape="circle"
+      image="https://www.svgrepo.com/show/410285/libra.svg"
       class="mr-3 bg-primary dark:bg-primary-400 text-white dark:text-gray-900 flex-shrink-0"
+      style="background-color: #dee9fc; padding: 4px;"
     />
 
     <div
       :class="[
         'max-w-[85%] px-4 py-3 rounded-2xl shadow-md break-words',
         message.role === 'user'
-          ? 'bg-blue-500 text-white rounded-tr-none'
-          : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-tl-none'
+          ? 'bg-sunset-700 dark:bg-sunset-300 text-black dark:text-white rounded-tr-none'
+          : 'bg-ochre-700 dark:bg-ochre-300 text-black dark:text-white rounded-tl-none'
       ]"
     >
       <div class="markdown-content" v-html="truncatedContent"></div>
@@ -24,7 +25,7 @@
         icon="pi pi-window-maximize"
         @click="$emit('show-full-message', message.content)"
         class="p-button-text p-button-sm mt-2"
-        :class="{ 'text-white !underline': message.role === 'user', 'text-primary dark:text-primary-300': message.role === 'assistant' }"
+        :class="{ 'text-white !underline': message.role === 'user', 'text-black dark:text-primary-300': message.role === 'assistant' }"
       />
     </div>
   </div>

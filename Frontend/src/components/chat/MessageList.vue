@@ -6,11 +6,12 @@
            border border-gray-200 bg-sunset-600 dark:bg-timberwolf-100
            min-h-[calc(100vh-14rem)] transition-colors duration-300"
   >
-    <TransitionGroup name="fade" tag="div" class="space-y-4">
+    <TransitionGroup name="fade" tag="div" class="space-y-4 space-x-2">
       <MessageBubble
         v-for="(msg, index) in messages"
         :key="msg.id || index"
         :message="msg"
+        class="mt-2"
       />
     </TransitionGroup>
     <TypingIndicator v-if="isLoading" class="mt-2" />

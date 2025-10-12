@@ -2,7 +2,8 @@
   <div id="app" class="flex flex-col h-full bg-sunset-800 dark:bg-zinc-900">
     <Toast position="top-center" autoZIndex />
     <Navbar />
-    <main class="flex-grow overflow-y-auto p-4">
+
+    <main class="flex-grow overflow-y-auto p-4"> 
       <router-view v-slot="{ Component: PageComponent }">
         <transition name="fade" mode="out-in">
           <component :is="PageComponent" v-if="PageComponent" :key="$route.fullPath" />
@@ -14,7 +15,7 @@
 
 <script setup>
 import Navbar from './components/Navbar.vue';
-import Toast from 'primevue/toast'; // <-- This import was missing
+import Toast from 'primevue/toast';
 </script>
 
 <style>
