@@ -40,7 +40,7 @@
     <div class="md:hidden fixed top-4 right-4 z-50">
       <Button
         :icon="isNavOpen ? 'pi pi-times' : 'pi pi-bars'"
-        class="p-button-rounded p-button-lg p-button-secondary"
+        class="p-button-rounded p-button-lg"
         @click="isNavOpen = !isNavOpen"
         aria-label="Toggle navigation menu"
       />

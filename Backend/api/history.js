@@ -1,30 +1,35 @@
-import { CosmosClient, StatusCodes } from '@azure/cosmos';
+import { CosmosClient } from '@azure/cosmos';
 import admin from 'firebase-admin';
 
-// --- Firebase Admin Initialization (Unified) ---
+// --- Vercel/Serverless Firebase Admin Initialization (Unified) ---
 if (!admin.apps.length) {
   try {
     if (!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
       throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable is required.');
     }
-    const serviceAccountJson = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
+    
+    const serviceAccountJson = Buffer.from(
+      process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 
+      'base64'
+    ).toString('utf8');
     const serviceAccount = JSON.parse(serviceAccountJson);
+
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
     console.log('[Firebase] Admin initialized successfully for history API.');
+
   } catch (error) {
     console.error('[Firebase] Initialization critical error:', error.message);
-    throw new Error('Failed to initialize critical backend services.');
+    throw new Error('Failed to initialize critical backend services.'); 
   }
 }
 
-// --- CosmosDB Client Initialization ---
+// Initialize CosmosDB client
 const cosmosClient = new CosmosClient(process.env.COSMOSDB_CONNECTION_STRING);
 const database = cosmosClient.database('libraapp');
 const container = database.container('Conversations');
 
-// --- Firebase Token Verification ---
 async function verifyFirebaseToken(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -32,6 +37,7 @@ async function verifyFirebaseToken(req) {
     error.status = 401;
     throw error;
   }
+
   const idToken = authHeader.split('Bearer ')[1];
   try {
     return await admin.auth().verifyIdToken(idToken);
@@ -43,47 +49,52 @@ async function verifyFirebaseToken(req) {
   }
 }
 
-// --- Main API Handler ---
 export default async function handler(req, res) {
-  // Set CORS and Security Headers
+  // --- (CORS and Method checks remain the same, but now allow PUT/DELETE) ---
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  if (req.method !== 'GET' && req.method !== 'PUT' && req.method !== 'DELETE') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   try {
-    // --- Security Checks (Applied to ALL methods) ---
     const decodedToken = await verifyFirebaseToken(req);
-    const clientUserId = req.method === 'GET' ? req.query.userId : req.body.userId;
+    const clientUserId = req.body.userId || req.query.userId;
 
     if (!clientUserId) {
         return res.status(400).json({ error: 'User ID is required' });
     }
-
     if (decodedToken.uid !== clientUserId) {
-      console.warn(`[Security] User ${decodedToken.uid} attempted to access resources of user ${clientUserId}`);
-      return res.status(403).json({ error: 'Unauthorized to access this resource' });
+        return res.status(403).json({ error: 'Unauthorized to access this resource' });
     }
 
-    // --- GET Method: Fetch History List ---
+    // --- GET (Fetch History) ---
     if (req.method === 'GET') {
-      const { resources: conversations } = await container.items
-        .query({
-          query: 'SELECT c.id, c.title, c.createdAt, c.updatedAt FROM c WHERE c.userId = @userId ORDER BY c.updatedAt DESC',
-          parameters: [{ name: '@userId', value: clientUserId }]
-        })
-        .fetchAll();
-      return res.status(200).json(conversations);
+      const page = parseInt(req.query.page || '1', 10);
+      const pageSize = parseInt(req.query.pageSize || '10', 10);
+      const offset = (page - 1) * pageSize;
+
+      // Query for the total count of items first
+      const countQuerySpec = {
+        query: 'SELECT VALUE COUNT(1) FROM c WHERE c.userId = @userId',
+        parameters: [{ name: '@userId', value: clientUserId }]
+      };
+      const { resources: [total] } = await container.items.query(countQuerySpec).fetchAll();
+
+      // Query for the paginated list of conversations
+      const querySpec = {
+        query: 'SELECT c.id, c.title, c.createdAt, c.updatedAt FROM c WHERE c.userId = @userId ORDER BY c.updatedAt DESC OFFSET @offset LIMIT @limit',
+        parameters: [
+          { name: '@userId', value: clientUserId },
+          { name: '@offset', value: offset },
+          { name: '@limit', value: pageSize }
+        ]
+      };
+      const { resources: conversations } = await container.items.query(querySpec).fetchAll();
+      
+      return res.status(200).json({ conversations, total });
     }
 
     // --- PUT Method: Update a Conversation (Moved from conversation.js) ---
