@@ -1,9 +1,8 @@
 <template>
-  <!-- 👇 Added h-full for layout stability -->
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-full px-2">
 
-    <header class="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-      <h1 class="text-xl font-bold text-gray-800 dark:text-white truncate">
+    <header class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+      <h1 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white truncate">
         {{ chatTitle || 'New Chat' }}
       </h1>
     </header>
@@ -14,9 +13,9 @@
       </Message>
     </div>
 
-    <main class="flex-grow overflow-y-auto p-4">
+    <main class="flex-grow overflow-y-auto">
       <MessageList
-        :messages="filteredMessages"
+        ref="messageListComp" :messages="filteredMessages"
         :is-loading="isLoadingChat"
         @show-full-message="showFullMessage"
       />
@@ -24,10 +23,10 @@
         header="Full Message" 
         v-model:visible="isDialogVisible" 
         modal 
-        :style="{ width: '80vw', maxWidth: '600px'}"
+        :style="{ width: '90vw', maxWidth: '600px'}"
       >
         <div 
-          class="prose dark:prose-invert max-h-[60vh] overflow-y-auto" 
+          class="prose dark:prose-invert max-h-[70vh] overflow-y-auto" 
           v-html="fullMessageContent"
         >
         </div>
@@ -37,8 +36,8 @@
       </Dialog>
     </main>
 
-    <footer class="p-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
-      <div v-if="inputMode === 'buttons' && actionOptions.length" class="flex flex-col gap-3">
+    <footer class="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-2">
+      <div v-if="inputMode === 'buttons' && actionOptions.length" class="flex flex-col gap-3 p-2">
         <ActionButtons
           :options="actionOptions"
           @response="handleButtonResponse"
@@ -65,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 
@@ -95,10 +94,11 @@ const isLoadingChat = ref(false);
 const inputMode = ref('text');
 const actionOptions = ref([]);
 const currentConversationId = ref(null);
-
+const hasUnsavedChanges = ref(false);
+let saveTimeout = null;
 const route = useRoute();
 const router = useRouter();
-
+const isInitialLoad = ref(true);
 const messageInputComp = ref(null); 
 const filteredMessages = computed(() => messages.value.filter(m => m.role !== 'system'));
 const isDialogVisible = ref(false);
@@ -111,8 +111,11 @@ function showFullMessage(content) {
 
 async function scrollToBottom() {
   await nextTick();
-  const container = messageListComp.value?.$el;
-  if (container) container.scrollTop = container.scrollHeight;
+  // Correctly access the exposed ref from the child component
+  const container = messageListComp.value?.messagesContainer;
+  if (container) {
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+  }
 }
 
 async function loadChatHistory(id) {
@@ -170,9 +173,17 @@ async function sendMessage(text) {
     const token = await getAuthToken();
     const data = await sendChatMessage(text, currentConversationId.value, token, userId.value);
 
+    // --- START: The only change you need ---
+    // If the API response includes a title and we are in a new chat, update it.
+    if (data.title && !currentConversationId.value) {
+      chatTitle.value = data.title;
+    }
+    // --- END: The only change you need ---
+
     messages.value.push({ role: 'assistant', content: data.response, timestamp: new Date().toISOString() });
     actionOptions.value = data.options || [];
     inputMode.value = actionOptions.value.length ? 'buttons' : 'text';
+    
     if (data.conversationId && !currentConversationId.value) {
       currentConversationId.value = data.conversationId;
       router.replace({ params: { id: data.conversationId } });
@@ -185,6 +196,22 @@ async function sendMessage(text) {
   }
 }
 
+const saveChat = async () => {
+  if (currentConversationId.value && messages.value.length > 0 && hasUnsavedChanges.value) {
+    try {
+      await saveConversation(
+        currentConversationId.value,
+        messages.value,
+        chatTitle.value,
+        userId.value
+      );
+      hasUnsavedChanges.value = false;
+    } catch (error) {
+      console.error('Failed to save chat:', error);
+    }
+  }
+};
+
 function startNewChat() {
   messages.value = [];
   chatTitle.value = 'New Chat';
@@ -195,30 +222,85 @@ function startNewChat() {
   errorMessage.value = null;
 }
 
+watch([messages, chatTitle], () => {
+  // Only set up a save timeout if the chat has a real ID
+  if (isSignedIn.value && currentConversationId.value && messages.value.length > 0) {
+    hasUnsavedChanges.value = true;
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveChat, 2000);
+  }
+}, { deep: true });
+
 watch(
-  () => [route.params.id, isSignedIn.value],
-  ([newId, signedIn]) => {
-    if (!authStore.loading && signedIn) {
+  () => [route.params.id, isSignedIn.value, authStore.loading],
+  // The fix is here: '= []' is added to the second parameter
+  async ([newId, signedIn, isLoading], [oldId, oldSignedIn, oldIsLoading] = []) => {
+    // 1. Do nothing if authentication is still loading
+    if (isLoading) return;
+
+    // 2. Save any pending changes before navigating away
+    if (oldId && newId !== oldId && hasUnsavedChanges.value) {
+      await saveChat();
+    }
+
+    // 3. Handle user signing out
+    if (signedIn === false && oldSignedIn === true) {
+      router.push('/sign-in');
+      return;
+    }
+    
+    // 4. Handle user signing in or initial load
+    if (signedIn && oldSignedIn !== true) {
+        if (newId) {
+            await loadChatHistory(newId);
+        } else {
+            startNewChat();
+        }
+        return;
+    }
+
+    // 5. Handle navigation between chats
+    if (signedIn && newId !== oldId) {
+      // THIS IS THE KEY: If oldId is undefined, it means we just created this chat.
+      // The component state is already up-to-date, so we DO NOT reload.
+      if (oldId === undefined) {
+        return; 
+      }
+      
       if (newId) {
-        loadChatHistory(newId);
+        // This handles navigating from one existing chat to another.
+        await loadChatHistory(newId);
       } else {
+        // This handles navigating from an existing chat to the "New Chat" page.
         startNewChat();
       }
-    } else if (!authStore.loading && !signedIn) {
-      router.push('/sign-in');
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 );
 
 onBeforeUnmount(async () => {
-  if (currentConversationId.value && messages.value.length > 0) {
-    await saveConversation(
-      currentConversationId.value,
-      messages.value,
-      chatTitle.value,
-      userId.value
-    );
+  if (saveTimeout) clearTimeout(saveTimeout);
+  if (hasUnsavedChanges.value) {
+    await saveChat();
   }
+});
+
+const handleBeforeUnload = (e) => {
+  if (hasUnsavedChanges.value) {
+    // This will show a confirmation dialog
+    e.preventDefault();
+    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+    return e.returnValue;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('beforeunload', handleBeforeUnload);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload);
+  if (saveTimeout) clearTimeout(saveTimeout);
 });
 </script>

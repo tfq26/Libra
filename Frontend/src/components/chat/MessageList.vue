@@ -2,9 +2,7 @@
   <div
     id="messages-container"
     ref="messagesContainer"
-    class="flex-grow overflow-y-auto rounded-xl px-4 shadow-inner
-           border border-gray-200 bg-sunset-600 dark:bg-timberwolf-100
-           min-h-[calc(100vh-14rem)] transition-colors duration-300 custom-scrollbar"
+    class="flex-grow overflow-y-auto p-4 custom-scrollbar"
   >
     <TransitionGroup name="fade" tag="div" class="space-y-4">
       <MessageBubble
@@ -18,8 +16,9 @@
   </div>
 </template>
 
-<script setup>
-import { onUpdated, ref, nextTick, watch } from 'vue'; 
+<<script setup>
+// 1. Import defineExpose
+import { ref, watch, defineEmits, defineProps, defineExpose } from 'vue'; 
 import MessageBubble from './MessageBubble.vue';
 import TypingIndicator from './TypingIndicator.vue';
 import { TransitionGroup } from 'vue';
@@ -35,37 +34,19 @@ const props = defineProps({
   }
 });
 
-// This line tells Vue that this component can emit an event called 'show-full-message'.
 defineEmits(['show-full-message']);
 
 const messagesContainer = ref(null);
 
+// 2. Expose the container ref to the parent component
+defineExpose({ messagesContainer });
+
 // --- LOGGING (retained for debugging) ---
 watch(() => props.messages.length, (newLength) => {
   console.log(`[MessageList] Received ${newLength} messages.`);
-  if (newLength > 0) {
-    console.log('[MessageList] Last message content:', props.messages.at(-1)?.content);
-  }
 }, { immediate: true });
 // --- END LOGGING ---
 
-// --- UPDATED SCROLL LOGIC ---
-onUpdated(async () => {
-  await nextTick();
-  const el = messagesContainer.value;
-  
-  if (el) {
-    // Determine if the user is currently scrolled near the bottom (e.g., within 100px)
-    const isNearBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 100;
-
-    // Only auto-scroll if the chat is loading (new message imminent) OR 
-    // the user was already near the bottom.
-    if (props.isLoading || isNearBottom) {
-      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-    }
-  }
-});
-// --- END UPDATED SCROLL LOGIC ---
 </script>
 
 <style scoped>

@@ -7,26 +7,18 @@
       "config": { "distDir": "dist" }
     },
     {
-      "src": "Backend/api/conversation.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "Backend/api/history.js",
+      "src": "Backend/api/**/*.js",
       "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/conversation",
-      "dest": "/Backend/api/conversation.js"
+      "source": "/api/:path*",
+      "destination": "/Backend/api/:path*"
     },
     {
-      "src": "/api/history",
-      "dest": "/Backend/api/history.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/Frontend/$1"
+      "source": "/((?!api/|.*\\..*).*)",
+      "destination": "/index.html"
     }
   ]
 }

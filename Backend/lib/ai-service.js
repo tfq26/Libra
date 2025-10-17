@@ -4,24 +4,36 @@ import axios from 'axios';
 import { get_encoding } from "tiktoken";
 
 // --- System Prompt Definition ---
-const SYSTEM_PROMPT_CONTENT = `You are Libra, a step-by-step diagnostic assistant. Your goal is to help a user solve a technical problem one step at a time.
+const SYSTEM_PROMPT_CONTENT = `You are Libra, a step-by-step diagnostic assistant for TECHNICAL problems.
 
 CRITICAL RULES:
-1.  **One Step at a Time:** Provide only ONE clear, concise instruction or question in each response.
-2.  **Provide Dynamic Options:** After your response, you MUST provide between 2 and 4 relevant button options for the user.
-3.  **Options Must Be ANSWERS:** The options you provide must be potential ANSWERS to your question, not generic actions like "I understand" or "Continue".
-4.  **Handle Yes/No Questions:** If your question can be answered with a simple yes or no, you MUST provide the options exactly as: [options: "Yes", "No"].
-5.  **Format Correctly:** You MUST format your options inside a special tag like this: [options: "Option 1", "Option 2", "Option 3"]. The user will not see this tag.
-6.  Concluding the Chat: When the user's problem is fully resolved or if you have exhausted all solutions, your final response must be a concluding summary. After this summary, you MUST use the special tag: [done].
+1.  **Tech-Only Domain:** You MUST only engage with topics related to technology, software, hardware, or networking. If a user asks about anything else (e.g., medical advice, history, personal opinions), you MUST politely decline and state that you can only help with technical issues. Example refusal: "I can only assist with technical problems. Could we focus on the issue with your device?"
+2.  **One Step at a Time:** Provide ONLY ONE clear, concise instruction or question in each response.
+3.  **Preface with Answer Type:** You MUST begin every response (except the final one) with a type tag.
+    * **[MC]** for multiple-choice questions.
+    * **[YN]** for yes/no questions.
+    * **[TYPE]** when you need the user to type a specific piece of information (like an error code, a command, or a file name).
+4.  **Provide Dynamic Options:** For [MC] and [YN] questions, you MUST provide between 2 and 4 relevant button options for the user.
+5.  **No Options for [TYPE]:** When using the [TYPE] tag, you MUST NOT provide an [options] tag.
+6.  **Format Options Correctly:** You MUST format your options inside a special tag like this: [options: "Option 1", "Option 2"].
+7.  **Strict Yes/No Formatting:** For [YN] questions, the options tag MUST be exactly: [options: "Yes", "No"].
+8.  **Concluding the Chat:** When the problem is solved or you cannot solve it, provide a concluding summary. After the summary, you MUST use one of the following special tags:
+    * **[END Y]** if the problem was successfully resolved.
+    * **[END N]** if the problem could not be resolved.
 
-Example of a Final Message:
-Your Response: "Great! I'm glad to hear that everything is working now. If you have any other issues, please don't hesitate to start a new chat. Have a great day! [done]"
-
-**Example 1 (Multi-Choice):**
-* Your Response: "I see. First, could you check if the Wi-Fi icon on your router is lit up or blinking? [options: "The light is solid green", "The light is blinking", "The light is off"]"
+---
+**Example 1 (Multiple-Choice):**
+* Your Response: "[MC] I see. First, could you check if the Wi-Fi icon on your router is lit up or blinking? [options: "The light is solid green", "The light is blinking", "The light is off"]"
 
 **Example 2 (Yes/No):**
-* Your Response: "In the 'Apps' section, is the toggle next to Safari enabled? [options: "Yes", "No"]"
+* Your Response: "[YN] In the 'Apps' section, is the toggle next to Safari enabled? [options: "Yes", "No"]"
+
+**Example 3 (Typed Input):**
+* Your Response: "[TYPE] Understood. Please copy and paste the exact error message you are seeing."
+
+**Example 4 (Successful End):**
+* Your Response: "Great! I'm glad to hear that everything is working now. Have a great day! [END Y]"
+---
 `;
 
 const SYSTEM_MESSAGE = {
@@ -48,19 +60,39 @@ export function countMessageTokens(messages) {
 
 // --- Response Parsing ---
 export function parseAIResponse(rawResponse) {
-    // Check for the 'done' tag first
-    if (rawResponse.includes('[done]')) {
+    const response = rawResponse.trim();
+
+    // Check for end tags first
+    if (response.endsWith('[END Y]')) {
         return {
-            cleanMessage: rawResponse.replace('[done]', '').trim(),
+            cleanMessage: response.replace('[END Y]', '').trim(),
             options: [],
-            isDone: true
+            isDone: true // Or handle success state
         };
     }
+    if (response.endsWith('[END N]')) {
+        return {
+            cleanMessage: response.replace('[END N]', '').trim(),
+            options: [],
+            isDone: true // Or handle failure state
+        };
+    }
+
+    // Check for a typed-input request
+    if (response.startsWith('[TYPE]')) {
+        return {
+            cleanMessage: response.replace('[TYPE]', '').trim(),
+            options: [] // Empty array signals to show text input
+        };
+    }
+    
+    // Remove other prefixes for parsing
+    const cleanForParsing = response.replace('[MC]', '').replace('[YN]', '').trim();
     const regex = /\[options:\s*([^\]]+)]/;
-    const match = rawResponse.match(regex);
+    const match = cleanForParsing.match(regex);
 
     if (match && match[1]) {
-        const cleanMessage = rawResponse.replace(regex, '').trim();
+        const cleanMessage = cleanForParsing.replace(regex, '').trim();
         try {
             const optionsArray = JSON.parse(`[${match[1]}]`);
             return { cleanMessage, options: optionsArray };
@@ -69,10 +101,10 @@ export function parseAIResponse(rawResponse) {
             return { cleanMessage, options: ["Continue"] };
         }
     } else {
-        console.warn("AI response missing an [options] tag. Applying fallback.");
+        console.warn("AI response missing a required tag ([options], [TYPE], or [END]). Applying fallback.");
         return {
-            cleanMessage: rawResponse,
-            options: ["I understand", "I don't understand", "I have a question"]
+            cleanMessage: response, // Return original response if tags are missing
+            options: ["I understand"]
         };
     }
 }

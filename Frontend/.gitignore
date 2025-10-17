@@ -26,3 +26,4 @@ dist-ssr
 # Ignore all files in the node_modules directory
 node_modules
 .env
+.vercel

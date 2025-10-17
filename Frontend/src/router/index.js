@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth'; // 👈 Import the auth store
+import { watch } from 'vue';
 
 // --- Component Imports ---
 import Home from '../pages/Home.vue';
@@ -56,28 +57,48 @@ const router = createRouter({
  * We call this function from `main.js` after Pinia and Firebase have initialized.
  */
 export function setupNavigationGuards() {
-  const authStore = useAuthStore(); // Instantiated here, safe if called after Pinia is set up
+  const authStore = useAuthStore();
 
-  router.beforeEach((to, from, next) => {
+  // ======================================================
+  // ✨ NEW: Helper function to wait for auth to be ready
+  // ======================================================
+  function waitForAuthInit() {
+    // If loading is already false, we're good to go
+    if (!authStore.loading) {
+      return Promise.resolve();
+    }
+    // Otherwise, watch the 'loading' state and resolve the promise
+    // once it turns false.
+    return new Promise(resolve => {
+      const unwatch = watch(() => authStore.loading, (isLoading) => {
+        if (!isLoading) {
+          unwatch(); // Clean up the watcher
+          resolve();
+        }
+      });
+    });
+  }
+
+  router.beforeEach(async (to, from, next) => { // 👈 Make the guard async
+    // ======================================================
+    // ✨ NEW: Wait for the initial check to complete
+    // ======================================================
+    await waitForAuthInit();
+
     const requiresAuth = to.meta.requiresAuth;
     const guestOnly = to.meta.guestOnly;
     const isAuthenticated = authStore.isAuthenticated;
 
     if (requiresAuth && !isAuthenticated) {
-      // ❗️ User tries to access a protected page but is not logged in.
-      // Redirect to the sign-in page, saving their intended destination.
       console.log(`Guard: Redirecting to sign-in from ${to.fullPath}`);
       next({
         name: 'SignIn',
-        query: { redirect: to.fullPath } // Save the intended path
+        query: { redirect: to.fullPath }
       });
     } else if (guestOnly && isAuthenticated) {
-      // ❗️ User is logged in but tries to access a guest-only page (like sign-in/sign-up).
-      // Redirect them to the home page or dashboard.
       console.log('Guard: Redirecting to home from guest-only page');
-      next({ name: 'Home' }); // You might change this to 'Dashboard' if you have one
+      next({ name: 'Home' });
     } else {
-      // ✅ All good, proceed to the page.
       next();
     }
   });

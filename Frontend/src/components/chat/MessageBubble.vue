@@ -11,13 +11,13 @@
 
     <div
       :class="[
-        'max-w-[85%] px-4 py-3 rounded-2xl shadow-md break-words',
+        'max-w-[90%] sm:max-w-[85%] px-4 py-3 rounded-2xl shadow-md break-words',
         message.role === 'user'
-          ? 'bg-sunset-700 dark:bg-sunset-300 text-black dark:text-white rounded-tr-none'
-          : 'bg-ochre-700 dark:bg-ochre-300 text-black dark:text-white rounded-tl-none'
+          ? 'bg-sunset-700 dark:bg-sunset-300 text-black dark:text-white rounded-br-lg'
+          : 'bg-ochre-700 dark:bg-ochre-300 text-black dark:text-white rounded-bl-lg'
       ]"
     >
-      <div class="markdown-content" v-html="truncatedContent"></div>
+      <div class="markdown-content prose-sm" v-html="truncatedContent"></div>
 
       <Button
         v-if="isTruncated"

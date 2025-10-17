@@ -1,17 +1,17 @@
 <template>
-  <div class="w-full flex items-center justify-center gap-2">
+  <div class="w-full flex items-center gap-2 bg-gray-100 dark:bg-ochre-300 p-2 rounded-xl">
     <span class="p-input-icon-right flex-grow relative">
       <Textarea
         ref="textAreaRef"
         v-model="internalValue"
         :placeholder="placeholder"
         :disabled="isLoading"
-        fluid
         autoResize
         rows="1"
-        cols="30"
         @keydown.enter.prevent="handleKeydown"
-        @focus="handleFocus" />
+        @focus="handleFocus" 
+        class="w-full bg-transparent border-none focus:ring-0 resize-none pr-8"
+      />
       <i
         v-if="isLoading"
         class="pi pi-spinner pi-spin text-gray-400 absolute right-4 top-1/2 -translate-y-1/2"
@@ -23,6 +23,7 @@
       :loading="isLoading"
       :disabled="!internalValue?.trim() || isLoading"
       @click="handleSend"
+      class="p-button-rounded p-button-text"
     />
   </div>
 </template>

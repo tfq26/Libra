@@ -123,84 +123,94 @@ export default async function handler(req, res) {
     }
 
     // --- POST REQUEST LOGIC (SEND MESSAGE) ---
-    if (req.method === 'POST') {
-        if (!message) {
-          return res.status(StatusCodes.BAD_REQUEST).json({ 
-            error: 'Message is required.'
+  if (req.method === 'POST') {
+      if (!message) {
+          return res.status(StatusCodes.BAD_REQUEST).json({
+              error: 'Message is required.'
           });
-        }
+      }
 
-        let convoId = conversationId;
-        let conversation;
-        let history = []; 
+      let convoId = conversationId;
+      let conversation;
+      let history = [];
 
-        // 1. Load/Create Conversation
-        if (!convoId) {
-            convoId = uuidv4();
-            conversation = {
-                id: convoId,
-                userId: clientUserId,
-                title: message.substring(0, 30),
-                messages: [],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-        } else {
-            const { resource: existingConvo } = await container.item(convoId, clientUserId).read();
-            if (!existingConvo) {
-                return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found' });
-            }
-            conversation = existingConvo;
-            history = existingConvo.messages;
-        }
+      // 1. Load or Create Conversation
+      if (!convoId) {
+          convoId = uuidv4();
+          conversation = {
+              id: convoId,
+              userId: clientUserId,
+              title: "New Chat", // Use a generic title initially
+              messages: [],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+              // The incorrect 'title: conversation.title' line has been removed
+          };
+      } else {
+          const { resource: existingConvo } = await container.item(convoId, clientUserId).read();
+          if (!existingConvo) {
+              return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found' });
+          }
+          conversation = existingConvo;
+          history = existingConvo.messages;
+      }
 
-        // Add user message
-        conversation.messages.push({
-            id: uuidv4(),
-            role: 'user',
-            content: message,
-            timestamp: new Date().toISOString()
-        });
+      // Add user message to the conversation
+      conversation.messages.push({
+          id: uuidv4(),
+          role: 'user',
+          content: message,
+          timestamp: new Date().toISOString()
+      });
 
-        // 2. AI Logic: Call the external service
-        const aiResponseText = await callOpenAI(message, history); 
-        const { cleanMessage, options, isDone } = parseAIResponse(aiResponseText);
-        
-        // Add assistant response
-        conversation.messages.push({
-            id: uuidv4(),
-            role: 'assistant',
-            content: cleanMessage,
-            timestamp: new Date().toISOString(),
-            options: options.length > 0 ? options : undefined // Store options for history
-        });
-        conversation.updatedAt = new Date().toISOString();
+      // 2. AI Logic: Get the main response from the AI
+      const aiResponseText = await callOpenAI(message, history);
+      const { cleanMessage, options, isDone } = parseAIResponse(aiResponseText);
 
-        // 3. Update Title (only on first message)
-        if (history.length === 0) {
-            const titlePrompt = `Summarize this chat into a 5-word title: User: "${message}"`;
-            const titleResponseText = await callOpenAI(titlePrompt, []);
-            conversation.title = parseAIResponse(titleResponseText).cleanMessage;
-        }
+      // Add the assistant's response to the conversation
+      conversation.messages.push({
+          id: uuidv4(),
+          role: 'assistant',
+          content: cleanMessage,
+          timestamp: new Date().toISOString(),
+          options: options.length > 0 ? options : undefined
+      });
+      conversation.updatedAt = new Date().toISOString();
 
-        if (isDone) {
-            conversation.isDone = true;
-        }
+      // 3. Update Title (only on the very first user message)
+      if (history.length === 0) {
+          const titlePrompt = `Analyze the following user query. If it is a technical question about software, code, or a development issue, summarize it into a short, 4-5 word title. If it is NOT a technical question, respond with the exact word NULL. Query: "${message}"`;
+          const titleResponseText = await callOpenAI(titlePrompt, []);
+          const newTitle = parseAIResponse(titleResponseText).cleanMessage;
 
-        // 4. Save to Database
-        await container.items.upsert(conversation);
+          // <-- FIX: The NULL check is now inside the handler
+          if (newTitle && newTitle.toUpperCase() !== 'NULL') {
+              conversation.title = newTitle;
+          } else {
+              // If not technical, use the first few words as a fallback title
+              conversation.title = message.substring(0, 40);
+          }
+      }
 
-        // 5. Send final response (MUST include options)
-        return res.status(StatusCodes.OK).json({
-            success: true,
-            conversationId: convoId,
-            response: cleanMessage,
-            options: options, // Critical for the new UI feature
-            isDone: isDone,
-            messages: conversation.messages,
-            timestamp: new Date().toISOString()
-        });
-    }
+      if (isDone) {
+          conversation.isDone = true;
+      }
+
+      // 4. Save the updated conversation to the Database
+      await container.items.upsert(conversation);
+
+      // 5. Send the final response back to the frontend
+      return res.status(StatusCodes.OK).json({
+          success: true,
+          conversationId: convoId,
+          response: cleanMessage,
+          options: options,
+          title: conversation.title, // <-- FIX: The title is now included in the response
+          isDone: isDone,
+          messages: conversation.messages,
+          timestamp: new Date().toISOString()
+      });
+  }
 
     if (req.method === 'PUT') {
       const { conversationId, messages, title } = req.body;
