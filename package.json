@@ -1,7 +1,11 @@
 {
-  "name": "libra",
+  "name": "libra-monorepo",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "Frontend",
+    "Backend"
+  ],
   "scripts": {
     "dev": "concurrently \"bun run dev:frontend\" \"bun run dev:backend\"",
     "dev:frontend": "cd Frontend && bun run dev",

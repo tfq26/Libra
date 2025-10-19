@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "vercel-build": "vite build",
     "preview": "vite preview",
     "tailwind:build": "tailwindcss -i ./src/input.css -o ./src/output.css",
     "tailwind:watch": "tailwindcss -i ./src/input.css -o ./src/output.css --watch"
