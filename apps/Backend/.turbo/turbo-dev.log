@@ -1,0 +1,218 @@
+[0m[2m[35m$[0m [2m[1mNODE_ENV=development node --watch dev-server.js[0m
+[Conversation API] ✅ Environment variables loaded
+[Conversation API] ✅ Firebase Admin initialized successfully
+[Conversation API] ✅ CosmosDB client initialized
+[History API] ✅ Environment variables loaded
+[History API] ✅ CosmosDB client initialized
+[Backend Init] ✅ Environment variables loaded from .backend.env
+[Backend Init] ✅ Backend services initialized successfully
+[Dev Server] Backend dev server listening on http://localhost:3001
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 733.649 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 326.252 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 201.569 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:aed3b2cb-3816-469b-bf12-f36df094ec02
+[0mGET /conversation?id=aed3b2cb-3816-469b-bf12-f36df094ec02&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 1601.626 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:aed3b2cb-3816-469b-bf12-f36df094ec02
+[0mGET /conversation?id=aed3b2cb-3816-469b-bf12-f36df094ec02&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 140.073 ms - -[0m
+[0mPUT /history [32m200[0m 324.935 ms - 48[0m
+[0mGET /history?userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2&page=1&pageSize=10 [32m200[0m 111.543 ms - 1461[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[0mGET /warm [0m-[0m - ms - -[0m
+[warmUp] ✅ CosmosDB connectivity verified
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [32m200[0m 270.554 ms - 15[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[0mPOST /init-conversation [32m200[0m 130.337 ms - 72[0m
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 330.251 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 291.504 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 261.804 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:aed3b2cb-3816-469b-bf12-f36df094ec02
+[0mGET /conversation?id=aed3b2cb-3816-469b-bf12-f36df094ec02&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 725.048 ms - -[0m
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 458.095 ms - -[0m
+[Redis] cache miss conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc
+[0mGET /conversation?id=2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 942.416 ms - 416[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc
+[0mGET /conversation?id=2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 159.781 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 351.439 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 289.394 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 215.074 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc
+[0mGET /conversation?id=2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 517.552 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc
+[0mGET /conversation?id=2a8ac7c0-4453-4249-beaa-e9c8f1bfdcbc&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 133.279 ms - -[0m
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1494.902 ms - -[0m
+[0mPUT /history [32m200[0m 99.368 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[0mPOST /init-conversation [32m200[0m 54.341 ms - 72[0m
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 284.989 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 266.364 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 200.187 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 295.106 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[Redis] cache miss conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:ef34ec09-f031-4e0b-bca8-8ace3ed4f2de
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 204.186 ms - -[0m
+[0mGET /conversation?id=ef34ec09-f031-4e0b-bca8-8ace3ed4f2de&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 596.667 ms - 416[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:ef34ec09-f031-4e0b-bca8-8ace3ed4f2de
+[0mGET /conversation?id=ef34ec09-f031-4e0b-bca8-8ace3ed4f2de&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 177.483 ms - -[0m
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1565.007 ms - -[0m
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 969.029 ms - -[0m
+[0mPUT /history [32m200[0m 108.434 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[0mPOST /init-conversation [32m200[0m 51.212 ms - 72[0m
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 321.564 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 264.208 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 198.142 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 224.533 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[Redis] cache miss conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 287.565 ms - -[0m
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 623.481 ms - 416[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 138.005 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 340.639 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 266.773 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 201.162 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 512.735 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 146.360 ms - -[0m
+c[32mRestarting 'dev-server.js'[39m
+[Conversation API] ✅ Environment variables loaded
+[Conversation API] ✅ Firebase Admin initialized successfully
+[Conversation API] ✅ CosmosDB client initialized
+[History API] ✅ Environment variables loaded
+[History API] ✅ CosmosDB client initialized
+[Backend Init] ✅ Environment variables loaded from .backend.env
+[Backend Init] ✅ Backend services initialized successfully
+[Dev Server] Backend dev server listening on http://localhost:3001
+[AI] Starting Azure SDK streaming call...
+[0mPUT /history [32m200[0m 313.719 ms - 48[0m
+[0mPOST /conversation [32m200[0m 2457.590 ms - -[0m
+[AI] Starting Azure SDK streaming call...
+AI response missing a required tag ([options], [TYPE], or [END]). Applying fallback.
+[0mPOST /conversation [32m200[0m 942.626 ms - -[0m
+[0mPUT /history [32m200[0m 103.557 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 396.305 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 360.690 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 310.376 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 576.925 ms - 1131[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 143.645 ms - -[0m
+[0mPUT /history [32m200[0m 177.031 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 202.161 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 275.895 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 227.642 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 402.263 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7
+[0mGET /conversation?id=bef22ac1-d9b0-4da3-8eb3-bf4a4fbeb0c7&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 134.733 ms - -[0m
+[0mPUT /history [32m200[0m 101.638 ms - 48[0m
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1741.518 ms - -[0m
+[0mPUT /history [32m200[0m 158.211 ms - 48[0m
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1277.503 ms - -[0m
+[0mPUT /history [32m200[0m 202.293 ms - 48[0m

@@ -1,27 +1,34 @@
 {
-  "name": "libra-monorepo",
-  "version": "1.0.0",
+  "name": "libra",
   "private": true,
+  "type": "module",
   "workspaces": [
-    "Frontend",
-    "Backend"
+    "apps/*",
+    "packages/*"
   ],
+  "packageManager": "bun@1.1.12",
   "scripts": {
-    "dev": "concurrently \"bun run dev:frontend\" \"bun run dev:backend\"",
-    "dev:frontend": "cd Frontend && bun run dev",
-    "dev:backend": "cd Backend && bun run dev",
-    "build": "cd Frontend && bun run build",
-    "start": "cd Frontend && bun run preview",
-    "vercel-build": "bun run build",
-    "preview": "cd Frontend && bun run preview",
-    "build:backend": "cd Backend && bun run build",
-    "start:backend": "cd Backend && bun run start"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:vercel": "vercel dev",
+    "dev:frontend": "turbo run dev --filter=frontend",
+    "dev:backend": "turbo run dev --filter=libra-backend || (cd apps/Backend && bun run dev:server)",
+    "build:frontend": "turbo run build --filter=frontend",
+    "build:backend": "turbo run build --filter=libra-backend",
+    "start": "turbo run start",
+    "start:backend": "turbo run start --filter=libra-backend",
+    "preview": "turbo run preview --filter=frontend",
+    "vercel-build": "turbo run vercel-build",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules .turbo"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8",
+    "@types/bun": "latest"
   },
   "dependencies": {
-    "concurrently": "^9.2.1",
-    "vercel": "^48.2.9"
-  },
-  "engines": {
-    "node": ">=20.0.0"
+    "vercel": "^48.4.1"
   }
 }

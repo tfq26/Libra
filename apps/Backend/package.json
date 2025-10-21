@@ -1,0 +1,53 @@
+{
+  "name": "libra-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Backend: No build step required'",
+    "dev": "NODE_ENV=development node --watch dev-server.js",
+    "dev:server": "NODE_ENV=development node dev-server.js",
+    "start": "NODE_ENV=production node init.js",
+    "test": "NODE_ENV=test jest",
+    "test:azure": "NODE_ENV=test jest test/azure.integration.test.js --runInBand --testTimeout=120000",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@azure/core-auth": "^1.10.1",
+    "@azure/cosmos": "^4.5.0",
+    "@azure/openai": "^2.0.0",
+    "@azure/storage-blob": "^12.0.0",
+    "@upstash/ratelimit": "^2.0.6",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^13.5.0",
+    "h3": "^1.15.4",
+    "helmet": "^7.1.0",
+    "http-status-codes": "^2.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "openai": "^6.6.0",
+    "tiktoken": "^1.0.22",
+    "upstash": "^0.0.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.1",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  }
+}
