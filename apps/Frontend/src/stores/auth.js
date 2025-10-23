@@ -82,6 +82,16 @@ export const useAuthStore = defineStore('auth', {
     async login(email, password) {
       // The onIdTokenChanged listener will automatically update the state
       await signInWithEmailAndPassword(auth, email, password);
+      // Exchange ID token for a secure session cookie on the server
+      const idToken = await this.getToken();
+      if (idToken) {
+        await fetch('/api/session-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+          credentials: 'include', // ensure cookies are included
+        });
+      }
     },
 
     async register(email, password) {
@@ -92,8 +102,20 @@ export const useAuthStore = defineStore('auth', {
 
 
     async logout() {
-      // The listener will set user and token to null
+      // Clear client session and tell server to clear the session cookie
       await signOut(auth);
+      await fetch('/api/session-logout', { method: 'POST', credentials: 'include' });
+    },
+
+    // Verify server-side session cookie
+    async verifySession() {
+      try {
+        const res = await fetch('/api/session-verify', { method: 'GET', credentials: 'include' });
+        return await res.json();
+      } catch (err) {
+        console.warn('[Auth] session verify failed', err.message);
+        return { authenticated: false };
+      }
     },
   },
 });

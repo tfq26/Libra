@@ -1,2 +1,7 @@
 node_modules
 .vercel
+
+# Do not commit service account JSONs or backend secrets
+apps/Backend/secrets/
+apps/Frontend/src/firebase/firebase-service-account.json
+apps/Frontend/.env

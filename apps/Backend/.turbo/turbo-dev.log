@@ -1,4 +1,4 @@
-[0m[2m[35m$[0m [2m[1mNODE_ENV=development node --watch dev-server.js[0m
+$ NODE_ENV=development node --watch dev-server.js
 [Conversation API] ✅ Environment variables loaded
 [Conversation API] ✅ Firebase Admin initialized successfully
 [Conversation API] ✅ CosmosDB client initialized
@@ -6,7 +6,27 @@
 [History API] ✅ CosmosDB client initialized
 [Backend Init] ✅ Environment variables loaded from .backend.env
 [Backend Init] ✅ Backend services initialized successfully
+(node:19804) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
 [Dev Server] Backend dev server listening on http://localhost:3001
+[OAuth Google] Redirecting to Google auth URL: https://accounts.google.com/o/oauth2/v2/auth?client_id=123296392437-c15chkrqj7opg6denajou8h8diadtbsu.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Fauth%2Fgoogle%2Fcallback&response_type=code&scope=openid+email+profile&access_type=offline redirectUri: http://localhost:3001/api/auth/google/callback
+[0mGET /auth/google [36m302[0m 6.324 ms - 314[0m
+[OAuth Google] Callback received. query: {
+  code: '4/0AVGzR1A9StyYYfkU9c9XlKJEQaw4msOnG7wThezg1FJ_4-7BsdwzDJGAhH3qZDfa8vW2vg',
+  scope: 'email profile https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email openid',
+  authuser: '0',
+  prompt: 'consent'
+}
+[OAuth Google] Identity Toolkit signInWithIdp failed {
+  error: {
+    code: 400,
+    message: 'INVALID_IDP_RESPONSE : Invalid Idp Response: the Google id_token is not allowed to be used with this application. Its audience (OAuth 2.0 client ID) is 123296392437-c15chkrqj7opg6denajou8h8diadtbsu.apps.googleusercontent.com, which is not authorized to be used in the project with project_number: 208344169743.',
+    errors: [ [Object] ]
+  }
+}
+[0mGET /api/auth/google/callback?code=4%2F0AVGzR1A9StyYYfkU9c9XlKJEQaw4msOnG7wThezg1FJ_4-7BsdwzDJGAhH3qZDfa8vW2vg&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=consent [31m500[0m 351.058 ms - 32[0m
+[0mGET /favicon.ico [33m404[0m 1.786 ms - 150[0m
+[0mGET /.well-known/appspecific/com.chrome.devtools.json [33m404[0m 0.369 ms - 187[0m
 [Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
 [warmUp] Firebase Admin already initialized
 [warmUp] ✅ CosmosDB connectivity verified

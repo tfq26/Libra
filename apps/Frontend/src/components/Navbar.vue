@@ -20,6 +20,12 @@
         @click="router.push('/history')"
       />
       <template v-if="!authStore.loading">
+        <Avatar
+          :image="avatarShouldShow ? authStore.userPhotoUrl : null"
+          :label="!authStore.userPhotoUrl ? undefined : undefined"
+          class="p-avatar-circle cursor-pointer"
+          :class="{ 'bg-primary text-white': authStore.isAuthenticated, 'bg-gray-300 text-gray-700': !authStore.isAuthenticated }"
+          size="large"
         <div
           class="cursor-pointer"
           :class="{ 'bg-primary text-white rounded-full flex items-center justify-center': authStore.isAuthenticated, 'bg-gray-300 text-gray-700 rounded-full flex items-center justify-center': !authStore.isAuthenticated }"
@@ -105,6 +111,20 @@ const toast = useToast();
 
 const isNavOpen = ref(false);
 const profileMenu = ref(); // Ref for the popover menu
+// Track whether avatar fetch has previously failed for the current user in this session
+const avatarFetchFailedKey = (uid) => `libra:avatarFailed:${uid}`;
+const avatarLoadAttempted = ref(false);
+const avatarShouldShow = computed(() => {
+  const uid = authStore.userId;
+  if (!authStore.userPhotoUrl) return false;
+  try {
+    const failed = uid ? sessionStorage.getItem(avatarFetchFailedKey(uid)) : null;
+    if (failed === 'true') return false;
+  } catch (e) {
+    // ignore storage errors
+  }
+  return true;
+});
 
 // Avatar image preload state
 const imageLoaded = ref(false);
@@ -168,6 +188,38 @@ const toggleProfileMenu = (event) => {
   }
 };
 
+// Preload avatar image once per session per user to avoid hitting Google too often
+function tryPreloadAvatar() {
+  if (avatarLoadAttempted.value) return;
+  avatarLoadAttempted.value = true;
+  const uid = authStore.userId;
+  const url = authStore.userPhotoUrl;
+  if (!uid || !url) return;
+  try {
+    const failed = sessionStorage.getItem(avatarFetchFailedKey(uid));
+    if (failed === 'true') return; // previously failed in this session
+  } catch (e) {
+    // ignore storage errors
+  }
+  const img = new Image();
+  img.onload = () => {
+    // image loaded, nothing to do (browser caches it)
+  };
+  img.onerror = () => {
+    try {
+      sessionStorage.setItem(avatarFetchFailedKey(uid), 'true');
+    } catch (e) {}
+    // Optionally log or show a toast in dev
+    console.warn('Avatar preload failed for', uid, url);
+  };
+  img.src = url;
+}
+
+// Watch for changes and try preloading
+watch(() => authStore.userPhotoUrl, (newVal) => {
+  if (newVal) tryPreloadAvatar();
+});
+
 // Defines the items in the popover menu based on auth state
 const profileMenuItems = computed(() => {
   if (authStore.isAuthenticated) {
@@ -203,6 +255,10 @@ const profileMenuItems = computed(() => {
       }
     ];
   }
+});
+
+onMounted(() => {
+  if (authStore.userPhotoUrl) tryPreloadAvatar();
 });
 </script>
 

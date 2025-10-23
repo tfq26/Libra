@@ -1,16 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import { chat, history } from './init.js';
 import { warmUp } from './init.js';
 import initConversationHandler from './api/init-conversation.js';
 import warmHandler from './api/warm.js';
+import adminTestHandler from './api/admin-test.js';
+import oauthGoogleHandler from './api/oauth-google.js';
+import authHandler from './api/auth.js';
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan('dev'));
 
 // Mount handlers (they already accept (req, res))
@@ -49,6 +54,52 @@ app.all(['/api/init-conversation', '/init-conversation'], async (req, res) => {
     await initConversationHandler(req, res);
   } catch (err) {
     console.error('[Dev Server] /api/init-conversation error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Mount admin-test endpoint (server-side only)
+app.all(['/api/admin-test', '/admin-test'], async (req, res) => {
+  try {
+    await adminTestHandler(req, res);
+  } catch (err) {
+    console.error('[Dev Server] /api/admin-test error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Mount Google OAuth endpoints
+app.get(['/api/auth/google', '/auth/google'], async (req, res) => {
+  try {
+    await oauthGoogleHandler(req, res);
+  } catch (err) {
+    console.error('[Dev Server] /api/auth/google error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get(['/api/auth/google/callback', '/auth/google/callback'], async (req, res) => {
+  try {
+    await oauthGoogleHandler(req, res);
+  } catch (err) {
+    console.error('[Dev Server] /api/auth/google/callback error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Mount auth endpoints: session-login, session-logout, session-verify
+app.all([
+  '/api/session-login',
+  '/session-login',
+  '/api/session-logout',
+  '/session-logout',
+  '/api/session-verify',
+  '/session-verify',
+], async (req, res) => {
+  try {
+    await authHandler(req, res);
+  } catch (err) {
+    console.error('[Dev Server] /api/auth error', err);
     res.status(500).json({ error: err.message });
   }
 });

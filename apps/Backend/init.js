@@ -33,8 +33,21 @@ export async function warmUp(options = { pingAI: false }) {
 				if (!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
 					console.warn('[warmUp] FIREBASE_SERVICE_ACCOUNT_BASE64 not set; skipping Firebase init');
 				} else {
-					const serviceAccountJson = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
-					const serviceAccount = JSON.parse(serviceAccountJson);
+										const base64 = (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 || '').trim();
+										if (!base64) {
+											throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 is empty');
+										}
+										const serviceAccountJson = Buffer.from(base64, 'base64').toString('utf8');
+										if (!serviceAccountJson) {
+											throw new Error('Decoded FIREBASE_SERVICE_ACCOUNT_BASE64 is empty');
+										}
+										let serviceAccount;
+										try {
+											serviceAccount = JSON.parse(serviceAccountJson);
+										} catch (e) {
+											console.error('[warmUp] Decoded FIREBASE_SERVICE_ACCOUNT_BASE64 is not valid JSON');
+											throw e;
+										}
 					// initialize on the resolved admin object
 					admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 					console.log('[warmUp] ✅ Firebase Admin initialized');

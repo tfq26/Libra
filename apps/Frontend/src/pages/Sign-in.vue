@@ -85,7 +85,7 @@
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { auth, GoogleAuthProvider, signInWithPopup } from '../firebase/config';
+import { auth } from '../firebase/config';
 
 // --- UPDATED IMPORTS ---
 import Button from 'primevue/button';
@@ -129,21 +129,16 @@ const handleSignIn = async () => {
   }
 };
 
-const signInWithGoogle = async () => {
-  const provider = new GoogleAuthProvider();
-  loading.value = true;
-  error.value = '';
-  try {
-    await signInWithPopup(auth, provider);
-    const redirectPath = route.query.redirect || '/chat';
-    router.push(redirectPath);
-  } catch (err) {
-    console.error('Google sign in error:', err);
-    if (err.code !== 'auth/popup-closed-by-user') {
-      error.value = 'Failed to sign in with Google. Please try again.';
+  const signInWithGoogle = async () => {
+    // Start server-side OAuth flow
+    loading.value = true;
+    error.value = '';
+    try {
+      window.location.href = '/api/auth/google';
+    } catch (err) {
+      console.error('Google sign in redirect error:', err);
+      error.value = 'Failed to start Google sign in. Please try again.';
+      loading.value = false;
     }
-  } finally {
-    loading.value = false;
-  }
-};
+  };
 </script>
