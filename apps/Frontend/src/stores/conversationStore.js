@@ -27,13 +27,20 @@ export const useConversationStore = defineStore('conversation', {
       console.log(`[Cache] MISS for conversation ${id}. Fetching from network.`);
       
       // It calls your original API function here
-      const conversationData = await apiLoadConversation(id, token, userId);
-
-      // 3. SAVE THE NEWLY FETCHED DATA TO THE CACHE
-      this.cachedConversations.set(id, conversationData);
-
-      // 4. RETURN THE DATA
-      return conversationData;
+      try {
+        const conversationData = await apiLoadConversation(id, token, userId);
+        // 3. SAVE THE NEWLY FETCHED DATA TO THE CACHE
+        this.cachedConversations.set(id, conversationData);
+        // 4. RETURN THE DATA
+        return conversationData;
+      } catch (error) {
+        // If 404, treat as new chat (do not throw)
+        if (error?.response?.status === 404 || error?.message?.includes('404')) {
+          console.log(`[Cache] Conversation ${id} not found. Treating as new chat.`);
+          return { id: null, messages: [], title: 'New Chat' };
+        }
+        throw error;
+      }
     },
     
     /**

@@ -470,25 +470,7 @@ function startNewChat() {
   inputMode.value = 'text';
   actionOptions.value = [];
   currentPrompt.value = '';
-  // If user is signed in, pre-create a draft conversation so subsequent sends have an ID
-  (async () => {
-    if (isSignedIn.value) {
-      try {
-        const token = await getAuthToken();
-        const data = await initConversation(token);
-        if (data && data.conversationId) {
-          currentConversationId.value = data.conversationId;
-          // Persist & broadcast
-          broadcastConversationId(userId.value, data.conversationId);
-          localStorage.setItem(storageKeyFor(userId.value), data.conversationId);
-          // Update route without reloading
-          router.replace({ params: { id: data.conversationId } });
-        }
-      } catch (e) {
-        console.warn('Could not initialize draft conversation:', e.message || e);
-      }
-    }
-  })();
+    // No auto-draft creation! Only create a conversation when the user sends a message.
 }
 
 watch([messages, chatTitle], () => {
@@ -530,20 +512,25 @@ watch(
 
     // 5. Handle navigation between chats
     if (signedIn && newId !== oldId) {
-      // THIS IS THE KEY: If oldId is undefined, it means we just created this chat.
-      // The component state is already up-to-date, so we DO NOT reload.
-      if (oldId === undefined) {
-        return; 
-      }
-      
       if (newId) {
-        // This handles navigating from one existing chat to another.
+        // Always reload the chat history when navigating to a chat (even if oldId is undefined)
         await loadChatHistory(newId);
       } else {
-        // This handles navigating from an existing chat to the "New Chat" page.
+        // Navigating to the "New Chat" page
         startNewChat();
       }
     }
+        // If no conversation exists, create one now (async, before sending message)
+        if (!currentConversationId.value) {
+          const token = await getAuthToken();
+          const data = await initConversation(token);
+          if (data && data.conversationId) {
+            currentConversationId.value = data.conversationId;
+            broadcastConversationId(userId.value, data.conversationId);
+            localStorage.setItem(storageKeyFor(userId.value), data.conversationId);
+            router.replace({ params: { id: data.conversationId } });
+          }
+        }
   },
   { immediate: true }
 );

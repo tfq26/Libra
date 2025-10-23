@@ -106,87 +106,119 @@ export default async function handler(req, res) {
   }
 
   // Check supported methods
-  if (req.method !== 'POST' && req.method !== 'GET' && req.method !== 'PUT') {
+  if (![ 'GET', 'POST', 'PUT', 'DELETE' ].includes(req.method)) {
     return res.status(StatusCodes.METHOD_NOT_ALLOWED).json({
-      error: 'Method not allowed', allowedMethods: ['GET', 'POST', 'PUT']
+      error: 'Method not allowed', allowedMethods: ['GET', 'POST', 'PUT', 'DELETE']
     });
   }
+
 
   try {
     // --- GET REQUEST LOGIC (LOAD CONVERSATION HISTORY) ---
     // (No major changes needed here)
-  if (req.method === 'GET') {
-    const id = req.query.id;
-    if (!id) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ 
-        error: 'Conversation ID is required for GET request.',
-      });
-    }
+    if (req.method === 'GET') {
+      const id = req.query.id;
+      if (!id) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
+          error: 'Conversation ID is required for GET request.',
+        });
+      }
 
-    const cacheKey = `conversation:${clientUserId}:${id}`;
-    // Try cache first — only accept cached copy if conversation is still in-progress
-    try {
-      const cached = await redisClient.get(cacheKey);
-      if (cached) {
-        // Diagnostic logging to help determine stored shape
-        console.log('[Redis] cache raw type:', typeof cached, 'value preview:', (typeof cached === 'string' ? cached.slice(0, 120) : '[object]'));
-        try {
-          let parsed;
-          if (typeof cached === 'object') {
-            // some redis clients return parsed objects directly
-            parsed = cached;
-          } else if (typeof cached === 'string') {
-            const txt = cached.trim();
-            // If it's the infamous '[object Object]' string, evict and fall back
-            if (txt === '[object Object]') {
-              console.warn('[Redis] Cached value is the string "[object Object]". Evicting key and falling back to DB', cacheKey);
-              try { await redisClient.del(cacheKey); } catch (_) {}
-              parsed = null;
-            } else if (txt.startsWith('{') || txt.startsWith('[')) {
-              parsed = JSON.parse(txt);
-            } else {
-              // Not JSON — fallback
-              console.warn('[Redis] Cached string is not JSON, falling back to DB', cacheKey);
-              parsed = null;
+      const cacheKey = `conversation:${clientUserId}:${id}`;
+      // Try cache first — only accept cached copy if conversation is still in-progress
+      try {
+        const cached = await redisClient.get(cacheKey);
+        if (cached) {
+          // Diagnostic logging to help determine stored shape
+          console.log('[Redis] cache raw type:', typeof cached, 'value preview:', (typeof cached === 'string' ? cached.slice(0, 120) : '[object]'));
+          try {
+            let parsed;
+            if (typeof cached === 'object') {
+              parsed = cached;
+            } else if (typeof cached === 'string') {
+              const txt = cached.trim();
+              if (txt === '[object Object]') {
+                console.warn('[Redis] Cached value is the string "[object Object]". Evicting key and falling back to DB', cacheKey);
+                try { await redisClient.del(cacheKey); } catch (_) {}
+                parsed = null;
+              } else if (txt.startsWith('{') || txt.startsWith('[')) {
+                parsed = JSON.parse(txt);
+              } else {
+                console.warn('[Redis] Cached string is not JSON, falling back to DB', cacheKey);
+                parsed = null;
+              }
             }
-          }
 
-          if (parsed && parsed.status !== 'resolved') {
-            console.log('[Redis] cache hit (in-progress)', cacheKey);
-            return res.status(StatusCodes.OK).json(parsed);
-          } else if (parsed && parsed.status === 'resolved') {
-            console.log('[Redis] cache hit (resolved) — falling back to DB', cacheKey);
+            // Only use cache if it has messages
+            if (parsed && parsed.status !== 'resolved' && Array.isArray(parsed.messages) && parsed.messages.length > 0) {
+              console.log('[Redis] cache hit (in-progress, has messages)', cacheKey);
+              return res.status(StatusCodes.OK).json(parsed);
+            } else if (parsed && Array.isArray(parsed.messages) && parsed.messages.length === 0) {
+              // Evict empty-message cache and fall back
+              console.warn('[Redis] Cached conversation has no messages, evicting and falling back to DB', cacheKey);
+              try { await redisClient.del(cacheKey); } catch (_) {}
+            } else if (parsed && parsed.status === 'resolved') {
+              console.log('[Redis] cache hit (resolved) — falling back to DB', cacheKey);
+            }
+          } catch (e) {
+            console.warn('[Redis] Failed to parse cached conversation, falling back to DB', e && e.message ? e.message : e);
           }
-        } catch (e) {
-          console.warn('[Redis] Failed to parse cached conversation, falling back to DB', e && e.message ? e.message : e);
-          // fallthrough to DB read
+        } else {
+          console.log('[Redis] cache miss', cacheKey);
         }
-      } else {
-        console.log('[Redis] cache miss', cacheKey);
+      } catch (e) {
+        console.warn('[Redis] Error reading conversation cache:', e && e.message ? e.message : e);
       }
-    } catch (e) {
-      console.warn('[Redis] Error reading conversation cache:', e && e.message ? e.message : e);
-    }
 
-    const { resource: conversation } = await conversationsContainer.item(id, clientUserId).read();
-    if (!conversation) {
-      return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found.' });
-    }
-
-    // Populate cache (best-effort) only if conversation is still in-progress
-    try {
-      if (conversation.status !== 'resolved') {
-        await redisClient.set(cacheKey, JSON.stringify(conversation), { ex: CONVERSATION_CACHE_TTL });
-      } else {
-        // ensure no stale resolved cache remains
-        try { await redisClient.del(cacheKey); } catch (_) {}
+      const { resource: conversation } = await conversationsContainer.item(id, clientUserId).read();
+      if (!conversation) {
+        return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found.' });
       }
-    } catch (e) {
-      console.warn('[Redis] Failed to set conversation cache:', e && e.message ? e.message : e);
+
+      // Populate cache (best-effort) only if conversation is still in-progress AND has messages
+      try {
+        if (conversation.status !== 'resolved' && Array.isArray(conversation.messages) && conversation.messages.length > 0) {
+          await redisClient.set(cacheKey, JSON.stringify(conversation), { ex: CONVERSATION_CACHE_TTL });
+        } else {
+          // ensure no stale or empty cache remains
+          try { await redisClient.del(cacheKey); } catch (_) {}
+        }
+      } catch (e) {
+        console.warn('[Redis] Failed to set conversation cache:', e && e.message ? e.message : e);
+      }
+
+      return res.status(StatusCodes.OK).json(conversation);
     }
 
-    return res.status(StatusCodes.OK).json(conversation);
-  }
+    // --- DELETE REQUEST LOGIC (DELETE SINGLE OR ALL CONVERSATIONS) ---
+    if (req.method === 'DELETE') {
+      const { id, all, userId } = req.query;
+      // Only allow the authenticated user to delete their own conversations
+      if (userId !== clientUserId) {
+        return res.status(StatusCodes.FORBIDDEN).json({ error: 'Forbidden: userId mismatch.' });
+      }
+      if (all === 'true') {
+        // Delete all conversations for this user
+        const query = {
+          query: 'SELECT c.id FROM c WHERE c.userId = @userId',
+          parameters: [ { name: '@userId', value: clientUserId } ]
+        };
+        const { resources: convos } = await conversationsContainer.items.query(query).fetchAll();
+        for (const convo of convos) {
+          await conversationsContainer.item(convo.id, clientUserId).delete();
+          // Remove from Redis cache
+          try { await redisClient.del(`conversation:${clientUserId}:${convo.id}`); } catch (_) {}
+        }
+        return res.status(StatusCodes.OK).json({ success: true, message: 'All conversations deleted.' });
+      } else if (id) {
+        // Delete a single conversation
+        await conversationsContainer.item(id, clientUserId).delete();
+        try { await redisClient.del(`conversation:${clientUserId}:${id}`); } catch (_) {}
+        return res.status(StatusCodes.OK).json({ success: true, message: 'Conversation deleted.' });
+      } else {
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: 'id or all=true required for DELETE.' });
+      }
+    }
 
     // --- POST REQUEST LOGIC (SEND MESSAGE - REWRITTEN FOR STREAMING) ---
     if (req.method === 'POST') {
@@ -265,11 +297,32 @@ export default async function handler(req, res) {
       conversation.messages.push(assistantMessage);
       conversation.updatedAt = new Date().toISOString();
 
-      // --- MODIFIED: Update Title (Optimized) ---
-      // Only set title on the very first user message.
-      // A simple substring is much faster and cheaper than a separate AI call.
+
+      // --- Generate a technology-focused title using the AI after the first assistant response ---
       if (history.length === 0) {
+        try {
+          // Use the first user and assistant message to generate a title
+          const titlePrompt =
+            'Summarize the following technical conversation in 5 words or less, focusing on the main technology or problem. Only return the title, no punctuation.';
+          const titleMessages = [
+            { role: 'system', content: titlePrompt },
+            { role: 'user', content: message },
+            { role: 'assistant', content: cleanMessage }
+          ];
+          let title = '';
+          // Use the same streaming function, but just accumulate the result
+          for await (const chunk of callOpenAIStream(cleanMessage, [
+            { role: 'system', content: titlePrompt },
+            { role: 'user', content: message },
+            { role: 'assistant', content: cleanMessage }
+          ])) {
+            title += chunk;
+          }
+          // Clean up the title: remove punctuation, trim, limit length
+          conversation.title = (title || '').replace(/[\n\r\-\.:]+/g, ' ').trim().slice(0, 50) || 'New Chat';
+        } catch (e) {
           conversation.title = message.substring(0, 50);
+        }
       }
 
       if (isDone) {
@@ -277,10 +330,10 @@ export default async function handler(req, res) {
       }
 
     await conversationsContainer.items.upsert(conversation);
-    // Update cache after save (best-effort)
+    // Update cache after save (best-effort) — only if conversation has messages
     try {
       const cacheKey = `conversation:${clientUserId}:${convoId}`;
-      if (conversation.status !== 'resolved') {
+      if (conversation.status !== 'resolved' && Array.isArray(conversation.messages) && conversation.messages.length > 0) {
         await redisClient.set(cacheKey, JSON.stringify(conversation), { ex: CONVERSATION_CACHE_TTL });
       } else {
         try { await redisClient.del(cacheKey); } catch (_) {}
@@ -313,10 +366,10 @@ export default async function handler(req, res) {
       };
 
     await conversationsContainer.items.upsert(updatedConversation);
-    // Update cache after save (best-effort)
+    // Update cache after save (best-effort) — only if conversation has messages
     try {
       const cacheKey = `conversation:${clientUserId}:${conversationId}`;
-      if (updatedConversation.status !== 'resolved') {
+      if (updatedConversation.status !== 'resolved' && Array.isArray(updatedConversation.messages) && updatedConversation.messages.length > 0) {
         await redisClient.set(cacheKey, JSON.stringify(updatedConversation), { ex: CONVERSATION_CACHE_TTL });
       } else {
         try { await redisClient.del(cacheKey); } catch (_) {}

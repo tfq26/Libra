@@ -1,3 +1,37 @@
+/**
+ * Deletes a single conversation for the user.
+ * Calls DELETE /conversation?userId=...&id=...
+ * @param {string} userId
+ * @param {string} conversationId
+ */
+export async function deleteConversation(userId, conversationId) {
+  try {
+    const response = await api.delete('/conversation', {
+      params: { userId, id: conversationId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes all conversations for the user.
+ * Calls DELETE /conversation?userId=...&all=true
+ * @param {string} userId
+ */
+export async function clearAllConversations(userId) {
+  try {
+    const response = await api.delete('/conversation', {
+      params: { userId, all: true }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error clearing all conversations:', error);
+    throw error;
+  }
+}
 import api from './api'; // 👈 Import the shared api client
 import axios from 'axios';
 

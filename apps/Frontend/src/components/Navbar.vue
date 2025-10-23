@@ -20,22 +20,27 @@
         @click="router.push('/history')"
       />
       <template v-if="!authStore.loading">
-        <Avatar
-          :image="authStore.userPhotoUrl"
-          :label="!authStore.userPhotoUrl ? undefined : undefined"
-          class="p-avatar-circle cursor-pointer"
-          :class="{ 'bg-primary text-white': authStore.isAuthenticated, 'bg-gray-300 text-gray-700': !authStore.isAuthenticated }"
-          size="large"
+        <div
+          class="cursor-pointer"
+          :class="{ 'bg-primary text-white rounded-full flex items-center justify-center': authStore.isAuthenticated, 'bg-gray-300 text-gray-700 rounded-full flex items-center justify-center': !authStore.isAuthenticated }"
+          style="width:48px; height:48px;"
+          role="button"
           aria-haspopup="true"
           aria-controls="profile_menu"
           v-tooltip.left="'Account'"
           @click="toggleProfileMenu"
         >
-          <template #default>
-            <!-- Fallback icon if image not available -->
-            <i v-if="!authStore.userPhotoUrl" class="pi pi-user text-xl"></i>
-          </template>
-        </Avatar>
+          <!-- Show preloaded image when available -->
+          <img v-if="imageLoaded && authStore.userPhotoUrl" :src="authStore.userPhotoUrl" alt="avatar" class="w-full h-full object-cover rounded-full" />
+
+          <!-- If image failed or not present, show initials or icon -->
+          <span v-else class="text-lg font-semibold">
+            <template v-if="initials">{{ initials }}</template>
+            <template v-else>
+              <i class="pi pi-user text-xl"></i>
+            </template>
+          </span>
+        </div>
       </template>
     </div>
 
@@ -80,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'; // Import computed
+import { ref, computed, watch, onMounted } from 'vue'; // Import computed
 import { useRoute, useRouter } from 'vue-router';
 import 'primeicons/primeicons.css';
 import { useAuthStore } from '../stores/auth';
@@ -101,6 +106,49 @@ const toast = useToast();
 const isNavOpen = ref(false);
 const profileMenu = ref(); // Ref for the popover menu
 
+// Avatar image preload state
+const imageLoaded = ref(false);
+const imageError = ref(false);
+
+const initials = computed(() => {
+  const user = authStore.user || {};
+  const name = user.displayName || user.name || user.email || '';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+});
+
+// Preload helper
+function preloadImage(url) {
+  imageLoaded.value = false;
+  imageError.value = false;
+  if (!url) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      imageLoaded.value = true;
+      imageError.value = false;
+      resolve(true);
+    };
+    img.onerror = () => {
+      imageLoaded.value = false;
+      imageError.value = true;
+      resolve(false);
+    };
+    img.src = url;
+  });
+}
+
+// Watch for changes to the user's photo URL and preload when it changes
+watch(
+  () => authStore.userPhotoUrl,
+  (url) => {
+    preloadImage(url).catch(() => {});
+  },
+  { immediate: true }
+);
+
 const handleLogout = async () => {
   isNavOpen.value = false;
   await authStore.logout();
@@ -114,7 +162,10 @@ function navigateTo(path) {
 
 // Toggles the popover menu
 const toggleProfileMenu = (event) => {
-  profileMenu.value.toggle(event);
+  // Menu component expects a ref with toggle method. Guard against missing ref.
+  if (profileMenu.value && typeof profileMenu.value.toggle === 'function') {
+    profileMenu.value.toggle(event);
+  }
 };
 
 // Defines the items in the popover menu based on auth state
