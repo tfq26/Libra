@@ -277,17 +277,20 @@ export default async function handler(req, res) {
               }
             }
 
-            // Only use cache if it has messages
-            if (parsed && parsed.status !== 'resolved' && Array.isArray(parsed.messages) && parsed.messages.length > 0) {
-              console.log('[Redis] cache hit (in-progress, has messages)', cacheKey);
-              const sanitized = await sanitizeConversationForResponse(parsed);
-              return res.status(StatusCodes.OK).json(sanitized);
+            // Only use cache if it's in-progress (not resolved) and has messages
+            if (parsed && parsed.status === 'resolved') {
+              console.log('[Redis] Cached conversation is resolved, deleting cache and falling back to DB', cacheKey);
+              try { await redisClient.del(cacheKey); } catch (_) {}
+              parsed = null;
             } else if (parsed && Array.isArray(parsed.messages) && parsed.messages.length === 0) {
               // Evict empty-message cache and fall back
               console.warn('[Redis] Cached conversation has no messages, evicting and falling back to DB', cacheKey);
               try { await redisClient.del(cacheKey); } catch (_) {}
-            } else if (parsed && parsed.status === 'resolved') {
-              console.log('[Redis] cache hit (resolved) — falling back to DB', cacheKey);
+              parsed = null;
+            } else if (parsed && Array.isArray(parsed.messages) && parsed.messages.length > 0) {
+              console.log('[Redis] cache hit (in-progress, has messages)', cacheKey);
+              const sanitized = await sanitizeConversationForResponse(parsed);
+              return res.status(StatusCodes.OK).json(sanitized);
             }
           } catch (e) {
             console.warn('[Redis] Failed to parse cached conversation, falling back to DB', e && e.message ? e.message : e);
@@ -304,19 +307,33 @@ export default async function handler(req, res) {
         return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found.' });
       }
 
-      // Populate cache (best-effort) only if conversation is still in-progress AND has messages
-      try {
-        if (conversation.status !== 'resolved' && Array.isArray(conversation.messages) && conversation.messages.length > 0) {
+      // CRITICAL: If conversation is resolved/complete, ALWAYS delete from cache and never cache it
+      if (conversation.status === 'resolved') {
+        try {
+          await redisClient.del(cacheKey);
+          console.log('[Redis] Deleted cache for resolved conversation from DB:', cacheKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to delete cache for resolved conversation:', e && e.message ? e.message : e);
+        }
+      } else if (Array.isArray(conversation.messages) && conversation.messages.length > 0) {
+        // Only cache in-progress conversations with messages
+        try {
           const cachePayload = cloneConversationForCache(conversation);
           if (cachePayload) {
             const serialized = JSON.stringify(cachePayload);
             await redisClient.set(cacheKey, serialized, { ex: cacheTtlWithJitter() });
+            console.log('[Redis] Cached in-progress conversation:', cacheKey);
           }
-        } else {
-          await redisClient.del(cacheKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to set conversation cache:', e && e.message ? e.message : e);
         }
-      } catch (e) {
-        console.warn('[Redis] Failed to set conversation cache:', e && e.message ? e.message : e);
+      } else {
+        // Empty messages or other edge cases: delete cache
+        try {
+          await redisClient.del(cacheKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to delete cache:', e && e.message ? e.message : e);
+        }
       }
 
   const sanitizedConversation = await sanitizeConversationForResponse(conversation);
@@ -577,27 +594,28 @@ export default async function handler(req, res) {
 
       if (isDone) {
         conversation.status = 'resolved';
-        // Delete cache immediately when conversation is complete to prevent stale reads
-        try {
-          await redisClient.del(cacheKey);
-          console.log('[Redis] Deleted cache for completed conversation:', cacheKey);
-        } catch (e) {
-          console.warn('[Redis] Failed to delete cache for completed conversation:', e && e.message ? e.message : e);
-        }
       }
 
       stripEphemeralFieldsFromConversation(conversation);
       await conversationsContainer.items.upsert(conversation);
 
-      // Update cache after save (best-effort) — only if conversation is still in-progress AND has messages
-      if (!isDone) {
+      // CRITICAL: Cache management AFTER database save
+      if (isDone || conversation.status === 'resolved') {
+        // Delete cache immediately when conversation is complete
+        try {
+          await redisClient.del(cacheKey);
+          console.log('[Redis] Deleted cache for completed conversation after save:', cacheKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to delete cache for completed conversation:', e && e.message ? e.message : e);
+        }
+      } else if (Array.isArray(conversation.messages) && conversation.messages.length > 0) {
+        // Only cache in-progress conversations with messages
         try {
           const cachePayload = cloneConversationForCache(conversation);
-          if (conversation.status !== 'resolved' && Array.isArray(conversation.messages) && conversation.messages.length > 0) {
-            if (cachePayload) {
-              const serialized = JSON.stringify(cachePayload);
-              await redisClient.set(cacheKey, serialized, { ex: cacheTtlWithJitter() });
-            }
+          if (cachePayload) {
+            const serialized = JSON.stringify(cachePayload);
+            await redisClient.set(cacheKey, serialized, { ex: cacheTtlWithJitter() });
+            console.log('[Redis] Cached in-progress conversation after POST:', cacheKey);
           }
         } catch (e) {
           console.warn('[Redis] Failed to update conversation cache after POST:', e && e.message ? e.message : e);
@@ -628,13 +646,24 @@ export default async function handler(req, res) {
       };
 
     await conversationsContainer.items.upsert(updatedConversation);
-    // Update cache after save (best-effort) — only if conversation has messages
+    
+    // CRITICAL: Cache management for PUT - NEVER cache resolved conversations
     try {
       const cacheKey = `conversation:${clientUserId}:${conversationId}`;
-      if (updatedConversation.status !== 'resolved' && Array.isArray(updatedConversation.messages) && updatedConversation.messages.length > 0) {
-        await redisClient.set(cacheKey, JSON.stringify(updatedConversation), { ex: CONVERSATION_CACHE_TTL });
+      if (updatedConversation.status === 'resolved') {
+        // Always delete cache for resolved conversations
+        await redisClient.del(cacheKey);
+        console.log('[Redis] Deleted cache for resolved conversation after PUT:', cacheKey);
+      } else if (Array.isArray(updatedConversation.messages) && updatedConversation.messages.length > 0) {
+        // Only cache in-progress conversations with messages
+        const cachePayload = cloneConversationForCache(updatedConversation);
+        if (cachePayload) {
+          await redisClient.set(cacheKey, JSON.stringify(cachePayload), { ex: cacheTtlWithJitter() });
+          console.log('[Redis] Cached in-progress conversation after PUT:', cacheKey);
+        }
       } else {
-        try { await redisClient.del(cacheKey); } catch (_) {}
+        // Empty or edge cases: delete cache
+        await redisClient.del(cacheKey);
       }
     } catch (e) {
       console.warn('[Redis] Failed to update conversation cache after PUT:', e && e.message ? e.message : e);
