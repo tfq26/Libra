@@ -60,4 +60,20 @@
   --color-timberwolf-800: #efefee;
   --color-timberwolf-900: #f7f7f7;
   --color-timberwolf: #d8d7d5; /* DEFAULT */
+
+  --color-marine: #001529;
+  
+
+  /* Additional Colors */
+
+}
+
+@layer base {
+  html {
+    /* Replace with your app's background color.
+       From your image, it looks like bg-gray-950 or bg-black.
+    */
+    @apply bg-white;
+    @apply dark:bg-zinc-900; 
+  }
 }

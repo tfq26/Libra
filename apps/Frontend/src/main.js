@@ -9,6 +9,7 @@ import { useAuthStore } from './stores/auth';
 // PrimeVue and Theme imports
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 
@@ -99,6 +100,7 @@ app.use(PrimeVue, {
 app.use(pinia);
 app.use(router);
 app.use(ToastService);
+app.use(ConfirmationService);
 
 // Instantiate the auth store AFTER Pinia is registered
 const authStore = useAuthStore();

@@ -44,6 +44,17 @@ export const useAuthStore = defineStore('auth', {
           this.token = await firebaseUser.getIdToken();
           // Prefer the photoURL on the firebaseUser. If not present, try to read a 'photo' claim from the token.
           this.userPhoto = firebaseUser.photoURL || null;
+          // Fallback: some providers populate providerData with a photoURL even if top-level photoURL is null
+          try {
+            if (!this.userPhoto && Array.isArray(firebaseUser.providerData)) {
+              const fromProvider = firebaseUser.providerData.find(p => p && p.photoURL);
+              if (fromProvider && fromProvider.photoURL) {
+                this.userPhoto = fromProvider.photoURL;
+              }
+            }
+          } catch (e) {
+            // Non-fatal
+          }
           try {
             const claims = await firebaseUser.getIdTokenResult();
             if (!this.userPhoto && claims && claims.claims && claims.claims.photo) {

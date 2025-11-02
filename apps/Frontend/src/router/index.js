@@ -5,7 +5,7 @@ import { watch } from 'vue';
 // --- Component Imports ---
 import Home from '../pages/Home.vue';
 import Chat from '../pages/Chat.vue';
-import History from '../pages/History.vue';
+import Profile from '../pages/Profile.vue';
 import SignIn from '../pages/Sign-in.vue';
 import SignUp from '../pages/Sign-up.vue';
 import ErrorPage from '../pages/Error.vue';
@@ -14,7 +14,8 @@ import ErrorPage from '../pages/Error.vue';
 export const routes = [
   { path: '', name: 'Home', component: Home, exact: true }, // Added 'exact: true' for clarity
   { path: '/chat/:id?', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
-  { path: '/history', name: 'History', component: History, meta: { requiresAuth: true } },
+  { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
+  { path: '/history', redirect: '/profile' }, // Redirect old history route to profile
   { path: '/sign-in', name: 'SignIn', component: SignIn, meta: { guestOnly: true } },
   { path: '/sign-up', name: 'SignUp', component: SignUp, meta: { guestOnly: true } },
   {

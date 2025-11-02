@@ -133,53 +133,47 @@ export async function saveConversation(conversationId, messages, title, token, u
  * @returns {{cleanMessage: string, options: string[], isDone: boolean}}
  */
 export function parseAIResponse(rawResponse) {
-  const response = rawResponse.trim();
+  const text = (rawResponse ?? '').toString().trim();
 
-  // Check for end tags first
-  if (response.endsWith('[END Y]')) {
-    return {
-      cleanMessage: response.replace('[END Y]', '').trim(),
-      options: [],
-      isDone: true,
-    };
-  }
-  if (response.endsWith('[END N]')) {
-    return {
-      cleanMessage: response.replace('[END N]', '').trim(),
-      options: [],
-      isDone: true,
-    };
+  const endMatch = text.match(/\[END\s+(Y|N)\]$/i);
+  if (endMatch) {
+    const clean = text.replace(/\[END\s+(Y|N)\]$/i, '').trim();
+    return { cleanMessage: clean, options: [], isDone: true };
   }
 
-  // Check for a typed-input request
-  if (response.startsWith('[TYPE]')) {
-    return {
-      cleanMessage: response.replace('[TYPE]', '').trim(),
-      options: [], // Empty array signals to show text input
-      isDone: false,
-    };
-  }
-  
-  // Remove other prefixes for parsing
-  const cleanForParsing = response.replace(/\[MC\]|\[YN\]/g, '').trim();
-  const regex = /\[options:\s*([^\]]+)\]/;
-  const match = cleanForParsing.match(regex);
+  let tag = null;
+  if (/^\s*\[TYPE\]/i.test(text)) tag = 'TYPE';
+  else if (/^\s*\[YN\]/i.test(text)) tag = 'YN';
+  else if (/^\s*\[MC\]/i.test(text)) tag = 'MC';
 
-  if (match && match[1]) {
-    const cleanMessage = cleanForParsing.replace(regex, '').trim();
-    try {
-      const optionsArray = JSON.parse(`[${match[1]}]`);
-      return { cleanMessage, options: optionsArray, isDone: false };
-    } catch (e) {
-      // Fallback for malformed options
-      return { cleanMessage, options: [], isDone: false };
-    }
+  let cleaned = text.replace(/^\s*\[(MC|YN|TYPE)\]\s*/i, '').trim();
+  const optionsRegex = /\[options:\s*([^\]]+)\]/i;
+  let options = [];
+  const m = cleaned.match(optionsRegex);
+  if (m && m[1]) {
+    try { options = JSON.parse(`[${m[1]}]`).map(String); } catch (_) { options = []; }
+    cleaned = cleaned.replace(optionsRegex, '').trim();
   }
 
-  // If no tags are found yet, just return the cleaned text.
-  return {
-    cleanMessage: cleanForParsing,
-    options: [],
-    isDone: false,
+  const clampOptions = (arr, min, max, fallback) => {
+    const list = Array.isArray(arr) ? arr.filter(v => typeof v === 'string' && v.trim()).map(v => v.trim()) : [];
+    if (list.length < min) return fallback;
+    return list.slice(0, max);
   };
+
+  if (!tag) {
+    if (/\b(yes|no)\b/i.test(cleaned) && cleaned.includes('?')) tag = 'YN';
+    else if (/\b(choose|select|pick|option|options)\b/i.test(cleaned)) tag = 'MC';
+    else tag = 'TYPE';
+  }
+
+  if (tag === 'TYPE') {
+    options = [];
+  } else if (tag === 'YN') {
+    options = ['Yes', 'No'];
+  } else if (tag === 'MC') {
+    options = clampOptions(options, 2, 4, ['Continue', 'Something else']);
+  }
+
+  return { cleanMessage: cleaned, options, isDone: false };
 }

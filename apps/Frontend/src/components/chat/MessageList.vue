@@ -12,15 +12,13 @@
         @show-full-message="$emit('show-full-message', $event)"
       />
     </TransitionGroup>
-    <TypingIndicator v-if="isLoading" class="my-2" />
   </div>
 </template>
 
-<<script setup>
+<script setup>
 // 1. Import defineExpose
 import { ref, watch, defineEmits, defineProps, defineExpose } from 'vue'; 
 import MessageBubble from './MessageBubble.vue';
-import TypingIndicator from './TypingIndicator.vue';
 import { TransitionGroup } from 'vue';
 
 const props = defineProps({
@@ -28,6 +26,7 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  // isLoading is no longer used directly here; kept for backward compatibility
   isLoading: {
     type: Boolean,
     default: false

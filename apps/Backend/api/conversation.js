@@ -10,6 +10,13 @@ import { callOpenAIStream, parseAIResponse } from '../lib/ai-service.js'; // ---
 import admin from 'firebase-admin';
 import { Ratelimit } from "@upstash/ratelimit"; // --- NEW: Import Upstash Rate Limiter ---
 import { Redis } from "@upstash/redis"; // --- NEW: Import Upstash Redis ---
+import {
+  uploadAttachment,
+  deleteBlobIfExists,
+  stripEphemeralAttachmentFields,
+  enrichAttachmentsWithSignedUrls,
+} from '../lib/blob-service.js';
+import { parseMultipartRequest } from '../lib/multipart.js';
 
 // Load environment variables from .backend.env
 const __filename = fileURLToPath(import.meta.url);
@@ -75,6 +82,127 @@ const database = cosmosClient.database('libraapp');
 const conversationsContainer = database.container('Conversations');
 const profilesContainer = database.container('Profiles'); // --- NEW: Container for user profiles ---
 console.log('[Conversation API] ✅ CosmosDB client initialized');
+
+const MAX_IMAGE_UPLOAD_BYTES = parseInt(process.env.MAX_IMAGE_UPLOAD_BYTES || String(5 * 1024 * 1024), 10);
+const MAX_IMAGE_ATTACHMENTS = parseInt(process.env.MAX_IMAGE_ATTACHMENTS || '3', 10);
+const ALLOWED_IMAGE_TYPES = (process.env.ALLOWED_IMAGE_MIME_TYPES || 'image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif')
+  .split(',')
+  .map(type => type.trim().toLowerCase())
+  .filter(Boolean);
+const ATTACHMENT_SIGNED_URL_TTL_SECONDS = parseInt(process.env.ATTACHMENT_SIGNED_URL_TTL_SECONDS || '900', 10);
+
+function cacheTtlWithJitter() {
+  const jitter = Math.floor(Math.random() * 30);
+  const base = Number.isFinite(CONVERSATION_CACHE_TTL) ? CONVERSATION_CACHE_TTL : 300;
+  return Math.max(60, base + jitter);
+}
+
+function cloneConversationForCache(conversation) {
+  if (!conversation) return null;
+  const cacheCopy = JSON.parse(JSON.stringify(conversation));
+  stripEphemeralFieldsFromConversation(cacheCopy);
+  return cacheCopy;
+}
+
+function createHttpError(message, statusCode) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  return err;
+}
+
+function collectAttachmentBlobNames(conversation) {
+  const blobNames = new Set();
+  if (!conversation || !Array.isArray(conversation.messages)) return blobNames;
+  for (const message of conversation.messages) {
+    const attachments = message?.content?.attachments;
+    if (!Array.isArray(attachments)) continue;
+    for (const attachment of attachments) {
+      if (attachment?.blobName) {
+        blobNames.add(attachment.blobName);
+      }
+    }
+  }
+  return blobNames;
+}
+
+async function deleteAttachmentsForConversation(conversation) {
+  const blobNames = collectAttachmentBlobNames(conversation);
+  for (const blobName of blobNames) {
+    try {
+      await deleteBlobIfExists(blobName);
+    } catch (err) {
+      console.warn('[Attachments] Failed to delete blob', blobName, err.message || err);
+    }
+  }
+}
+
+async function sanitizeConversationForResponse(conversation) {
+  if (!conversation) return conversation;
+  const cloned = JSON.parse(JSON.stringify(conversation));
+  if (Array.isArray(cloned.messages)) {
+    for (const message of cloned.messages) {
+      await enrichAttachmentsWithSignedUrls(message, { expiresInSeconds: ATTACHMENT_SIGNED_URL_TTL_SECONDS });
+    }
+  }
+  return cloned;
+}
+
+function stripEphemeralFieldsFromConversation(conversation) {
+  if (!conversation || !Array.isArray(conversation.messages)) return;
+  for (const message of conversation.messages) {
+    stripEphemeralAttachmentFields(message);
+  }
+}
+
+function inferMimeTypeFromFilename(filename) {
+  if (!filename || typeof filename !== 'string') return null;
+  const ext = filename.slice(filename.lastIndexOf('.') + 1).toLowerCase();
+  switch (ext) {
+    case 'png': return 'image/png';
+    case 'jpg':
+    case 'jpeg': return 'image/jpeg';
+    case 'webp': return 'image/webp';
+    case 'gif': return 'image/gif';
+    case 'heic': return 'image/heic';
+    case 'heif': return 'image/heif';
+    default: return null;
+  }
+}
+
+function validateIncomingFile(file) {
+  if (!file) {
+    throw createHttpError('Invalid file received.', StatusCodes.BAD_REQUEST);
+  }
+
+  const originalName = file.originalName || file.filename || file.name || 'attachment';
+  let mime = (file.mimeType || file.mimetype || '').toLowerCase();
+  if (!mime) {
+    const inferred = inferMimeTypeFromFilename(originalName);
+    if (inferred) {
+      mime = inferred;
+    }
+  }
+
+  if (!mime) {
+    throw createHttpError('Unsupported file type: undefined', StatusCodes.UNSUPPORTED_MEDIA_TYPE);
+  }
+
+  if (!ALLOWED_IMAGE_TYPES.includes(mime)) {
+    throw createHttpError(`Unsupported file type: ${mime}`, StatusCodes.UNSUPPORTED_MEDIA_TYPE);
+  }
+
+  if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+    throw createHttpError(`File ${originalName} exceeds the ${MAX_IMAGE_UPLOAD_BYTES} byte limit.`, StatusCodes.PAYLOAD_TOO_LARGE);
+  }
+
+  return {
+    fieldname: file.fieldname,
+    originalName,
+    mimeType: mime,
+    size: file.size,
+    buffer: file.buffer,
+  };
+}
 
 /**
  * Vercel Serverless Function for handling chat messages.
@@ -152,7 +280,8 @@ export default async function handler(req, res) {
             // Only use cache if it has messages
             if (parsed && parsed.status !== 'resolved' && Array.isArray(parsed.messages) && parsed.messages.length > 0) {
               console.log('[Redis] cache hit (in-progress, has messages)', cacheKey);
-              return res.status(StatusCodes.OK).json(parsed);
+              const sanitized = await sanitizeConversationForResponse(parsed);
+              return res.status(StatusCodes.OK).json(sanitized);
             } else if (parsed && Array.isArray(parsed.messages) && parsed.messages.length === 0) {
               // Evict empty-message cache and fall back
               console.warn('[Redis] Cached conversation has no messages, evicting and falling back to DB', cacheKey);
@@ -178,16 +307,20 @@ export default async function handler(req, res) {
       // Populate cache (best-effort) only if conversation is still in-progress AND has messages
       try {
         if (conversation.status !== 'resolved' && Array.isArray(conversation.messages) && conversation.messages.length > 0) {
-          await redisClient.set(cacheKey, JSON.stringify(conversation), { ex: CONVERSATION_CACHE_TTL });
+          const cachePayload = cloneConversationForCache(conversation);
+          if (cachePayload) {
+            const serialized = JSON.stringify(cachePayload);
+            await redisClient.set(cacheKey, serialized, { ex: cacheTtlWithJitter() });
+          }
         } else {
-          // ensure no stale or empty cache remains
-          try { await redisClient.del(cacheKey); } catch (_) {}
+          await redisClient.del(cacheKey);
         }
       } catch (e) {
         console.warn('[Redis] Failed to set conversation cache:', e && e.message ? e.message : e);
       }
 
-      return res.status(StatusCodes.OK).json(conversation);
+  const sanitizedConversation = await sanitizeConversationForResponse(conversation);
+  return res.status(StatusCodes.OK).json(sanitizedConversation);
     }
 
     // --- DELETE REQUEST LOGIC (DELETE SINGLE OR ALL CONVERSATIONS) ---
@@ -205,6 +338,16 @@ export default async function handler(req, res) {
         };
         const { resources: convos } = await conversationsContainer.items.query(query).fetchAll();
         for (const convo of convos) {
+          try {
+            const { resource: convoResource } = await conversationsContainer.item(convo.id, clientUserId).read();
+            if (convoResource) {
+              await deleteAttachmentsForConversation(convoResource);
+            }
+          } catch (err) {
+            if (err.statusCode !== 404) {
+              console.warn('[Conversation DELETE all] Failed to fetch conversation before delete:', err.message || err);
+            }
+          }
           await conversationsContainer.item(convo.id, clientUserId).delete();
           // Remove from Redis cache
           try { await redisClient.del(`conversation:${clientUserId}:${convo.id}`); } catch (_) {}
@@ -212,6 +355,16 @@ export default async function handler(req, res) {
         return res.status(StatusCodes.OK).json({ success: true, message: 'All conversations deleted.' });
       } else if (id) {
         // Delete a single conversation
+        try {
+          const { resource: convoResource } = await conversationsContainer.item(id, clientUserId).read();
+          if (convoResource) {
+            await deleteAttachmentsForConversation(convoResource);
+          }
+        } catch (err) {
+          if (err.statusCode !== 404) {
+            console.warn('[Conversation DELETE] Failed to fetch conversation before delete:', err.message || err);
+          }
+        }
         await conversationsContainer.item(id, clientUserId).delete();
         try { await redisClient.del(`conversation:${clientUserId}:${id}`); } catch (_) {}
         return res.status(StatusCodes.OK).json({ success: true, message: 'Conversation deleted.' });
@@ -220,39 +373,135 @@ export default async function handler(req, res) {
       }
     }
 
-    // --- POST REQUEST LOGIC (SEND MESSAGE - REWRITTEN FOR STREAMING) ---
+    // --- POST REQUEST LOGIC (SEND MESSAGE WITH OPTIONAL IMAGE ATTACHMENTS) ---
     if (req.method === 'POST') {
-      const { message, conversationId } = req.body;
-      if (!message) {
-          return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Message is required.' });
+      const contentType = req.headers['content-type'] || '';
+      const isMultipart = contentType.includes('multipart/form-data');
+
+      console.log('[API] Incoming POST /conversation');
+      console.log('[API] Headers:', req.headers);
+      console.log('[API] Content-Type:', contentType, 'isMultipart:', isMultipart);
+
+      let rawMessage;
+      let providedConversationId;
+      let providedUserId;
+      let parsedFiles = [];
+
+      if (isMultipart) {
+        const { fields, files } = await parseMultipartRequest(req, {
+          maxFiles: MAX_IMAGE_ATTACHMENTS,
+          maxFileSize: MAX_IMAGE_UPLOAD_BYTES,
+        });
+        console.log('[API] Busboy fields:', fields);
+        console.log('[API] Busboy files:', files.map(f => ({ name: f.originalName, mimeType: f.mimeType, size: f.size })));
+        rawMessage = fields.message ?? '';
+        providedConversationId = fields.conversationId || fields.conversationID || fields.conversation || null;
+        providedUserId = fields.userId || null;
+        parsedFiles = Array.isArray(files) ? files : [];
+      } else {
+        console.log('[API] Non-multipart body:', req.body);
+        rawMessage = req.body?.message;
+        providedConversationId = req.body?.conversationId;
+        providedUserId = req.body?.userId;
       }
 
-      let convoId = conversationId;
+      if (providedUserId && providedUserId !== clientUserId) {
+        return res.status(StatusCodes.FORBIDDEN).json({ error: 'Forbidden: userId mismatch.' });
+      }
+
+      const messageText = typeof rawMessage === 'string' ? rawMessage.trim() : '';
+      const hasAttachments = parsedFiles.length > 0;
+
+      if (!messageText && !hasAttachments) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Message or image attachment is required.' });
+      }
+
+      let convoId = providedConversationId;
       let conversation;
       let history = [];
 
-      // 1. Load or Create Conversation
-      if (!convoId) {
-          convoId = uuidv4();
-          conversation = {
-              id: convoId,
-              userId: clientUserId,
-              title: "New Chat",
-              messages: [],
-              status: 'active', // --- MODIFIED: Use status field ---
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-          };
+      if (convoId) {
+        const { resource: existingConvo } = await conversationsContainer.item(convoId, clientUserId).read();
+        if (!existingConvo) {
+          return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found' });
+        }
+        conversation = existingConvo;
+        history = Array.isArray(existingConvo.messages) ? [...existingConvo.messages] : [];
       } else {
-          const { resource: existingConvo } = await conversationsContainer.item(convoId, clientUserId).read();
-          if (!existingConvo) {
-              return res.status(StatusCodes.NOT_FOUND).json({ error: 'Conversation not found' });
-          }
-          conversation = existingConvo;
-          history = existingConvo.messages;
+        convoId = uuidv4();
+        const now = new Date().toISOString();
+        conversation = {
+          id: convoId,
+          userId: clientUserId,
+          title: 'New Chat',
+          messages: [],
+          status: 'active',
+          createdAt: now,
+          updatedAt: now,
+        };
       }
 
-      // --- NEW: Load User Profile for context ---
+      const uploadedBlobNames = [];
+      const attachmentMetadata = [];
+
+      if (hasAttachments) {
+        if (parsedFiles.length > MAX_IMAGE_ATTACHMENTS) {
+          return res.status(StatusCodes.BAD_REQUEST).json({ error: `You can upload up to ${MAX_IMAGE_ATTACHMENTS} images per message.` });
+        }
+        try {
+          for (const file of parsedFiles) {
+            const normalizedFile = validateIncomingFile(file);
+            const uploadResult = await uploadAttachment(normalizedFile.buffer, {
+              userId: clientUserId,
+              conversationId: convoId,
+              mimeType: normalizedFile.mimeType,
+              fileName: normalizedFile.originalName,
+            });
+            uploadedBlobNames.push(uploadResult.blobName);
+            attachmentMetadata.push({
+              id: uuidv4(),
+              type: 'image',
+              fileName: normalizedFile.originalName || null,
+              mimeType: normalizedFile.mimeType,
+              size: normalizedFile.size,
+              blobName: uploadResult.blobName,
+              uploadedAt: uploadResult.uploadedAt,
+            });
+          }
+        } catch (err) {
+          for (const blobName of uploadedBlobNames) {
+            try { await deleteBlobIfExists(blobName); } catch (_) {}
+          }
+          if (err.statusCode) {
+            return res.status(err.statusCode).json({ error: err.message });
+          }
+          throw err;
+        }
+      }
+
+      const userMessageContent = {};
+      if (messageText) userMessageContent.text = messageText;
+      if (attachmentMetadata.length) userMessageContent.attachments = attachmentMetadata;
+
+      if (!userMessageContent.text && !userMessageContent.attachments) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Message or image attachment is required.' });
+      }
+
+      const userMessage = {
+        id: uuidv4(),
+        role: 'user',
+        content: userMessageContent,
+        timestamp: new Date().toISOString(),
+      };
+
+      conversation.messages = Array.isArray(conversation.messages) ? conversation.messages : [];
+      conversation.messages.push(userMessage);
+      conversation.updatedAt = new Date().toISOString();
+      if (!conversation.status || conversation.status === 'resolved') {
+        conversation.status = 'active';
+      }
+
+      // --- Load User Profile for context ---
       let userProfile = {};
       try {
         const { resource: profile } = await profilesContainer.item(clientUserId, clientUserId).read();
@@ -261,88 +510,101 @@ export default async function handler(req, res) {
         if (e.statusCode !== 404) console.warn(`Could not load profile for ${clientUserId}:`, e.message);
       }
 
-      // Add user message to conversation object (using new structure)
-      const userMessage = {
-          id: uuidv4(),
-          role: 'user',
-          content: { text: message }, // --- MODIFIED: Content is now an object ---
-          timestamp: new Date().toISOString()
-      };
-      conversation.messages.push(userMessage);
-
       // --- Streaming Logic ---
       res.setHeader('Content-Type', 'text/plain');
       res.setHeader('Transfer-Encoding', 'chunked');
+      res.setHeader('X-Conversation-Id', convoId);
 
-      let fullAIResponse = "";
-      const aiResponseStream = callOpenAIStream(message, history, userProfile); // Pass profile context
-
-      for await (const chunk of aiResponseStream) {
-        res.write(chunk); // Send chunk immediately to frontend
-        fullAIResponse += chunk; // Assemble full response on backend for saving
+      // Cache the in-progress conversation BEFORE streaming starts
+      const cacheKey = `conversation:${clientUserId}:${convoId}`;
+      try {
+        const cachePayload = cloneConversationForCache(conversation);
+        if (cachePayload) {
+          const serialized = JSON.stringify(cachePayload);
+          await redisClient.set(cacheKey, serialized, { ex: cacheTtlWithJitter() });
+          console.log('[Redis] Cached in-progress conversation before streaming', cacheKey);
+        }
+      } catch (e) {
+        console.warn('[Redis] Failed to cache conversation before streaming:', e?.message || e);
       }
-      res.end(); // Signal that the stream is finished
+
+      let fullAIResponse = '';
+      try {
+        const aiResponseStream = callOpenAIStream({ userMessage, history, userProfile });
+        for await (const chunk of aiResponseStream) {
+          res.write(chunk);
+          fullAIResponse += chunk;
+        }
+      } catch (err) {
+        for (const blobName of uploadedBlobNames) {
+          try { await deleteBlobIfExists(blobName); } catch (_) {}
+        }
+        throw err;
+      } finally {
+        res.end();
+      }
 
       // --- Post-Stream Database Save ---
-      // This runs *after* the client has the full response.
       const { cleanMessage, options, isDone } = parseAIResponse(fullAIResponse);
 
       const assistantMessage = {
-          id: uuidv4(),
-          role: 'assistant',
-          content: { text: cleanMessage }, // --- MODIFIED: Content is an object ---
-          timestamp: new Date().toISOString(),
-          options: options.length > 0 ? options : undefined
+        id: uuidv4(),
+        role: 'assistant',
+        content: { text: cleanMessage },
+        timestamp: new Date().toISOString(),
+        options: options.length > 0 ? options : undefined,
       };
       conversation.messages.push(assistantMessage);
       conversation.updatedAt = new Date().toISOString();
 
-
       // --- Generate a technology-focused title using the AI after the first assistant response ---
       if (history.length === 0) {
         try {
-          // Use the first user and assistant message to generate a title
-          const titlePrompt =
-            'Summarize the following technical conversation in 5 words or less, focusing on the main technology or problem. Only return the title, no punctuation.';
-          const titleMessages = [
-            { role: 'system', content: titlePrompt },
-            { role: 'user', content: message },
-            { role: 'assistant', content: cleanMessage }
-          ];
+          const titlePrompt = 'Summarize the following technical conversation in 5 words or less, focusing on the main technology or problem. Only return the title, no punctuation.';
           let title = '';
-          // Use the same streaming function, but just accumulate the result
           for await (const chunk of callOpenAIStream(cleanMessage, [
             { role: 'system', content: titlePrompt },
-            { role: 'user', content: message },
-            { role: 'assistant', content: cleanMessage }
+            { role: 'user', content: messageText || '[image]' },
+            { role: 'assistant', content: cleanMessage },
           ])) {
             title += chunk;
           }
-          // Clean up the title: remove punctuation, trim, limit length
           conversation.title = (title || '').replace(/[\n\r\-\.:]+/g, ' ').trim().slice(0, 50) || 'New Chat';
         } catch (e) {
-          conversation.title = message.substring(0, 50);
+          conversation.title = (messageText || 'New Chat').substring(0, 50) || 'New Chat';
         }
       }
 
       if (isDone) {
-          conversation.status = 'resolved'; // Or 'unresolved' based on [END Y/N]
+        conversation.status = 'resolved';
+        // Delete cache immediately when conversation is complete to prevent stale reads
+        try {
+          await redisClient.del(cacheKey);
+          console.log('[Redis] Deleted cache for completed conversation:', cacheKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to delete cache for completed conversation:', e && e.message ? e.message : e);
+        }
       }
 
-    await conversationsContainer.items.upsert(conversation);
-    // Update cache after save (best-effort) — only if conversation has messages
-    try {
-      const cacheKey = `conversation:${clientUserId}:${convoId}`;
-      if (conversation.status !== 'resolved' && Array.isArray(conversation.messages) && conversation.messages.length > 0) {
-        await redisClient.set(cacheKey, JSON.stringify(conversation), { ex: CONVERSATION_CACHE_TTL });
-      } else {
-        try { await redisClient.del(cacheKey); } catch (_) {}
+      stripEphemeralFieldsFromConversation(conversation);
+      await conversationsContainer.items.upsert(conversation);
+
+      // Update cache after save (best-effort) — only if conversation is still in-progress AND has messages
+      if (!isDone) {
+        try {
+          const cachePayload = cloneConversationForCache(conversation);
+          if (conversation.status !== 'resolved' && Array.isArray(conversation.messages) && conversation.messages.length > 0) {
+            if (cachePayload) {
+              const serialized = JSON.stringify(cachePayload);
+              await redisClient.set(cacheKey, serialized, { ex: cacheTtlWithJitter() });
+            }
+          }
+        } catch (e) {
+          console.warn('[Redis] Failed to update conversation cache after POST:', e && e.message ? e.message : e);
+        }
       }
-    } catch (e) {
-      console.warn('[Redis] Failed to update conversation cache after POST:', e && e.message ? e.message : e);
-    }
-      
-      // The response was already streamed, so we just exit.
+
+      // The response was already streamed
       return;
     }
 

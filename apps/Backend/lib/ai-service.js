@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { get_encoding } from "tiktoken";
+import { generateBlobSASUrl } from './blob-service.js';
 
 // Azure-only configuration
 
@@ -35,6 +36,14 @@ CRITICAL RULES:
     * **[END Y]** if the problem was successfully resolved.
     * **[END N]** if the problem could not be resolved.
 
+9.  **Output Schema (STRICT):** Your message MUST match EXACTLY ONE of the following forms. Do not include any other tags or JSON. No code fences.
+    * For multiple-choice: "[MC] <one concise instruction or question> [options: "Option 1", "Option 2", (up to 4 total)]"
+    * For yes/no:        "[YN] <one concise instruction or question> [options: "Yes", "No"]"
+    * For typed input:   "[TYPE] <one concise instruction requesting a specific input>"
+    If you choose [TYPE], do NOT output an options tag. If you choose [YN], the options MUST be exactly Yes/No. If you choose [MC], include 2–4 short, actionable options only.
+
+10. **Self-check before finalizing:** Re-read your message and confirm it matches the schema above. If not, FIX IT before you finish.
+
 ---
 **Example 1 (Multiple-Choice):**
 * Your Response: "[MC] I see. First, could you check if the Wi-Fi icon on your router is lit up or blinking? [options: "The light is solid green", "The light is blinking", "The light is off"]"
@@ -55,6 +64,121 @@ const SYSTEM_MESSAGE = {
     content: SYSTEM_PROMPT_CONTENT
 };
 
+const ATTACHMENT_SIGNED_URL_TTL_SECONDS = parseInt(process.env.ATTACHMENT_SIGNED_URL_TTL_SECONDS || '900', 10);
+const ATTACHMENT_IMAGE_DETAIL = process.env.AZURE_IMAGE_DETAIL_LEVEL || 'auto';
+
+function isPlainObject(value) {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function stringifyProfile(userProfile = {}) {
+    try {
+        if (!userProfile || typeof userProfile !== 'object') return '';
+        const entries = Object.entries(userProfile)
+            .filter(([, value]) => value !== undefined && value !== null && value !== '')
+            .map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`);
+        if (!entries.length) return '';
+        return `User context (may inform troubleshooting steps):\n${entries.join('\n')}`;
+    } catch (err) {
+        return '';
+    }
+}
+
+async function toAzureMessage(message) {
+    if (!message) return null;
+
+    const role = message.role || 'user';
+    const rawContent = message.content ?? message.text ?? message.message ?? '';
+
+    if (typeof rawContent === 'string') {
+        const text = rawContent.trim();
+        return { role, content: text || '' };
+    }
+
+    if (!isPlainObject(rawContent)) {
+        return { role, content: String(rawContent ?? '') };
+    }
+
+    const parts = [];
+    if (typeof rawContent.text === 'string' && rawContent.text.trim().length > 0) {
+        parts.push({ type: 'text', text: rawContent.text.trim() });
+    }
+
+    if (Array.isArray(rawContent.attachments)) {
+        for (const attachment of rawContent.attachments) {
+            if (!attachment || typeof attachment !== 'object') continue;
+
+            let url = attachment.signedUrl || attachment.url || null;
+            if (!url && attachment.blobName) {
+                try {
+                    url = await generateBlobSASUrl(attachment.blobName, ATTACHMENT_SIGNED_URL_TTL_SECONDS);
+                } catch (err) {
+                    console.warn('[AI] Failed to sign attachment for vision request', attachment.blobName, err.message || err);
+                }
+            }
+
+            if (!url) continue;
+
+            parts.push({
+                type: 'image_url',
+                image_url: {
+                    url,
+                    detail: ATTACHMENT_IMAGE_DETAIL
+                }
+            });
+        }
+    }
+
+    if (parts.length === 0) {
+        return { role, content: '' };
+    }
+    if (parts.length === 1 && parts[0].type === 'text') {
+        return { role, content: parts[0].text };
+    }
+    return { role, content: parts };
+}
+
+async function buildMessageSequence({ prompt, userMessage, history = [], userProfile }) {
+    const messages = [SYSTEM_MESSAGE];
+
+    const profileContext = stringifyProfile(userProfile);
+    if (profileContext) {
+        messages.push({ role: 'system', content: profileContext });
+    }
+
+    for (const historic of history) {
+        const azureMsg = await toAzureMessage(historic);
+        if (azureMsg) messages.push(azureMsg);
+    }
+
+    if (userMessage) {
+        const azureUserMsg = await toAzureMessage(userMessage);
+        if (azureUserMsg) messages.push(azureUserMsg);
+    } else if (typeof prompt === 'string' && prompt.trim().length > 0) {
+        messages.push({ role: 'user', content: prompt.trim() });
+    }
+
+    return messages;
+}
+
+function normalizeStreamArguments(input, legacyHistory, legacyProfile) {
+    if (isPlainObject(input) && (input.prompt || input.userMessage)) {
+        return {
+            prompt: input.prompt,
+            userMessage: input.userMessage,
+            history: input.history ?? legacyHistory ?? [],
+            userProfile: input.userProfile ?? legacyProfile ?? {}
+        };
+    }
+
+    const prompt = typeof input === 'string' ? input : String(input ?? '');
+    return {
+        prompt,
+        history: legacyHistory ?? [],
+        userProfile: legacyProfile ?? {}
+    };
+}
+
 // --- Token Counting ---
 export function countMessageTokens(messages) {
     const encoding = get_encoding("cl100k_base");
@@ -64,6 +188,16 @@ export function countMessageTokens(messages) {
         for (const [key, value] of Object.entries(message)) {
             if (typeof value === 'string') {
                 numTokens += encoding.encode(value).length;
+            } else if (Array.isArray(value)) {
+                for (const part of value) {
+                    if (typeof part === 'string') {
+                        numTokens += encoding.encode(part).length;
+                    } else if (part && typeof part === 'object' && typeof part.text === 'string') {
+                        numTokens += encoding.encode(part.text).length;
+                    }
+                }
+            } else if (value && typeof value === 'object' && typeof value.text === 'string') {
+                numTokens += encoding.encode(value.text).length;
             }
         }
     }
@@ -74,61 +208,69 @@ export function countMessageTokens(messages) {
 
 // --- Response Parsing ---
 export function parseAIResponse(rawResponse) {
-    const response = rawResponse.trim();
+    const text = (rawResponse ?? '').toString().trim();
 
-    // Check for end tags first
-    if (response.endsWith('[END Y]')) {
-        return {
-            cleanMessage: response.replace('[END Y]', '').trim(),
-            options: [],
-            isDone: true // Or handle success state
-        };
-    }
-    if (response.endsWith('[END N]')) {
-        return {
-            cleanMessage: response.replace('[END N]', '').trim(),
-            options: [],
-            isDone: true // Or handle failure state
-        };
+    // Detect explicit end
+    const endMatch = text.match(/\[END\s+(Y|N)\]$/i);
+    if (endMatch) {
+        const clean = text.replace(/\[END\s+(Y|N)\]$/i, '').trim();
+        return { cleanMessage: clean, options: [], isDone: true };
     }
 
-    // Check for a typed-input request
-    if (response.startsWith('[TYPE]')) {
-        return {
-            cleanMessage: response.replace('[TYPE]', '').trim(),
-            options: [] // Empty array signals to show text input
-        };
-    }
-    
-    // Remove other prefixes for parsing
-    const cleanForParsing = response.replace('[MC]', '').replace('[YN]', '').trim();
-    const regex = /\[options:\s*([^\]]+)]/;
-    const match = cleanForParsing.match(regex);
+    // Identify leading tag
+    let tag = null;
+    if (/^\s*\[TYPE\]/i.test(text)) tag = 'TYPE';
+    else if (/^\s*\[YN\]/i.test(text)) tag = 'YN';
+    else if (/^\s*\[MC\]/i.test(text)) tag = 'MC';
 
-    if (match && match[1]) {
-        const cleanMessage = cleanForParsing.replace(regex, '').trim();
+    // Strip known tag from start and capture message
+    let cleaned = text.replace(/^\s*\[(MC|YN|TYPE)\]\s*/i, '').trim();
+
+    // Extract [options: ...] if present
+    const optionsRegex = /\[options:\s*([^\]]+)\]/i;
+    let options = [];
+    const m = cleaned.match(optionsRegex);
+    if (m && m[1]) {
         try {
-            const optionsArray = JSON.parse(`[${match[1]}]`);
-            return { cleanMessage, options: optionsArray };
-        } catch (e) {
-            console.error("Failed to parse AI options, applying fallback.", e);
-            return { cleanMessage, options: ["Continue"] };
+            options = JSON.parse(`[${m[1]}]`).map(String);
+        } catch (_) {
+            options = [];
         }
-    } else {
-        console.warn("AI response missing a required tag ([options], [TYPE], or [END]). Applying fallback.");
-        return {
-            cleanMessage: response, // Return original response if tags are missing
-            options: ["I understand"]
-        };
+        cleaned = cleaned.replace(optionsRegex, '').trim();
     }
+
+    // Repair/Enforce schema
+    const clampOptions = (arr, min, max, fallback) => {
+        const list = Array.isArray(arr) ? arr.filter(v => typeof v === 'string' && v.trim()).map(v => v.trim()) : [];
+        if (list.length < min) return fallback;
+        return list.slice(0, max);
+    };
+
+    if (!tag) {
+        // Infer a reasonable tag when missing
+        if (/\b(yes|no)\b/i.test(cleaned) && cleaned.includes('?')) tag = 'YN';
+        else if (/\b(choose|select|pick|option|options)\b/i.test(cleaned)) tag = 'MC';
+        else tag = 'TYPE';
+    }
+
+    if (tag === 'TYPE') {
+        options = [];
+    } else if (tag === 'YN') {
+        options = ['Yes', 'No'];
+    } else if (tag === 'MC') {
+        options = clampOptions(options, 2, 4, ['Continue', 'Something else']);
+    }
+
+    return { cleanMessage: cleaned, options, isDone: false };
 }
 
-export async function* callOpenAIStream(prompt, history = [], userProfile = {}) {
+export async function* callOpenAIStream(input, history = [], userProfile = {}) {
   try {
     const MODEL_CONTEXT_WINDOW = 8192;
     const RESPONSE_BUFFER = 1500;
 
-    const messages = [SYSTEM_MESSAGE, ...history, { role: "user", content: prompt }];
+        const normalizedArgs = normalizeStreamArguments(input, history, userProfile);
+        const messages = await buildMessageSequence(normalizedArgs);
     const inputTokens = countMessageTokens(messages);
     const maxTokensForResponse = MODEL_CONTEXT_WINDOW - inputTokens - RESPONSE_BUFFER;
 
@@ -166,14 +308,10 @@ export async function* callOpenAIStream(prompt, history = [], userProfile = {}) 
         // Normalize messages for SDK or REST consumption
         const normalizedMessages = (messages || []).map((m) => {
             const role = m.role || 'user';
-            let content = '';
-            if (typeof m.content === 'string') content = m.content;
-            else if (m.content && typeof m.content === 'object') {
-                if (typeof m.content.text === 'string') content = m.content.text;
-                else if (typeof m.content.content === 'string') content = m.content.content;
-                else content = JSON.stringify(m.content);
-            } else if (m && typeof m === 'string') content = m;
-            return { role, content };
+            if (Array.isArray(m.content)) {
+                return { role, content: m.content };
+            }
+            return { role, content: m.content ?? '' };
         });
         // If we have an Azure SDK client and it supports streaming, use it
         if (client && sdkSupportsStreaming) {
@@ -229,4 +367,12 @@ export async function* callOpenAIStream(prompt, history = [], userProfile = {}) 
     // Yield a friendly error message to the client
     yield `[ERROR] I'm sorry, I encountered an error while processing your request.`;
   }
+}
+
+export async function callOpenAI(input, history = [], userProfile = {}) {
+    let fullResponse = '';
+    for await (const chunk of callOpenAIStream(input, history, userProfile)) {
+        fullResponse += chunk;
+    }
+    return fullResponse;
 }

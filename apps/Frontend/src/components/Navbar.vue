@@ -13,12 +13,6 @@
         v-tooltip.left="'Chat'"
         @click="router.push('/chat')"
       />
-      <Button
-        icon="pi pi-book"
-        :class="{ 'p-button-warning': route.path.startsWith('/history'), 'p-button-secondary': !route.path.startsWith('/history'), 'p-button-rounded p-button-icon-only p-button-lg': true }"
-        v-tooltip.left="'History'"
-        @click="router.push('/history')"
-      />
       <template v-if="!authStore.loading">
         <Avatar
           :image="avatarShouldShow ? authStore.userPhotoUrl : null"
@@ -33,11 +27,17 @@
           role="button"
           aria-haspopup="true"
           aria-controls="profile_menu"
-          v-tooltip.left="'Account'"
-          @click="toggleProfileMenu"
+          v-tooltip.left="'Profile'"
+          @click="toggleProfileMenu($event)"
         >
           <!-- Show preloaded image when available -->
-          <img v-if="imageLoaded && authStore.userPhotoUrl" :src="authStore.userPhotoUrl" alt="avatar" class="w-full h-full object-cover rounded-full" />
+          <img
+            v-if="imageLoaded && authStore.userPhotoUrl"
+            :src="authStore.userPhotoUrl"
+            alt="avatar"
+            class="w-full h-full object-cover rounded-full"
+            @error="() => { imageLoaded = false; imageError = true; }"
+          />
 
           <!-- If image failed or not present, show initials or icon -->
           <span v-else class="text-lg font-semibold">
@@ -62,17 +62,21 @@
         <div v-if="isNavOpen" class="absolute top-14 right-0 w-48 bg-timberwolf-100 rounded-md shadow-lg p-2 flex flex-col gap-1">
           <Button label="Home" icon="pi pi-home" class="p-button-text text-white justify-start" @click="navigateTo('/')" />
           <Button label="Chat" icon="pi pi-comment" class="p-button-text text-white justify-start" @click="navigateTo('/chat')" />
-          <Button label="History" icon="pi pi-book" class="p-button-text text-white justify-start" @click="navigateTo('/history')" />
           <div class="border-t border-gray-700 my-1"></div>
           <template v-if="!authStore.loading">
             <Button
               v-if="authStore.isAuthenticated"
-              label="Account"
+              label="Profile"
               icon="pi pi-user"
               class="p-button-text text-white justify-start"
-              @click="toggleProfileMenu"
-              aria-haspopup="true"
-              aria-controls="profile_menu"
+              @click="navigateTo('/profile')"
+            />
+            <Button
+              v-if="authStore.isAuthenticated"
+              label="Sign Out"
+              icon="pi pi-sign-out"
+              class="p-button-text text-white justify-start"
+              @click="handleLogout"
             />
             <Button
               v-else
@@ -225,17 +229,10 @@ const profileMenuItems = computed(() => {
   if (authStore.isAuthenticated) {
     return [
       {
-        label: localStorage.getItem('libra:autoRestoreDrafts') === 'false' ? 'Enable Auto-Restore Drafts' : 'Disable Auto-Restore Drafts',
-        icon: 'pi pi-refresh',
+        label: 'View Profile',
+        icon: 'pi pi-user',
         command: () => {
-          try {
-            const cur = localStorage.getItem('libra:autoRestoreDrafts');
-            const next = cur === 'false' ? 'true' : 'false';
-            localStorage.setItem('libra:autoRestoreDrafts', next);
-            toast.add({ severity: 'success', summary: 'Preference saved', detail: next === 'true' ? 'Auto-restore enabled' : 'Auto-restore disabled' });
-          } catch (e) {
-            console.warn('Could not toggle auto-restore setting', e.message || e);
-          }
+          navigateTo('/profile');
         }
       },
       {

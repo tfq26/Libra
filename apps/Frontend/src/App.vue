@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="flex flex-col h-screen bg-sunset-800 dark:bg-zinc-900 
+  <div id="app" class="flex flex-col h-screen bg-ochre-900 dark:bg-stone-900 
   min-h-[calc(100vh-4rem)] transition-colors duration-300 custom-scrollbar">
     <Toast position="top-center" autoZIndex />
     <Navbar />
