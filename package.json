@@ -9,7 +9,6 @@
   "packageManager": "bun@1.1.12",
   "scripts": {
     "build": "turbo run build",
-    "install": "bun install --cwd apps/Backend && bun install --cwd apps/frontend",
     "dev": "turbo run dev",
     "dev:vercel": "vercel dev",
     "dev:frontend": "turbo run dev --filter=frontend",
