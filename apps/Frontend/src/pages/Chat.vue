@@ -77,68 +77,26 @@
         </div>
       </div>
 
-      <!-- Normal input modes when conversation is not complete -->
-      <div v-else-if="inputMode === 'buttons' && actionOptions.length"
-        class="px-3 py-2 sm:px-4 sm:py-3"
-      >
-        <!-- Suggested next actions -->
-        <ActionButtons
-          :options="actionOptions"
-          :disabled="isLoadingChat"
-          @response="handleButtonResponse"
-          @switch-to-text="handleSwitchToTextMode"
-        />
-
-  <!-- Compact controls: Type, Attach, Restart -->
-  <div class="mt-2 w-full flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-          <Button
-            icon="pi pi-pen-to-square"
-            @click="handleSwitchToTextMode"
-            :class="typeResponseButtonClass"
-            :disabled="isLoadingChat"
-          />
-
-          <input
-            ref="quickAttachInput"
-            type="file"
-            class="hidden"
-            :accept="attachmentAccepts"
-            multiple
-            @change="handleQuickAttachmentChange"
-          />
-          <Button
-            type="button"
-            icon="pi pi-paperclip"
-            @click="triggerQuickAttachment"
-            :class="attachButtonClass"
-            :disabled="pendingAttachments.length >= MAX_ATTACHMENTS || isLoadingChat"
-            aria-label="Attach image"
-          />
-
-          <span class="mx-1 hidden sm:inline-block text-gray-300 dark:text-gray-600">|</span>
-
-          <Button
-            type="button"
-            icon="pi pi-refresh"
-            :loading="isRestarting"
-            @click="confirmRestart"
-            :class="restartButtonClass"
-            :disabled="isLoadingChat"
-            aria-label="Restart chat"
-          />
-        </div>
-      </div>
-
+      <!-- Unified Chat Input Toolbar -->
       <div v-else class="w-full">
-        <MessageInput
-          ref="messageInputComp"
+        <ChatInputToolbar
+          ref="chatInputToolbarRef"
           v-model="currentPrompt"
           :is-loading="isLoadingChat"
           :attachments="pendingAttachments"
           :max-attachments="MAX_ATTACHMENTS"
+          :action-options="actionOptions"
+          :show-text-input="inputMode === 'text'"
+          :show-action-buttons="inputMode === 'buttons' && actionOptions.length > 0"
+          :can-restart="messages.length > 0"
+          :show-text-mode-toggle="inputMode === 'buttons' && actionOptions.length > 0"
+          :empty-state-message="messages.length === 0 ? 'Start your conversation...' : 'Type your message...'"
           @send="handleTextInputSend"
           @add-attachments="handleAttachmentsAdded"
           @remove-attachment="handleAttachmentRemoved"
+          @action-click="handleButtonResponse"
+          @restart="confirmRestart"
+          @switch-to-text="handleSwitchToTextMode"
           placeholder="Type your message..."
         />
       </div>
@@ -160,8 +118,7 @@ import { saveConversation } from '../functions/history-api';
 import { useConversationStore } from '../stores/conversationStore'; // 👈 Add this import
 
 import MessageList from '../components/chat/MessageList.vue';
-import ActionButtons from '../components/chat/ActionButtons.vue';
-import MessageInput from '../components/chat/MessageInput.vue';
+import ChatInputToolbar from '../components/chat/ChatInputToolbar.vue';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -189,6 +146,7 @@ const error = ref(null);
 const chatTitle = ref('');
 const messageListComp = ref(null);
 const mainContainer = ref(null);
+const chatInputToolbarRef = ref(null);
 const isLoadingChat = ref(false);
 const isLoadingHistory = ref(false);
 const inputMode = ref('text');
@@ -199,7 +157,6 @@ let saveTimeout = null;
 const route = useRoute();
 const router = useRouter();
 const isInitialLoad = ref(true);
-const messageInputComp = ref(null); 
 const filteredMessages = computed(() => messages.value.filter(m => m.role !== 'system'));
 const isDialogVisible = ref(false);
 const fullMessageContent = ref('');
@@ -221,13 +178,7 @@ const IMAGE_COMPRESSION_MAX_DIMENSION = 1600;
 const COMPRESSIBLE_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/heic', 'image/heif']);
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
 const pendingAttachments = ref([]);
-const quickAttachInput = ref(null);
 const attachmentAccepts = ALLOWED_IMAGE_TYPES.join(',');
-
-const subduedButtonBase = 'inline-flex h-10 items-center justify-center rounded-lg border border-gray-300 bg-transparent px-4 text-sm font-medium text-gray-800 transition-colors duration-150 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 disabled:pointer-events-none disabled:opacity-60 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-600';
-const typeResponseButtonClass = `${subduedButtonBase} gap-2 py-2 h-9`; // tighter
-const attachButtonClass = `${subduedButtonBase} gap-2 py-2 h-9`;
-const restartButtonClass = `${subduedButtonBase} gap-2 py-2 h-9 border-red-300 text-red-700 hover:bg-red-50 dark:border-red-500 dark:text-red-300 dark:hover:bg-red-900/20`;
 
 // Show typing dots only when loading and there isn't an assistant message already streaming
 const hasAssistantStreamingMessage = computed(() => {
@@ -642,7 +593,7 @@ function handleSwitchToTextMode() {
   actionOptions.value = [];
   // Focus the input field after switching
   nextTick(() => {
-    try { messageInputComp.value?.focusInput?.(); } catch (_) {}
+    try { chatInputToolbarRef.value?.focusInput?.(); } catch (_) {}
   });
 }
 
@@ -685,25 +636,7 @@ async function handleGlobalKeydown(e) {
   // Seed the typed character so it doesn't get lost
   if (seed) currentPrompt.value = (currentPrompt.value || '') + seed;
   await nextTick();
-  try { messageInputComp.value?.focusInput?.(); } catch (_) {}
-}
-
-function triggerQuickAttachment() {
-  if (pendingAttachments.value.length >= MAX_ATTACHMENTS) return;
-  quickAttachInput.value?.click();
-}
-
-async function handleQuickAttachmentChange(event) {
-  const files = event?.target?.files;
-  if (!files || !files.length) {
-    event.target && (event.target.value = '');
-    return;
-  }
-  await handleAttachmentsAdded(files);
-  if (event?.target) event.target.value = '';
-  if (pendingAttachments.value.length) {
-    inputMode.value = 'text';
-  }
+  try { chatInputToolbarRef.value?.focusInput?.(); } catch (_) {}
 }
 
 async function handleButtonResponse(text) {
@@ -1025,7 +958,7 @@ function handleContinueConversation() {
   isConversationComplete.value = false;
   inputMode.value = 'text';
   nextTick(() => {
-    try { messageInputComp.value?.focusInput?.(); } catch (_) {}
+    try { chatInputToolbarRef.value?.focusInput?.(); } catch (_) {}
   });
 }
 

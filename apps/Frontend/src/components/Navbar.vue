@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Desktop Navigation -->
     <div class="hidden md:flex fixed top-6 right-6 z-50 flex-row items-center space-x-3">
       <Button
         icon="pi pi-home"
@@ -14,12 +15,6 @@
         @click="router.push('/chat')"
       />
       <template v-if="!authStore.loading">
-        <Avatar
-          :image="avatarShouldShow ? authStore.userPhotoUrl : null"
-          :label="!authStore.userPhotoUrl ? undefined : undefined"
-          class="p-avatar-circle cursor-pointer"
-          :class="{ 'bg-primary text-white': authStore.isAuthenticated, 'bg-gray-300 text-gray-700': !authStore.isAuthenticated }"
-          size="large"
         <div
           class="cursor-pointer"
           :class="{ 'bg-primary text-white rounded-full flex items-center justify-center': authStore.isAuthenticated, 'bg-gray-300 text-gray-700 rounded-full flex items-center justify-center': !authStore.isAuthenticated }"
@@ -50,85 +45,147 @@
       </template>
     </div>
 
+    <!-- Mobile Hamburger Button -->
     <div class="md:hidden fixed top-4 right-4 z-50">
       <Button
-        :icon="isNavOpen ? 'pi pi-times' : 'pi pi-bars'"
+        icon="pi pi-bars"
         class="p-button-rounded p-button-lg"
-        @click="isNavOpen = !isNavOpen"
-        aria-label="Toggle navigation menu"
+        @click="drawerVisible = true"
+        aria-label="Open navigation menu"
       />
-      
-      <transition name="fade-down">
-        <div v-if="isNavOpen" class="absolute top-14 right-0 w-48 bg-timberwolf-100 rounded-md shadow-lg p-2 flex flex-col gap-1">
-          <Button label="Home" icon="pi pi-home" class="p-button-text text-white justify-start" @click="navigateTo('/')" />
-          <Button label="Chat" icon="pi pi-comment" class="p-button-text text-white justify-start" @click="navigateTo('/chat')" />
-          <div class="border-t border-gray-700 my-1"></div>
+    </div>
+
+    <!-- Mobile Drawer Navigation -->
+    <Drawer v-model:visible="drawerVisible" position="right" class="w-80">
+      <template #header>
+        <div class="flex items-center gap-3">
+          <i class="pi pi-bars text-2xl"></i>
+          <span class="font-semibold text-xl">Menu</span>
+        </div>
+      </template>
+
+      <div class="flex flex-col h-full">
+        <!-- User Profile Section -->
+        <div v-if="!authStore.loading" class="mb-6 pb-6 border-b border-surface-200 dark:border-surface-700">
+          <div class="flex items-center gap-3 mb-4">
+            <div
+              class="rounded-full flex items-center justify-center"
+              :class="{ 'bg-primary text-white': authStore.isAuthenticated, 'bg-surface-200 text-surface-700': !authStore.isAuthenticated }"
+              style="width:56px; height:56px;"
+            >
+              <img
+                v-if="imageLoaded && authStore.userPhotoUrl"
+                :src="authStore.userPhotoUrl"
+                alt="avatar"
+                class="w-full h-full object-cover rounded-full"
+                @error="() => { imageLoaded = false; imageError = true; }"
+              />
+              <span v-else class="text-xl font-semibold">
+                <template v-if="initials">{{ initials }}</template>
+                <template v-else>
+                  <i class="pi pi-user text-2xl"></i>
+                </template>
+              </span>
+            </div>
+            <div v-if="authStore.isAuthenticated" class="flex-1">
+              <div class="font-semibold text-surface-900 dark:text-surface-0">
+                {{ authStore.user?.displayName || authStore.user?.name || 'User' }}
+              </div>
+              <div class="text-sm text-surface-600 dark:text-surface-400 truncate">
+                {{ authStore.user?.email }}
+              </div>
+            </div>
+            <div v-else class="flex-1">
+              <div class="text-surface-600 dark:text-surface-400">
+                Not signed in
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="flex-1 space-y-2">
+          <Button
+            label="Home"
+            icon="pi pi-home"
+            :class="{ 'bg-primary-subtle text-primary': route.path === '/' }"
+            class="w-full justify-start"
+            text
+            @click="navigateTo('/')"
+          />
+          <Button
+            label="Chat"
+            icon="pi pi-comment"
+            :class="{ 'bg-primary-subtle text-primary': route.path.startsWith('/chat') }"
+            class="w-full justify-start"
+            text
+            @click="navigateTo('/chat')"
+          />
+          
           <template v-if="!authStore.loading">
+            <Divider v-if="authStore.isAuthenticated" />
+            
             <Button
               v-if="authStore.isAuthenticated"
               label="Profile"
               icon="pi pi-user"
-              class="p-button-text text-white justify-start"
+              class="w-full justify-start"
+              text
               @click="navigateTo('/profile')"
             />
             <Button
               v-if="authStore.isAuthenticated"
               label="Sign Out"
               icon="pi pi-sign-out"
-              class="p-button-text text-white justify-start"
+              class="w-full justify-start"
+              severity="danger"
+              text
               @click="handleLogout"
             />
             <Button
               v-else
               label="Sign In"
               icon="pi pi-sign-in"
-              class="p-button-text text-white justify-start"
+              class="w-full justify-start"
+              severity="success"
+              text
               @click="navigateTo('/sign-in')"
             />
           </template>
-        </div>
-      </transition>
-    </div>
+        </nav>
 
+        <!-- Footer Info -->
+        <div class="pt-4 mt-auto border-t border-surface-200 dark:border-surface-700">
+          <div class="text-xs text-surface-500 dark:text-surface-400 text-center">
+            Libra Chat App
+          </div>
+        </div>
+      </div>
+    </Drawer>
+
+    <!-- Desktop Profile Menu -->
     <Menu ref="profileMenu" id="profile_menu" :model="profileMenuItems" :popup="true" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'; // Import computed
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import 'primeicons/primeicons.css';
 import { useAuthStore } from '../stores/auth';
 import Button from 'primevue/button';
-import Avatar from 'primevue/avatar'; // Added Avatar
-import Menu from 'primevue/menu';     // Added Menu
+import Menu from 'primevue/menu';
+import Drawer from 'primevue/drawer';
+import Divider from 'primevue/divider';
 import { useToast } from 'primevue/usetoast';
-
-// v-tooltip is a directive and must be registered globally in your main.js/main.ts
-// like this: app.directive('tooltip', Tooltip);
-// You'll also need: import Tooltip from 'primevue/tooltip'; in main.js
 
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
 
-const isNavOpen = ref(false);
-const profileMenu = ref(); // Ref for the popover menu
-// Track whether avatar fetch has previously failed for the current user in this session
-const avatarFetchFailedKey = (uid) => `libra:avatarFailed:${uid}`;
-const avatarLoadAttempted = ref(false);
-const avatarShouldShow = computed(() => {
-  const uid = authStore.userId;
-  if (!authStore.userPhotoUrl) return false;
-  try {
-    const failed = uid ? sessionStorage.getItem(avatarFetchFailedKey(uid)) : null;
-    if (failed === 'true') return false;
-  } catch (e) {
-    // ignore storage errors
-  }
-  return true;
-});
+const drawerVisible = ref(false);
+const profileMenu = ref();
 
 // Avatar image preload state
 const imageLoaded = ref(false);
@@ -174,55 +231,22 @@ watch(
 );
 
 const handleLogout = async () => {
-  isNavOpen.value = false;
+  drawerVisible.value = false;
   await authStore.logout();
   router.push('/');
 };
 
 function navigateTo(path) {
   router.push(path);
-  isNavOpen.value = false;
+  drawerVisible.value = false;
 }
 
 // Toggles the popover menu
 const toggleProfileMenu = (event) => {
-  // Menu component expects a ref with toggle method. Guard against missing ref.
   if (profileMenu.value && typeof profileMenu.value.toggle === 'function') {
     profileMenu.value.toggle(event);
   }
 };
-
-// Preload avatar image once per session per user to avoid hitting Google too often
-function tryPreloadAvatar() {
-  if (avatarLoadAttempted.value) return;
-  avatarLoadAttempted.value = true;
-  const uid = authStore.userId;
-  const url = authStore.userPhotoUrl;
-  if (!uid || !url) return;
-  try {
-    const failed = sessionStorage.getItem(avatarFetchFailedKey(uid));
-    if (failed === 'true') return; // previously failed in this session
-  } catch (e) {
-    // ignore storage errors
-  }
-  const img = new Image();
-  img.onload = () => {
-    // image loaded, nothing to do (browser caches it)
-  };
-  img.onerror = () => {
-    try {
-      sessionStorage.setItem(avatarFetchFailedKey(uid), 'true');
-    } catch (e) {}
-    // Optionally log or show a toast in dev
-    console.warn('Avatar preload failed for', uid, url);
-  };
-  img.src = url;
-}
-
-// Watch for changes and try preloading
-watch(() => authStore.userPhotoUrl, (newVal) => {
-  if (newVal) tryPreloadAvatar();
-});
 
 // Defines the items in the popover menu based on auth state
 const profileMenuItems = computed(() => {
