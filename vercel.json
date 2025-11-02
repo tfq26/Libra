@@ -4,11 +4,6 @@
   "outputDirectory": "apps/Frontend/dist",
   "framework": null,
   "installCommand": "bun install",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
