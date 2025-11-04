@@ -35,7 +35,12 @@ export const useConversationStore = defineStore('conversation', {
         return conversationData;
       } catch (error) {
         // If 404, treat as new chat (do not throw)
-        if (error?.response?.status === 404 || error?.message?.includes('404')) {
+        if (
+          error?.response?.status === 404 ||
+          error?.response?.status === 410 ||
+          error?.message?.includes('404') ||
+          error?.message?.includes('410')
+        ) {
           console.log(`[Cache] Conversation ${id} not found. Treating as new chat.`);
           return { id: null, messages: [], title: 'New Chat' };
         }

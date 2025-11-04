@@ -376,3 +376,59 @@ export async function callOpenAI(input, history = [], userProfile = {}) {
     }
     return fullResponse;
 }
+
+// --- Title Generation (bypasses main SYSTEM_MESSAGE) ---
+export async function generateConversationTitle({ userText = '', assistantText = '' } = {}) {
+    try {
+        const { key, endpoint, deploymentName } = ensureAzureConfig();
+        const apiVersion = process.env.AZURE_OPENAI_API_VERSION || process.env.AZURE_OPENAI_API_VER || '2025-01-01-preview';
+
+        let url = endpoint.replace(/\/$/, '');
+        if (!/\/openai\//i.test(url)) {
+            const dep = encodeURIComponent(deploymentName);
+            url = `${url}/openai/deployments/${dep}/chat/completions?api-version=${apiVersion}`;
+        }
+
+        const TITLE_SYSTEM_PROMPT = [
+            'You are a title generator for technical troubleshooting chats.',
+            'Return a concise, specific title that captures the main technology or problem.',
+            'Hard rules:',
+            '- 3–6 words, Title Case.',
+            '- No punctuation, no quotes, no emojis.',
+            '- Output ONLY the title text, nothing else.',
+        ].join('\n');
+
+        const trimmedUser = (userText || '').toString().trim().slice(0, 500);
+        const trimmedAssistant = (assistantText || '').toString().trim().slice(0, 800);
+
+        const messages = [
+            { role: 'system', content: TITLE_SYSTEM_PROMPT },
+            { role: 'user', content: `User: ${trimmedUser || '[image or attachment]'}\nAssistant: ${trimmedAssistant || '[pending]'}` },
+        ];
+
+        const resp = await axios.post(url, {
+            messages,
+            temperature: 0.2,
+            max_tokens: 16,
+        }, {
+            headers: {
+                'api-key': key,
+                'Content-Type': 'application/json'
+            },
+            timeout: 20000
+        });
+
+        const raw = resp?.data?.choices?.[0]?.message?.content || '';
+        // Sanitize: strip newlines/punctuation, clamp length
+        const cleaned = String(raw)
+            .replace(/[\n\r]+/g, ' ')
+            .replace(/["'`“”‘’•·\[\]\(\)\.:;!,?]+/g, '')
+            .trim()
+            .slice(0, 60);
+        return cleaned || 'New Chat';
+    } catch (e) {
+        console.warn('[AI] Title generation failed:', e?.message || e);
+        // Fallback handled by caller
+        return 'New Chat';
+    }
+}

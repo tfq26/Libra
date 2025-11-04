@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { CosmosClient } from '@azure/cosmos';
 import { v4 as uuidv4 } from 'uuid';
 import { StatusCodes } from 'http-status-codes';
-import { callOpenAIStream, parseAIResponse } from '../lib/ai-service.js'; // --- MODIFIED: Import the new streaming function ---
+import { callOpenAIStream, parseAIResponse, generateConversationTitle } from '../lib/ai-service.js'; // --- MODIFIED: Import streaming + title helper ---
 import admin from 'firebase-admin';
 import { Ratelimit } from "@upstash/ratelimit"; // --- NEW: Import Upstash Rate Limiter ---
 import { Redis } from "@upstash/redis"; // --- NEW: Import Upstash Redis ---
@@ -56,6 +56,7 @@ const ratelimit = new Ratelimit({
 // Redis client for caching conversations (same env vars used by Upstash)
 const redisClient = Redis.fromEnv();
 const CONVERSATION_CACHE_TTL = parseInt(process.env.CONVERSATION_CACHE_TTL_SECONDS || '300', 10);
+const RESOLVED_TOMBSTONE_TTL = parseInt(process.env.CONVERSATION_RESOLVED_TOMBSTONE_TTL_SECONDS || '600', 10);
 
 /**
  * FIREBASE AUTH: Verifies the Firebase ID token from the request's Authorization header.
@@ -95,6 +96,20 @@ function cacheTtlWithJitter() {
   const jitter = Math.floor(Math.random() * 30);
   const base = Number.isFinite(CONVERSATION_CACHE_TTL) ? CONVERSATION_CACHE_TTL : 300;
   return Math.max(60, base + jitter);
+}
+
+function tombstoneTtlWithJitter() {
+  const jitter = Math.floor(Math.random() * 30);
+  const base = Number.isFinite(RESOLVED_TOMBSTONE_TTL) ? RESOLVED_TOMBSTONE_TTL : 600;
+  return Math.max(60, base + jitter);
+}
+
+function cacheKeyFor(userId, conversationId) {
+  return `conversation:${userId}:${conversationId}`;
+}
+
+function tombstoneKeyFor(userId, conversationId) {
+  return `conversation:tombstone:${userId}:${conversationId}`;
 }
 
 function cloneConversationForCache(conversation) {
@@ -252,9 +267,24 @@ export default async function handler(req, res) {
         });
       }
 
-      const cacheKey = `conversation:${clientUserId}:${id}`;
+      const cacheKey = cacheKeyFor(clientUserId, id);
+      const tombKey = tombstoneKeyFor(clientUserId, id);
       // Try cache first — only accept cached copy if conversation is still in-progress
       try {
+        // If a tombstone exists, never use cache, and ensure cache is evicted
+        const tombstone = await redisClient.get(tombKey);
+        if (tombstone) {
+          console.log('[Redis] Tombstone present, evicting cache and skipping cache for', cacheKey);
+          try { await redisClient.del(cacheKey); } catch (_) {}
+          // Short-circuit: do not return conversation payload when tombstoned
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          return res.status(StatusCodes.GONE).json({
+            id,
+            resolved: true,
+            message: 'Conversation has been resolved and is no longer available.'
+          });
+        } else {
         const cached = await redisClient.get(cacheKey);
         if (cached) {
           // Diagnostic logging to help determine stored shape
@@ -298,6 +328,7 @@ export default async function handler(req, res) {
         } else {
           console.log('[Redis] cache miss', cacheKey);
         }
+        }
       } catch (e) {
         console.warn('[Redis] Error reading conversation cache:', e && e.message ? e.message : e);
       }
@@ -315,6 +346,21 @@ export default async function handler(req, res) {
         } catch (e) {
           console.warn('[Redis] Failed to delete cache for resolved conversation:', e && e.message ? e.message : e);
         }
+        // Set tombstone to avoid racing readers from re-caching
+        try {
+          await redisClient.set(tombKey, '1', { ex: tombstoneTtlWithJitter() });
+          console.log('[Redis] Set tombstone for resolved conversation from DB:', tombKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to set tombstone for resolved conversation:', e?.message || e);
+        }
+        // Do not return resolved conversation payload
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        return res.status(StatusCodes.GONE).json({
+          id,
+          resolved: true,
+          message: 'Conversation has been resolved and is no longer available.'
+        });
       } else if (Array.isArray(conversation.messages) && conversation.messages.length > 0) {
         // Only cache in-progress conversations with messages
         try {
@@ -366,8 +412,11 @@ export default async function handler(req, res) {
             }
           }
           await conversationsContainer.item(convo.id, clientUserId).delete();
-          // Remove from Redis cache
-          try { await redisClient.del(`conversation:${clientUserId}:${convo.id}`); } catch (_) {}
+          // Remove from Redis cache and set tombstone
+          const cacheKey = cacheKeyFor(clientUserId, convo.id);
+          const tombKey = tombstoneKeyFor(clientUserId, convo.id);
+          try { await redisClient.del(cacheKey); } catch (_) {}
+          try { await redisClient.set(tombKey, '1', { ex: tombstoneTtlWithJitter() }); } catch (_) {}
         }
         return res.status(StatusCodes.OK).json({ success: true, message: 'All conversations deleted.' });
       } else if (id) {
@@ -383,7 +432,10 @@ export default async function handler(req, res) {
           }
         }
         await conversationsContainer.item(id, clientUserId).delete();
-        try { await redisClient.del(`conversation:${clientUserId}:${id}`); } catch (_) {}
+        const cacheKey = cacheKeyFor(clientUserId, id);
+        const tombKey = tombstoneKeyFor(clientUserId, id);
+        try { await redisClient.del(cacheKey); } catch (_) {}
+        try { await redisClient.set(tombKey, '1', { ex: tombstoneTtlWithJitter() }); } catch (_) {}
         return res.status(StatusCodes.OK).json({ success: true, message: 'Conversation deleted.' });
       } else {
         return res.status(StatusCodes.BAD_REQUEST).json({ error: 'id or all=true required for DELETE.' });
@@ -533,7 +585,8 @@ export default async function handler(req, res) {
       res.setHeader('X-Conversation-Id', convoId);
 
       // Cache the in-progress conversation BEFORE streaming starts
-      const cacheKey = `conversation:${clientUserId}:${convoId}`;
+      const cacheKey = cacheKeyFor(clientUserId, convoId);
+      const tombKey = tombstoneKeyFor(clientUserId, convoId);
       try {
         const cachePayload = cloneConversationForCache(conversation);
         if (cachePayload) {
@@ -574,19 +627,14 @@ export default async function handler(req, res) {
       conversation.messages.push(assistantMessage);
       conversation.updatedAt = new Date().toISOString();
 
-      // --- Generate a technology-focused title using the AI after the first assistant response ---
+      // --- Generate a technology-focused title using a dedicated AI call after the first exchange ---
       if (history.length === 0) {
         try {
-          const titlePrompt = 'Summarize the following technical conversation in 5 words or less, focusing on the main technology or problem. Only return the title, no punctuation.';
-          let title = '';
-          for await (const chunk of callOpenAIStream(cleanMessage, [
-            { role: 'system', content: titlePrompt },
-            { role: 'user', content: messageText || '[image]' },
-            { role: 'assistant', content: cleanMessage },
-          ])) {
-            title += chunk;
-          }
-          conversation.title = (title || '').replace(/[\n\r\-\.:]+/g, ' ').trim().slice(0, 50) || 'New Chat';
+          const title = await generateConversationTitle({
+            userText: messageText || (attachmentMetadata.length ? `[${attachmentMetadata.length} image${attachmentMetadata.length > 1 ? 's' : ''}]` : ''),
+            assistantText: cleanMessage,
+          });
+          conversation.title = (title || '').trim().slice(0, 50) || 'New Chat';
         } catch (e) {
           conversation.title = (messageText || 'New Chat').substring(0, 50) || 'New Chat';
         }
@@ -607,6 +655,13 @@ export default async function handler(req, res) {
           console.log('[Redis] Deleted cache for completed conversation after save:', cacheKey);
         } catch (e) {
           console.warn('[Redis] Failed to delete cache for completed conversation:', e && e.message ? e.message : e);
+        }
+        // Set a short-lived tombstone to avoid races re-populating the cache
+        try {
+          await redisClient.set(tombKey, '1', { ex: tombstoneTtlWithJitter() });
+          console.log('[Redis] Set tombstone after POST completion:', tombKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to set tombstone after POST completion:', e?.message || e);
         }
       } else if (Array.isArray(conversation.messages) && conversation.messages.length > 0) {
         // Only cache in-progress conversations with messages
@@ -649,11 +704,18 @@ export default async function handler(req, res) {
     
     // CRITICAL: Cache management for PUT - NEVER cache resolved conversations
     try {
-      const cacheKey = `conversation:${clientUserId}:${conversationId}`;
+      const cacheKey = cacheKeyFor(clientUserId, conversationId);
+      const tombKey = tombstoneKeyFor(clientUserId, conversationId);
       if (updatedConversation.status === 'resolved') {
         // Always delete cache for resolved conversations
         await redisClient.del(cacheKey);
         console.log('[Redis] Deleted cache for resolved conversation after PUT:', cacheKey);
+        try {
+          await redisClient.set(tombKey, '1', { ex: tombstoneTtlWithJitter() });
+          console.log('[Redis] Set tombstone after PUT resolve:', tombKey);
+        } catch (e) {
+          console.warn('[Redis] Failed to set tombstone after PUT resolve:', e?.message || e);
+        }
       } else if (Array.isArray(updatedConversation.messages) && updatedConversation.messages.length > 0) {
         // Only cache in-progress conversations with messages
         const cachePayload = cloneConversationForCache(updatedConversation);

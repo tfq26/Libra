@@ -1,4 +1,4 @@
-$ NODE_ENV=development node --watch dev-server.js
+[0m[2m[35m$[0m [2m[1mNODE_ENV=development node --watch dev-server.js[0m
 [Conversation API] ✅ Environment variables loaded
 [Conversation API] ✅ Firebase Admin initialized successfully
 [Conversation API] ✅ CosmosDB client initialized
@@ -7,18 +7,663 @@ $ NODE_ENV=development node --watch dev-server.js
 [Backend Init] ✅ Environment variables loaded from .backend.env
 [Backend Init] ✅ Backend services initialized successfully
 [Dev Server] Backend dev server listening on http://localhost:3001
-[Backend Init] 🔥 warmUp starting, options: { pingAI: false }
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
 [warmUp] Firebase Admin already initialized
 [warmUp] ✅ CosmosDB connectivity verified
-[0mGET /warm [36m304[0m 604.999 ms - -[0m
-[Backend Init] 🔥 warmUp starting, options: { pingAI: false }
+[0mGET /warm [36m304[0m 681.757 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
 [warmUp] Firebase Admin already initialized
 [warmUp] ✅ CosmosDB connectivity verified
-[0mGET /warm [36m304[0m 525.145 ms - -[0m
+[0mGET /warm [36m304[0m 202.524 ms - -[0m
 [Redis] cache raw type: object value preview: [object]
-[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:915f210a-b8ca-48da-9114-10d20be35a01
-[0mGET /conversation?id=915f210a-b8ca-48da-9114-10d20be35a01&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 663.497 ms - -[0m
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 905.783 ms - 660[0m
 [Redis] cache raw type: object value preview: [object]
-[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:915f210a-b8ca-48da-9114-10d20be35a01
-[0mGET /conversation?id=915f210a-b8ca-48da-9114-10d20be35a01&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 170.433 ms - -[0m
-[0mPUT /history [32m200[0m 297.930 ms - 48[0m
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 204.494 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 205.895 ms - -[0m
+[0mPUT /history [32m200[0m 244.924 ms - 48[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'135'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1 Edg/142.0.0.0'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIwOTEzMCwiZXhwIjoxNzYyMjEyNzMwLCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.jYQoGTmuqltdHoCijXRSOl6Smw8XUuMTzpyn6wpga7dxTSp8Od2DssXACxRpEHtNL7TkzMpR4J9Ddncb7GPRnBkssdTeOE6JL-IXlKqRJudC2H4GmPCDGh8_aoWM9B-VvOiJEqzZzJxqm2alDHCAz4ZSvEXy-F9VW1VTmG54nwrEyp6vnIK445FrW3z4WpAYPhCZlE2wVV-tRByh47e688Wtl_PcosJEkkwpp4yjafgeGcB0aVKCDJTl6k8VBrnTakP7t9qc7MI9yrg6ff9W3vnybHM5h94c9qD5N3CLr94Wo2cNaKEbtQfHbJc8tCQkJJKmtLIJkLZ-Q5a4y4RLJA'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat/a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'jsnjnsjnsnsjnsjnsjsnjsnja'[39m,
+  conversationId: [32m'a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1559.322 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mPUT /history [32m200[0m 105.851 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 719.367 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 563.339 ms - 1225[0m
+[0mPUT /history [32m200[0m 105.704 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 265.385 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 575.553 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 198.475 ms - -[0m
+[0mPUT /history [32m200[0m 103.106 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 359.329 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 730.341 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 217.140 ms - -[0m
+[0mPUT /history [32m200[0m 114.601 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 504.601 ms - -[0m
+[Redis] cache miss conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[Redis] Cached in-progress conversation: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 680.887 ms - 1225[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1
+[0mGET /conversation?id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 214.085 ms - -[0m
+[0mPUT /history [32m200[0m 115.129 ms - 48[0m
+[0mDELETE /conversation?userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2&id=a1ab7293-6ffe-4341-a3c9-98a3c06e9dd1 [32m200[0m 659.329 ms - 50[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 314.826 ms - -[0m
+c[32mRestarting 'dev-server.js'[39m
+file:///Users/taufeeqali/Projects/Libra/apps/Backend/lib/blob-service.js:1
+<template>
+^
+
+SyntaxError: Unexpected token '<'
+[90m    at compileSourceTextModule (node:internal/modules/esm/utils:346:16)[39m
+[90m    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:107:18)[39m
+[90m    at #translate (node:internal/modules/esm/loader:536:12)[39m
+[90m    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:583:27)[39m
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+[90m    at async ModuleJob._link (node:internal/modules/esm/module_job:162:19)[39m
+
+Node.js v22.18.0
+[31mFailed running 'dev-server.js'. Waiting for file changes before restarting...[39m
+c[32mRestarting 'dev-server.js'[39m
+[Conversation API] ✅ Environment variables loaded
+[Conversation API] ✅ Firebase Admin initialized successfully
+[Conversation API] ✅ CosmosDB client initialized
+[History API] ✅ Environment variables loaded
+[History API] ✅ CosmosDB client initialized
+[Backend Init] ✅ Environment variables loaded from .backend.env
+[Backend Init] ✅ Backend services initialized successfully
+[Dev Server] Backend dev server listening on http://localhost:3001
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 662.441 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 456.538 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] CosmosDB verification warning: read ETIMEDOUT
+[0mGET /warm [36m304[0m 3713.460 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 647.058 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 278.318 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 314.457 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 337.261 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 750.498 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 1045.618 ms - -[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'117'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTQ1OCwiZXhwIjoxNzYyMjE5MDU4LCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.Kui2Oe2PdFz2zOC181Jrw_TO1sfBkx9N5UcC98Ldj2RrWXcEEyTPaceTOKphv87ZzieoJKdfGfRF6TGl2ccpvbzEtMP4SlxoLoyI659r8Q264JJ4T46nDrNG9W1KzuSfJm0myAoFWJ-r-j7_p7bdZykUy89f47Uz8VH1209kO5iciVUTRVJasB1tNBDfqK1LFZtEewr4fM1Nk4JAWpfOD-QGSuALaumBZvTrF4eKkUmlGnyjw1h6G5Ey_xTSmYDS2CN9VCP6YbYCvxkvCEf_uKhQN52oCNP-51LgT9NgAjw6bik1QMMZR7UoUVO0FlQhofH6Tlr--eyYl4y4bS5Trw'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'hello, i need help with my macbook air m4'[39m,
+  conversationId: [1mnull[22m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 7117.932 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mPUT /history [32m200[0m 199.333 ms - 48[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'158'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTQ4MSwiZXhwIjoxNzYyMjE5MDgxLCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.VtFH7eyW7r7bRaKkceI5fWNHvTZLAXktlxo0AFIkGb7_5IG6yB9DVKd5579kfwQPWXf5z2n49ar7KoGeWwb9Rq6MN80phe6Kz9MxF1FepDL8qaO2Q_P0B6PXP7jWDY-oUl_PewoHFO5drakwCgM4lTyF_TsBgOwrFBzXWQ2gv6RsHDJuL2CUI1RFG7qP5rAo9Gjy7RdNHZ5ddAxOz7p9DyZ-kCV_VADdKDqpQvgo0mudg82HULLM2ISVY8zgNQ-nAJnJPjC04SpLFsry3Kn5XW4vX-SW2jmZSiakMR2I89qg4O_5CzDUYoA4jzPUzMravpCbLqiEBmLR0JZJGYLqVg'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'im not able to connect my airpods to the macbook'[39m,
+  conversationId: [32m'cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1363.348 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mPUT /history [32m200[0m 102.862 ms - 48[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'113'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTQ4NSwiZXhwIjoxNzYyMjE5MDg1LCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.dpQ79cseoGNoI4e0xu2WOcB0TPlWdWP_gzqXH69bMtflJU-KWXmlUWrhLjnaTtqtEy0WgnRFqBYklLJyCK_dLgKcyuUi89gMoC2PCpbyPSJMtNjAB2A2T4uNz44GBI1bUkyWCS2HO16kv25bQQBsrdJPTJGiBt_0Mj1bo7BRXJsCx6dOrdDofA6Y-PwFvD9zPbOSWsOnuc8qAXqfK3WApzofI5OTSSpu9JhbirhixRndLRbRAM6sgSnEcV78Oa4EGVxz9FL-KW8LC2SgHe4iIn2y8YLXrccwmZ5rMy5oCeYJhwIFb282VJtEX_-8lhFjX56cMySYHRQypYOPjZqM2Q'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'yes'[39m,
+  conversationId: [32m'cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1083.909 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mPUT /history [32m200[0m 870.216 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 692.259 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 204.627 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 662.953 ms - 1550[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 206.897 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 206.073 ms - -[0m
+[0mPUT /history [32m200[0m 129.005 ms - 48[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'151'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTg0NiwiZXhwIjoxNzYyMjE5NDQ2LCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.KsE8TwalYQVNIGOs5WqmXNXcxExis-pV4AVmBNiyZJy4jEYZpBKgLnMG_HBnaNP4nGjFtr9Tb4grKKqDO3YzbUigEY6leFjTy1tDLMlBVsftg3cmF8u8Gor8n0vRAbCPlf5fcudvZ3caM5d1C9TxpK-wgRtdnjT9mQgDBiJhz2XX0_Pyi3rJWyojWAkLOko9g8oxIGD80qMgN4cQXnNJUHEtM0QhVDspXrfWnDIBh67xcGYd0kXaOL6WypXYdofxYEkhKxVyEFo6FahYVZUy4DXM6DXc3hwtyBod-YPHvOck-38p5fPE9UaEVMc2r5tFRYsnEcMi7kj55rTsFdWRMw'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat/cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m"AirPods don't appear in Bluetooth devices"[39m,
+  conversationId: [32m'cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1720.093 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'151'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTg1MCwiZXhwIjoxNzYyMjE5NDUwLCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.mO_4HWh3OS05NSjos74SO8yIdFKcUmoYa56uP4Fw0a5w_QRBnNqQ5R77_yA35CBdtHlrG0T_4jCXiNn9IwfsBZ1RKYGtT0o6ktHzdvoKasoUrrHFAUg9j11DIxC4YcREiyK6y_eyHdp2bqYJreR5Z1RhxZTyFdIcuKaVYzcx-JZbi1RQop-xYkX-dyE_QV36suy7fOXI5Huf1aclpujRITwnwcL80TP6xO9EhMTmJjpmU4kRjhfC-cGMzJQWXSgG8qrDkUIzTRtZPd71LXhyfpI_Lo7A5S38w_CRatnE55n508ubeIHudhLXntZK9IFCZAYftJolnINPqAI4Z_PO_Q'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat/cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'Yes, they are charged and in pairing mode'[39m,
+  conversationId: [32m'cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1022.307 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mPUT /history [32m200[0m 108.991 ms - 48[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'139'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTg1OCwiZXhwIjoxNzYyMjE5NDU4LCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.EyFdZZN5lW4qLCw5tfLp176n-UANQsleiA8dB4SRR0p75EUR5XFnTjpO8Jkz1MeN16ULS3rBIR2lO8LYODWd_hv2biEbIIRyuhBbwY1oaxaruPA9cECd5JRal2Yq0dS8lQEjOC0jKMvCX3nVg9MyAubFzfzw8TSC7G3KRs3o2s0dW7r0RnzB1a0sZVlSC0r6p-3NMi5ZuPOT2NNeBovW2cXQ0u71gad2mqJiPuoCudHJ6FaU1rmBI0s6Da4NX9SGxEythhWtBdqjlHiQvFqtPxoKyxVGbhqMPpYJJDxRsgV0h5oKqBWNqXnqKJi5pRVQIT6y-OUpD5146xay0cYu0w'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat/cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'Yes, other devices are listed'[39m,
+  conversationId: [32m'cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1165.420 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mPUT /history [32m200[0m 111.742 ms - 48[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'127'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTg5MiwiZXhwIjoxNzYyMjE5NDkyLCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.VmMgkpN9AJZlL_tnvR98m3NlifPUFRZEULteVL71YfVxM_J6ny3yr4agUFyD_qUaogpTCTVae_pX3NzATJhZbOiC5SRxyaRK0NY2YhkOTDLqDvDTZ7292shnLXQfhndAdMxzhtgRFL0D7S3yKufPtqdVbFj75zg4ONIgZMf02OZR_5wpx6ZXtwfFLJjaaoAR0Xco12WiWhp5kGzEkojoJkYgugzw9TmU8Sp3qOGdKqEkWjj_hFdokqyf4frx3zNVNsANs422KkSU-wBhDCfWXVUB9O_aaAHh2LHkXwIxP1RYUhq0AxgmXX_SMBcioGqmexQtH3YjD6AEUE6YofiNEw'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat/cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'yes, they show up'[39m,
+  conversationId: [32m'cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1418.114 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mPUT /history [32m200[0m 119.968 ms - 48[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'137'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNTg5NywiZXhwIjoxNzYyMjE5NDk3LCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.cIPatIjyyi77PBiz8_er60OjHI-T83r50dSqy18_vNl2LmIeJuQdYPQlxP2kg2XW_9y7RzANrk2cKgCdo19R1P3x_LYqo8oFtN49e7RDdgZ40EOWQA2LZbltPqymanDoG-gobAHatssBaf6ChjdWYS0alBXafdTJeZLbICWytJxDJgUAYFK7YYJ6y1bxyojqN1Ei8Cpef6PzLE-d7rqqBOjbpZz6vu1PwMTbNlmsKz_ooLJjXWIdWRqYe3RvVCjtzEWuGMBcioqNnOGg8zEV4Vak0qEBys5rBLf6_bjnaTKx7C0gV5cACl-Xc_hVygVZk2SD_6eNPOKcVXvRCg2qdA'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat/cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'Yes, connected successfully'[39m,
+  conversationId: [32m'cad88c4f-c52a-4bb3-b613-c1c8ae32cca9'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 970.291 ms - -[0m
+[Redis] Deleted cache for completed conversation after save: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone after POST completion: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mPUT /history [32m200[0m 108.670 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 458.421 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 712.212 ms - 3450[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 383.610 ms - -[0m
+[0mPUT /history [32m200[0m 103.781 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 390.823 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 651.096 ms - 3450[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 392.300 ms - -[0m
+[0mPUT /history [32m200[0m 142.904 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 209.941 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 799.765 ms - 3450[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 383.114 ms - -[0m
+[0mPUT /history [32m200[0m 107.239 ms - 48[0m
+[0mGET /history?userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2&page=1&pageSize=10 [32m200[0m 111.817 ms - 818[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 288.821 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 211.146 ms - -[0m
+[0mPUT /history [32m200[0m 101.737 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 243.514 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 200.260 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 833.956 ms - 3450[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 384.113 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Deleted cache for resolved conversation from DB: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[Redis] Set tombstone for resolved conversation from DB: conversation:tombstone:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 382.058 ms - -[0m
+[0mPUT /history [32m200[0m 146.291 ms - 48[0m
+c[32mRestarting 'dev-server.js'[39m
+[Conversation API] ✅ Environment variables loaded
+[Conversation API] ✅ Firebase Admin initialized successfully
+[Conversation API] ✅ CosmosDB client initialized
+[History API] ✅ Environment variables loaded
+[History API] ✅ CosmosDB client initialized
+[Backend Init] ✅ Environment variables loaded from .backend.env
+[Backend Init] ✅ Backend services initialized successfully
+[Dev Server] Backend dev server listening on http://localhost:3001
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 681.576 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 786.952 ms - 132[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 207.313 ms - 132[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 223.329 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 193.677 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 482.615 ms - 132[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 192.385 ms - 132[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 206.899 ms - 132[0m
+[0mGET /history?userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2&page=1&pageSize=10 [32m200[0m 252.757 ms - 818[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 226.892 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 201.208 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 465.432 ms - 132[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 197.412 ms - 132[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 196.393 ms - 132[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 307.349 ms - -[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 562.542 ms - 132[0m
+[Redis] Tombstone present, evicting cache and skipping cache for conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:cad88c4f-c52a-4bb3-b613-c1c8ae32cca9
+[0mGET /conversation?id=cad88c4f-c52a-4bb3-b613-c1c8ae32cca9&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [33m410[0m 202.484 ms - 132[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 407.229 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 295.636 ms - -[0m
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'111'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNjQ1MCwiZXhwIjoxNzYyMjIwMDUwLCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.NCc9jcCjDvAxnDp_inIplbtK-CPHuRZhHIXpmK3cS389AHhEqI7zxpXhmG2V7S3-OdkPJKkhjW0nJa07G2mISjBrLAB69XfbS7yxnjZn6c-ydnx47Wv-LuPeyzmBxJfCfdItEB9nXgfN2lyzREEcBkr4FeFIhmt4b-S2KtJerPlaK5heRjDtVvrhkDs_W_8lR7i6BL54hyHHrct2QQc4M4vEuud64pcGEFei-n5nladEzsDQ_xn8chOmLLFkUoS2Sums_YW6yao53qqIYFbW9oMVTQenuQ2RwlEa62jvK5fIGZ0Cx9VI3pXGSSwfW9s-GjVtlG6F_diA7s_b346Xdw'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'Hi, i need help with my macbook pro'[39m,
+  conversationId: [1mnull[22m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[AI] Starting Azure SDK streaming call...
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 1384.929 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[API] Incoming POST /conversation
+[API] Headers: {
+  host: [32m'localhost:3001'[39m,
+  connection: [32m'close'[39m,
+  [32m'content-length'[39m: [32m'130'[39m,
+  [32m'sec-ch-ua-platform'[39m: [32m'"macOS"'[39m,
+  authorization: [32m'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU0NTEzMjA5OWFkNmJmNjEzODJiNmI0Y2RlOWEyZGZlZDhjYjMwZjAiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGF1ZmVlcSBBbGkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSmI4UDJIUjZjYVJIS3ljSElrcWdSNmdYdXJ3a1RMNUJJR1YxUEVlYkNjcHNDQzVIY2M9czk2LWMiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbGlicmEtMDgyNiIsImF1ZCI6ImxpYnJhLTA4MjYiLCJhdXRoX3RpbWUiOjE3NjE3NTk3NDgsInVzZXJfaWQiOiJxM3Nic0VJZXJyY1NKQ21aOXloN0U1d1RMRWwyIiwic3ViIjoicTNzYnNFSWVycmNTSkNtWjl5aDdFNXdUTEVsMiIsImlhdCI6MTc2MjIxNjQ1NCwiZXhwIjoxNzYyMjIwMDU0LCJlbWFpbCI6ImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA1NTQ0MTg5NDczNDAxMDEzNjUwIl0sImVtYWlsIjpbImJhdHN0ZWVsMjA5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.mqClc4zZBxvOMvTADK9-6k9ar8wXxGyaTgE0KacDHwmaP_b8KsYB05Sffw_zpGV5J9_cOK1o3rJ2M-uRTukFBapUIC8mPS1aBzZNJdraCcA-_VR3ZC51FpOCjL1GLCpyb4WPh2QRReBgjePsb5hSlvxUMRdyZtSSJxYOCgcNmPOkQDhkL-Hfb2Xuci4if0Dk_FdlkGC-wIBEBMP3AL16MzK_fBoTHk6oV6ssabpU39CDenjEgs6I8xm3KendZKMgH0DDxYQ_xf7xzIZ_a-NUdS3fWyU7A0Y55t-hNpFGzNNI3afOaSqlbA-zO1FASjjTwhFQfS4-32DKhuMuxRZtwQ'[39m,
+  [32m'user-agent'[39m: [32m'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0'[39m,
+  [32m'sec-ch-ua'[39m: [32m'"Chromium";v="142", "Microsoft Edge";v="142", "Not_A Brand";v="99"'[39m,
+  [32m'content-type'[39m: [32m'application/json'[39m,
+  [32m'sec-ch-ua-mobile'[39m: [32m'?0'[39m,
+  accept: [32m'*/*'[39m,
+  origin: [32m'http://localhost:5173'[39m,
+  [32m'sec-fetch-site'[39m: [32m'same-origin'[39m,
+  [32m'sec-fetch-mode'[39m: [32m'cors'[39m,
+  [32m'sec-fetch-dest'[39m: [32m'empty'[39m,
+  referer: [32m'http://localhost:5173/chat'[39m,
+  [32m'accept-encoding'[39m: [32m'gzip, deflate, br, zstd'[39m,
+  [32m'accept-language'[39m: [32m'en-US,en;q=0.9'[39m,
+  cookie: [32m'__clerk_db_jwt_gyI6voRz=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __clerk_db_jwt=dvb_32klUuoVaTPc76iUqsvjT6qhee5; __session=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __session_gyI6voRz=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18yeHRxNnVQY2VENXo3Q3BKYkhDWnJrZ2dSaXkiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NTk4MDc0MzUsImZ2YSI6WzM5OSwtMV0sImlhdCI6MTc1OTgwNzM3NSwiaXNzIjoiaHR0cHM6Ly9jYXJlZnVsLXZpcGVyLTE4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc1OTgwNzM2NSwic2lkIjoic2Vzc18zM2h5MTdHVkpIMU1TR0s1N2pGaXptbFhKd2kiLCJzdHMiOiJhY3RpdmUiLCJzdWIiOiJ1c2VyXzMya2xaOXFoTTdBMUhJVmtWbGlRM0NLbEZvdiIsInYiOjJ9.VF7Ejv4uEu5p-vx3_2EbPIaljLsoGXeS-YcQYy3B4WYYjUnbTUiLnRftTUzyGe47OPGe5feYaJZN7cRfHPt61w-r1_7QBHf8_38BEg5dfW7qGo2nABmgM3AVyomILo85RteCHC1vY18EXiqXhQ1Q6Spcbdj6-qyRDAh9IO9EpyeIwsB09Zzct-o5CDF4Jb5pFexJ__yDW6SE52HOCMzoPYBOEuS81iaNpjrkKBwS5jvVeuyqOO4hD_GrnFCcGu62UfknAqkR4XRw-MalG1H5nsaY3KnsYXR5u_bZycwVHTHr50gpLY7EiY3XN0UGIcCK8kpY2g_n1yUjwouhzOM4Ew; __client_uat_gyI6voRz=1759783380; __client_uat=1759783380; wos-session=Fe26.2*1*1f72cabb9b34674a9d68af96faef0d464ebef6b3cb714b7bef93913e0baef2ca*jhUWDOnVm6p92qeArBn01Q*VBWDcaTUha9bvbX_tVn4DxjwvJYGlw5dCoLCqHkffDteuhW_YzBhzpwTb1WwsKdV6J_8s-PwjRrmtv0otpyi2SXbKkaBZyYGeAAne0t0CzdIrVgNizbYMCz2J5s7TSUUb_BvL4ZgRKlVDWl66FL2DD_VA62BUWvBhheyoPUGBT3sVy16liL5sAuTGFLAOpSUY2DqS3nto7_posRBPSyfd2-E6zglPUtqrmmHtk0SnCiU9HiF-WFpz9R_52WAunh6ORXdZ91XcXCgQO3_tkGJV5uzKhAX00URmUufHEkO75QQC1O-UoxX-DOAMdrVnLAmc0RIxYObMwanaYbXmBVSPluvJH96MoXIrBqGEvmyODRSf2zeDh2nKJOc_9Ga6TadbrNkQvyZz-B3uu--xW1xccnedAwyBVF0I3MjdWrK9eZ-wzfXeApFmsSjtFEgVkOYeo4LPQq4ZIP3ZmOwHfzxlqMq7BoQSm_Dnt2ALlmQv3Zt6ozmQtwj_tW7Tx38M8doJ-c3PALp-tS_Q7tXDOIuWETf6JPQP0KJUrFo8GsfIheBHp2aF4okwGa07Tc1LhB-4sNiE3jfWvkkMmgbxlC7kn6WsNld9iSigPm_FoWTc_SlWScjsC0fHpiw9QoWySFi6XrK3C2uJdqmI4l9pQf6V9gdT1OCB3RSgw1DhD1zDCkQ4Adi5btcPiu3nXX2TZxzBmC-hIv25KiolQ8zawH7pJQxEYhMvOKvBmHKY7qmgI6pJWp5qtqAN0IqlCdjhGmHorJJmSCwqNZHhJkaVzHauyN8hpa5ZNtBwrn-4tHNFkwdmbinTzKAJZMAAxnEgSNu5tRnK6P1P-XPSgPrN0jY9C0O-o--QeW4TzYlRtOuLQdaRAt7jsD_X8qRlZTN0AQzEpuBCwIp-zsYO4mWuNz17Jcx71I2mUzsqBS1UBqSdBdw3T7dGvnuSrWOQPQ4WTEHJzMZRzasxsHqbZiblmPkt4v0yBh2pQEgndg76nvgwg32p5-lgFujAhWqByKoF7xlBF4zpdiuhKurNCsQOTtYxIKyIhqhgVzctEsigeG4VT5vy0CyubXPUKxAE7LDzycz9IAT_N6mNIWAlCp2-RRfpclbrTEUnp8BSZblolF7LZSfB6hFSlGvn6XDTQOwEVwPmP8Q7lBFLrF5vRtTUKPSHSwIU7kfDXN4zEsGKCM0BjKk-VukW7wqigOQG-p9fIERbhwhAbykA5Mp4IKnkl0fZ51WhYgqrHe7CfrDf6aBk6y4Jz7JkIs4_RTzsEgu2dmb3XqeOqJ6B2PxS_8f-tur_JnEumoXQvz2uP6RAWZb8UkGNtoRQLo_w415C7hmB4gwdVK1z3IzYFaMsXaM9wP8-b7kFeF0z_l2-OYzrd5kRwelqpVqpV8ROjOfaH1OLcnODgJE-nervRKvOFcm5Z2zCLwXS0l3gJNS2gw0Qe3lkNHnXw7q-iMYzEy-0PrgpCW6_32drFWUjEs2grsWQ_fBN6-MERDSPBtYTimRGtyJLL7iNr2pI4_FuEY2BujI8X7WVZYXv22-zk8z7LJLmRFG8JxCxZfuhtQyCC6ISJcrqTvwJDdqStnqw9-tnExzf7S8rUH324I6WLkAUdX_oY7M7OhXMBbft0A1ExPf75lHmjT7wOyMF3a7LhrHst0xQ93DR-5sB-76tL486H9n3owuQ3EUv-nXBKNFLV0q3YG4vz0**7dca5a11ffedcacabd6b9a7223c04ccf2bcc8a63655f22bab36d9a8f5b223961*4U3iLsxScaM2hBh7U4erzoAwsx_8-U7ecLmGRIvCmCE~2'[39m
+}
+[API] Content-Type: application/json isMultipart: [33mfalse[39m
+[API] Non-multipart body: {
+  message: [32m'Battery not charging'[39m,
+  conversationId: [32m'17cdbb14-7263-4bef-b021-a92913960d5d'[39m,
+  userId: [32m'q3sbsEIerrcSJCmZ9yh7E5wTLEl2'[39m
+}
+[Redis] Cached in-progress conversation before streaming conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[AI] Starting Azure SDK streaming call...
+[0mPOST /conversation [32m200[0m 876.328 ms - -[0m
+[Redis] Cached in-progress conversation after POST: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[0mPUT /history [32m200[0m 98.443 ms - 48[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 230.217 ms - -[0m
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 273.591 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[0mGET /conversation?id=17cdbb14-7263-4bef-b021-a92913960d5d&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 476.460 ms - 1344[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[0mGET /conversation?id=17cdbb14-7263-4bef-b021-a92913960d5d&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 200.931 ms - -[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[0mGET /conversation?id=17cdbb14-7263-4bef-b021-a92913960d5d&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 197.797 ms - -[0m
+[0mPUT /history [32m200[0m 108.009 ms - 48[0m
+c[32mRestarting 'dev-server.js'[39m
+[Conversation API] ✅ Environment variables loaded
+[Conversation API] ✅ Firebase Admin initialized successfully
+[Conversation API] ✅ CosmosDB client initialized
+[History API] ✅ Environment variables loaded
+[History API] ✅ CosmosDB client initialized
+[Backend Init] ✅ Environment variables loaded from .backend.env
+[Backend Init] ✅ Backend services initialized successfully
+[Dev Server] Backend dev server listening on http://localhost:3001
+c[32mRestarting 'dev-server.js'[39m
+[Conversation API] ✅ Environment variables loaded
+[Conversation API] ✅ Firebase Admin initialized successfully
+[Conversation API] ✅ CosmosDB client initialized
+[History API] ✅ Environment variables loaded
+[History API] ✅ CosmosDB client initialized
+[Backend Init] ✅ Environment variables loaded from .backend.env
+[Backend Init] ✅ Backend services initialized successfully
+[Dev Server] Backend dev server listening on http://localhost:3001

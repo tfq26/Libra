@@ -5,13 +5,13 @@
       <Button
         icon="pi pi-home"
         :class="{ 'p-button-warning': route.path === '/', 'p-button-secondary': route.path !== '/', 'p-button-rounded p-button-icon-only p-button-lg': true }"
-        v-tooltip.left="'Home'"
+        v-tooltip.bottom="'Home'"
         @click="router.push('/')"
       />
       <Button
         icon="pi pi-comment"
         :class="{ 'p-button-warning': route.path.startsWith('/chat'), 'p-button-secondary': !route.path.startsWith('/chat'), 'p-button-rounded p-button-icon-only p-button-lg': true }"
-        v-tooltip.left="'Chat'"
+        v-tooltip.bottom="'Chat'"
         @click="router.push('/chat')"
       />
       <template v-if="!authStore.loading">
@@ -22,7 +22,7 @@
           role="button"
           aria-haspopup="true"
           aria-controls="profile_menu"
-          v-tooltip.left="'Profile'"
+          v-tooltip.bottom="'Profile'"
           @click="toggleProfileMenu($event)"
         >
           <!-- Show preloaded image when available -->
@@ -56,80 +56,87 @@
     </div>
 
     <!-- Mobile Drawer Navigation -->
-    <Drawer v-model:visible="drawerVisible" position="right" class="w-80">
-      <template #header>
-        <div class="flex items-center gap-3">
-          <i class="pi pi-bars text-2xl"></i>
-          <span class="font-semibold text-xl">Menu</span>
-        </div>
-      </template>
+    <Drawer
+      v-model:visible="drawerVisible"
+      position="right"
+      class="w-80 border-l border-surface-100/60 dark:border-surface-700/60 
+             dark:bg-surface-900/80 backdrop-blur-xl transition-all duration-300"
+      fluid
 
-      <div class="flex flex-col h-full">
-        <!-- User Profile Section -->
-        <div v-if="!authStore.loading" class="mb-6 pb-6 border-b border-surface-200 dark:border-surface-700">
-          <div class="flex items-center gap-3 mb-4">
-            <div
-              class="rounded-full flex items-center justify-center"
-              :class="{ 'bg-primary text-white': authStore.isAuthenticated, 'bg-surface-200 text-surface-700': !authStore.isAuthenticated }"
-              style="width:56px; height:56px;"
-            >
-              <img
-                v-if="imageLoaded && authStore.userPhotoUrl"
-                :src="authStore.userPhotoUrl"
-                alt="avatar"
-                class="w-full h-full object-cover rounded-full"
-                @error="() => { imageLoaded = false; imageError = true; }"
-              />
-              <span v-else class="text-xl font-semibold">
-                <template v-if="initials">{{ initials }}</template>
-                <template v-else>
-                  <i class="pi pi-user text-2xl"></i>
-                </template>
-              </span>
-            </div>
-            <div v-if="authStore.isAuthenticated" class="flex-1">
-              <div class="font-semibold text-surface-900 dark:text-surface-0">
+    >
+      <!-- Header -->
+      <template #header>
+        <div class="flex items-center gap-3 px-2 py-1">
+          <div
+            class="rounded-full flex items-center justify-center shadow-md overflow-hidden ring-2 ring-primary/20"
+            style="width: 56px; height: 56px;"
+          >
+            <img
+              v-if="imageLoaded && authStore.userPhotoUrl"
+              :src="authStore.userPhotoUrl"
+              alt="avatar"
+              class="w-full h-full object-cover rounded-full"
+              @error="() => { imageLoaded = false; imageError = true }"
+            />
+            <span v-else class="text-lg font-semibold text-surface-700 dark:text-surface-200">
+              <template v-if="initials">{{ initials }}</template>
+              <template v-else>
+                <i class="pi pi-user text-xl text-primary"></i>
+              </template>
+            </span>
+          </div>
+
+          <div>
+            <div v-if="authStore.isAuthenticated">
+              <div class="font-semibold text-surface-900 dark:text-surface-0 leading-tight">
                 {{ authStore.user?.displayName || authStore.user?.name || 'User' }}
               </div>
-              <div class="text-sm text-surface-600 dark:text-surface-400 truncate">
+              <div class="text-sm text-surface-600 dark:text-surface-400 truncate max-w-[160px]">
                 {{ authStore.user?.email }}
               </div>
             </div>
-            <div v-else class="flex-1">
-              <div class="text-surface-600 dark:text-surface-400">
-                Not signed in
-              </div>
+            <div v-else>
+              <div class="text-surface-600 dark:text-surface-400">Not signed in</div>
             </div>
           </div>
         </div>
+      </template>
 
-        <!-- Navigation Links -->
-        <nav class="flex-1 space-y-2">
+      <!-- Main Content -->
+      <div class="flex flex-col h-full pb-2">
+        <!-- Nav Links -->
+        <nav class="flex-1 space-y-1 px-2 pt-2">
           <Button
             label="Home"
             icon="pi pi-home"
-            :class="{ 'bg-primary-subtle text-primary': route.path === '/' }"
-            class="w-full justify-start"
+            :class="{
+              'bg-primary/10 text-primary font-medium': route.path === '/',
+              'hover:bg-surface-100 dark:hover:bg-surface-800': route.path !== '/'
+            }"
+            class="w-full justify-start rounded-lg py-2 text-sm transition-colors duration-200"
             text
             @click="navigateTo('/')"
           />
           <Button
             label="Chat"
             icon="pi pi-comment"
-            :class="{ 'bg-primary-subtle text-primary': route.path.startsWith('/chat') }"
-            class="w-full justify-start"
+            :class="{
+              'bg-primary/10 text-primary font-medium': route.path.startsWith('/chat'),
+              'hover:bg-surface-100 dark:hover:bg-surface-800': !route.path.startsWith('/chat')
+            }"
+            class="w-full justify-start rounded-lg py-2 text-sm transition-colors duration-200"
             text
             @click="navigateTo('/chat')"
           />
-          
+
           <template v-if="!authStore.loading">
-            <Divider v-if="authStore.isAuthenticated" />
-            
+            <Divider class="my-3 opacity-60" v-if="authStore.isAuthenticated" />
+
             <Button
               v-if="authStore.isAuthenticated"
               label="Profile"
               icon="pi pi-user"
-              class="w-full justify-start"
+              class="w-full justify-start rounded-lg py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
               text
               @click="navigateTo('/profile')"
             />
@@ -137,8 +144,7 @@
               v-if="authStore.isAuthenticated"
               label="Sign Out"
               icon="pi pi-sign-out"
-              class="w-full justify-start"
-              severity="danger"
+              class="w-full justify-start rounded-lg py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
               text
               @click="handleLogout"
             />
@@ -146,23 +152,21 @@
               v-else
               label="Sign In"
               icon="pi pi-sign-in"
-              class="w-full justify-start"
-              severity="success"
+              class="w-full justify-start rounded-lg py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors"
               text
               @click="navigateTo('/sign-in')"
             />
           </template>
         </nav>
 
-        <!-- Footer Info -->
-        <div class="pt-4 mt-auto border-t border-surface-200 dark:border-surface-700">
-          <div class="text-xs text-surface-500 dark:text-surface-400 text-center">
-            Libra Chat App
+        <!-- Footer -->
+        <div class="pt-4 mt-auto border-t border-surface-200/70 dark:border-surface-700/70">
+          <div class="text-xs text-surface-500 dark:text-surface-400 text-center py-3">
+            Libra Chat App — v1.0
           </div>
         </div>
       </div>
     </Drawer>
-
     <!-- Desktop Profile Menu -->
     <Menu ref="profileMenu" id="profile_menu" :model="profileMenuItems" :popup="true" />
   </div>

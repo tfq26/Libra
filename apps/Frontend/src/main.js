@@ -8,6 +8,7 @@ import { useAuthStore } from './stores/auth';
 
 // PrimeVue and Theme imports
 import PrimeVue from 'primevue/config';
+import Tooltip from 'primevue/tooltip';
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import { definePreset } from '@primeuix/themes';
@@ -93,6 +94,9 @@ app.use(PrimeVue, {
   },
   ripple: true
 });
+
+// Register global directives
+app.directive('tooltip', Tooltip);
 
 // ======================================================
 // 🧱 Plugin & Store Registration

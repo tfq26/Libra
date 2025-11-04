@@ -1,15 +1,15 @@
 <template>
-  <div class="flex flex-col h-full px-2">
+  <div class="chat-page-shell flex h-full w-full max-w-6xl flex-col gap-0 px-2 sm:px-4 lg:px-6 mx-auto">
 
-    <header class="p-4 sm:p-6 border-b border-sunset-500 dark:border-gray-700 flex-shrink-0">
-      <div class="flex items-center justify-between gap-3">
+    <header class="flex-shrink-0 border-b border-sunset-500/60 dark:border-gray-700/70 py-4 sm:py-6">
+      <div class="flex items-start sm:items-center justify-between gap-3">
         <h1 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white truncate">
           {{ chatTitle || 'New Chat' }}
         </h1>
       </div>
     </header>
     
-    <main ref="mainContainer" class="flex-grow overflow-y-auto relative">
+    <main ref="mainContainer" class="chat-scroll relative flex-grow overflow-y-auto px-1 sm:px-3 lg:px-6 py-4 sm:py-6">
       <!-- Loading overlay for chat history -->
       <div 
         v-if="isLoadingHistory"
@@ -32,6 +32,7 @@
         ref="messageListComp" :messages="filteredMessages"
         :is-loading="isTypingIndicatorVisible"
         @show-full-message="showFullMessage"
+        class="mx-auto w-full max-w-6xl space-y-3"
       />
       <Dialog 
         header="Full Message" 
@@ -52,11 +53,12 @@
 
     <ConfirmDialog></ConfirmDialog>
 
-    <footer class="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-2">
+    <footer class="chat-footer flex-shrink-0 border-t border-gray-200/70 dark:border-gray-700/60 bg-surface-0/80 dark:bg-surface-900/75 backdrop-blur px-2 py-3 sm:px-4 sm:py-4">
       <!-- Conversation Complete State: show completion actions -->
       <div
         v-if="isConversationComplete"
-        class="px-3 py-3 sm:px-4 sm:py-4 space-y-3"
+        class="mx-auto w-full max-w-3xl space-y-3 rounded-2xl border border-gray-200/60 bg-gray-50/5 px-4 py-4 shadow-sm 
+        dark:border-gray-700/60 dark:bg-surface-900/70"
       >
         <div class="text-center text-sm text-gray-600 dark:text-gray-300 mb-2">
           This conversation has been completed.
@@ -78,7 +80,7 @@
       </div>
 
       <!-- Unified Chat Input Toolbar -->
-      <div v-else class="w-full">
+      <div v-else class="mx-auto w-full max-w-4xl">
         <ChatInputToolbar
           ref="chatInputToolbarRef"
           v-model="currentPrompt"
@@ -88,7 +90,7 @@
           :action-options="actionOptions"
           :show-text-input="inputMode === 'text'"
           :show-action-buttons="inputMode === 'buttons' && actionOptions.length > 0"
-          :can-restart="messages.length > 0"
+          :can-restart="canRestartChat"
           :show-text-mode-toggle="inputMode === 'buttons' && actionOptions.length > 0"
           :empty-state-message="messages.length === 0 ? 'Start your conversation...' : 'Type your message...'"
           @send="handleTextInputSend"
@@ -169,6 +171,13 @@ const isConversationComplete = ref(false);
 const clientInstanceId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
   ? crypto.randomUUID()
   : `client-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+const canRestartChat = computed(() => {
+  if (!isSignedIn.value) return false;
+  if (isConversationComplete.value) return true;
+  if (messages.value.length > 0) return true;
+  return Boolean(currentConversationId.value);
+});
 
 const MAX_ATTACHMENTS = 3;
 const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
@@ -539,6 +548,17 @@ async function loadChatHistory(id) {
     // 💥 CHANGE: Call the Pinia store's action instead of the raw API function.
     // This handles all the client-side caching logic for you.
     const conversation = await conversationStore.getConversation(id, token, userId.value);
+    // Proactive fix: if backend returned 410 (treated as blank by store), clear persisted id and move to a new chat
+    if (!conversation?.id) {
+      try {
+        const key = storageKeyFor(userId.value);
+        localStorage.removeItem(key);
+      } catch (_) {}
+      try { broadcastConversationId(userId.value, null); } catch (_) {}
+      startNewChat();
+      try { await router.replace({ name: 'Chat', params: {} }); } catch (_) {}
+      return; // stop further processing for this id
+    }
     
     messages.value = conversation.messages || [];
     chatTitle.value = conversation.title;
@@ -570,6 +590,12 @@ async function loadChatHistory(id) {
       isConversationComplete.value = true;
       inputMode.value = 'text';
       actionOptions.value = [];
+      // Proactively clear persisted id for resolved conversations so we don't restore them
+      try {
+        const key = storageKeyFor(userId.value);
+        localStorage.removeItem(key);
+      } catch (_) {}
+      try { broadcastConversationId(userId.value, null); } catch (_) {}
     }
 
     // Scroll to bottom after messages and options are loaded
