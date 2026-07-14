@@ -667,3 +667,22 @@ Node.js v22.18.0
 [Backend Init] ✅ Environment variables loaded from .backend.env
 [Backend Init] ✅ Backend services initialized successfully
 [Dev Server] Backend dev server listening on http://localhost:3001
+c[32mRestarting 'dev-server.js'[39m
+[Conversation API] ✅ Environment variables loaded
+[Conversation API] ✅ Firebase Admin initialized successfully
+[Conversation API] ✅ CosmosDB client initialized
+[History API] ✅ Environment variables loaded
+[History API] ✅ CosmosDB client initialized
+[Backend Init] ✅ Environment variables loaded from .backend.env
+[Backend Init] ✅ Backend services initialized successfully
+[Dev Server] Backend dev server listening on http://localhost:3001
+[Backend Init] 🔥 warmUp starting, options: { pingAI: [33mfalse[39m }
+[warmUp] Firebase Admin already initialized
+[warmUp] ✅ CosmosDB connectivity verified
+[0mGET /warm [36m304[0m 761.861 ms - -[0m
+[Redis] cache miss conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[Redis] Cached in-progress conversation: conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[0mGET /conversation?id=17cdbb14-7263-4bef-b021-a92913960d5d&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [32m200[0m 1158.906 ms - 1344[0m
+[Redis] cache raw type: object value preview: [object]
+[Redis] cache hit (in-progress, has messages) conversation:q3sbsEIerrcSJCmZ9yh7E5wTLEl2:17cdbb14-7263-4bef-b021-a92913960d5d
+[0mGET /conversation?id=17cdbb14-7263-4bef-b021-a92913960d5d&userId=q3sbsEIerrcSJCmZ9yh7E5wTLEl2 [36m304[0m 1230.372 ms - -[0m
